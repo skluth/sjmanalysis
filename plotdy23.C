@@ -94,11 +94,13 @@ void processAnalyses( const vector<Analysis>& analyses,
       cout << "event " << ievnt << " not found, skip" << endl;
       continue;
     }
+    map<string,Bool_t> selections= ntr->LEP1Selections();
+    bool MCnonrad= ntr->MCNonRad();
     for( size_t i= 0; i < analyses.size(); i++ ) {
       string cuts= analyses[i].getCuts();
       string mccuts= analyses[i].getMccuts();
-      if( ( cuts == "none" || (ntr->LEP1Selections())[cuts] ) &&
-	  ( mccuts == "none" || ntr->MCNonRad() ) ) {
+      if( ( cuts == "none" || selections[cuts] ) &&
+	  ( mccuts == "none" || MCnonrad ) ) {
 	for( size_t j= 0; j < vobs.size(); j++ ) {
 	  vobs[j]->fill( ntr, analyses[i] );
 	}

@@ -1,0 +1,32 @@
+
+CXX      = g++
+RC       = rootcint
+OPT      = -g
+CXXFLAGS = -Wall -fPIC $(OPT)
+
+FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.0.6/install/bin/fastjet-config
+FASTJETINC = $(shell $(FASTJETCONFIG) --cxxflags )
+FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --plugins )
+
+ROOTINC = $(shell root-config --noauxcflags --cflags )
+ROOTLIBS = $(shell root-config --libs )
+
+CPPFLAGS = $(ROOTINC) $(FASTJETINC)
+
+SRCS = NtupleReader.cc TFastJet.cc JetrateDataStructure.cc Observable.cc Analysis.cc ObsFastJetR.cc ObsFastJetEmin.cc DifferentialDataStructure.cc ObsDifferential.cc ObsFastJetDiff.cc ObsJetrate.cc ObsThrust.cc Unfolder.cc OutputWriter.cc
+DICT = NtupleReaderDict.cc
+SHLIB = libNtupleReaderDict.so
+
+all: $(SHLIB)
+
+$(DICT) : $(SRCS:.cc=.hh) $(DICT:Dict.cc=LinkDef.h)
+	$(RC) -f $@ -c $^
+
+$(SHLIB): $(DICT:.cc=.o) $(SRCS:.cc=.o)
+	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) -o $@ $^
+
+clean:
+	rm -f $(SHLIB) $(DICT:.cc=.*) $(SRCS:.cc=.o) 
+
+INTERMEDIATE: $(DICTS)
+

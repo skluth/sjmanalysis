@@ -6,6 +6,8 @@
 #pragma link C++ class vector<Analysis>;
 #pragma link C++ class JetrateDataStructure;
 #pragma link C++ class DifferentialDataStructure;
+#pragma link C++ class Observable;
+#pragma link C++ class vector<Observable*>;
 #pragma link C++ class ObsFastJetR;
 #pragma link C++ class ObsFastJetEmin;
 #pragma link C++ class ObsFastJetDiff;
@@ -13,4 +15,5 @@
 #pragma link C++ class TFastJet;
 #pragma link C++ class Unfolder;
 #pragma link C++ class OutputWriter;
+#pragma link C++ class map<string,Bool_t>;
 #endif

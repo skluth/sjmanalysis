@@ -1,7 +1,7 @@
 
 #if defined(__CINT__)
 //#include "Observable.hh"
-#include "ObsThrust.hh"
+//#include "ObsThrust.hh"
 //#include "ObsFastJetR.hh"
 //#include "ObsFastJetEmin.hh"
 //#include "ObsFastJetDiff.hh"
@@ -44,24 +44,22 @@ using std::string;
 #endif
 
 
-void printy23( Int_t ievnt=100, const char* filename="da130_95_200.root" ) {
-
+void printy23( Int_t ievnt=100, const char* filename="da91_96_200.root" ) {
   // Load libs in root before loading this macro
   // gROOT->LoadMacro("libNtupleReaderDict.so");
-
   NtupleReader* ntr= new NtupleReader( filename );
   if( ntr->GetEvent( ievnt ) > 0 ) {
     vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( "mt" );
-    TFastJet tfj( vtlv, "eekt" );
-    cout << "y23 values " << tfj.ymerge(2) << " " << ntr->dmt_ymerge(2) << endl;
+    TFastJet tfjd( vtlv, "eekt" );
+    TFastJet tfjj( vtlv, "jade" );
+    cout << "y23 eekt values " << tfjd.ymerge( 2 ) << " " << ntr->getYmergeD( "mt", 2 ) << endl;
+    cout << "y23 jade values " << tfjj.ymerge( 2 ) << " " << ntr->getYmergeE( "mt", 2 ) << endl;
   }
   else {
     cout << "event " << ievnt << " not found" << endl;
   }
   return;
-
 }
-
 
 void JetratePlot( Observable* obs, const Analysis& anal ) {
   map<string,DataStructure*> data= obs->getData();

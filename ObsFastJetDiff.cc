@@ -19,22 +19,7 @@ void ObsFastJetDiff::fill( NtupleReader* ntr, const Analysis& variation ) {
   vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( variation.getReco() );
   TFastJet tfj( vtlv, Algorithm.c_str() );
   Double_t yflip= tfj.ymerge( Jetlower );
-  map<string,DataStructure*>::iterator iter= datastructures.find( variation.getTag() );
-  if( iter != datastructures.end() ) {
-    DifferentialDataStructure* dds= 
-      dynamic_cast<DifferentialDataStructure*>( iter->second );
-    if( dds ) {
-      dds->fill( -TMath::Log10( yflip ) );
-    }
-    else {
-      std::cout << "ObsFastJetDiff::fill: dynamic_cast to DifferentialDataStructure failed" 
-		<< std::endl;
-    }
-  }
-  else {
-    std::cout << "ObsFastJetDiff::fill: analysis " << variation.getTag() << " not found" 
-	      << std::endl;
-  }
+  getAndFillDifferentialDataStructure( -TMath::Log10( yflip ), variation.getTag() );
   return;
 }
 

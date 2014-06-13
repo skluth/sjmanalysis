@@ -23,7 +23,6 @@ void ObsDifferential::addAnalyses( const vector<Analysis>& variations,
   }
 }
 
-
 void ObsDifferential::getAndFillDifferentialDataStructure( Double_t value, 
 							   const string& tag ) {
   map<string,DataStructure*>::iterator iter= datastructures.find( tag );

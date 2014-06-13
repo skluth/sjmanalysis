@@ -7,7 +7,6 @@
 #include <vector>
 #include <string>
 #include <map>
-//#include <utility>
 
 class TFile;
 class TTree;
@@ -26,7 +25,7 @@ public:
   Int_t GetNumberEntries();
   bool GetEvent( Int_t ievnt );
  
-  std::vector<TLorentzVector> GetLorentzVectors( const std::string & opt );
+  const std::vector<TLorentzVector>& GetLorentzVectors( const std::string & opt );
   void GetP( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack );
   void GetH( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack );
   void GetTrk( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack );
@@ -40,10 +39,9 @@ public:
   bool MCNonRad();
 
   Float_t costt() { return nt_Tvectc[2]; }
-  //Float_t tdmt() { return nt_Tdmt; }
-  Float_t dmt_ymerge( Int_t ); 
-  Float_t emt_ymerge( Int_t ); 
-  Double_t getThrust( const TString reco );
+  Double_t getYmergeD( const TString& reco, Int_t njet );
+  Double_t getYmergeE( const TString& reco, Int_t njet );
+  Double_t getThrust( const TString& reco );
 
 private:
 
@@ -53,6 +51,7 @@ private:
   TFile* nt_file;
   TTree* nt_tree;
   bool nt_isMC;
+  bool nt_vtlvcache;
 
   static const Int_t nt_maxtrk= 501;
   static const Int_t nt_maxp= 50;

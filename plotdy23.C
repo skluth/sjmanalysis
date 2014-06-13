@@ -1,4 +1,16 @@
 
+#if defined(__CINT__)
+//#include "Observable.hh"
+#include "ObsThrust.hh"
+//#include "ObsFastJetR.hh"
+//#include "ObsFastJetEmin.hh"
+//#include "ObsFastJetDiff.hh"
+//#include <vector>
+//using std::vector;
+#endif
+
+#if !defined(__CINT__) || defined(__MAKECINT__)
+
 #include "TLorentzVector.h"
 #include "TROOT.h"
 #include "TH1F.h"
@@ -16,20 +28,21 @@
 #include "ObsFastJetDiff.hh"
 #include "Unfolder.hh"
 #include "OutputWriter.hh"
-
-#ifndef __CINT__
 #include "NtupleReader.hh"
 #include "TFastJet.hh"
+
 #include <iostream>
-#include <vector>
-#include <map>
-#include <string>
 using std::cout;
 using std::endl;
-using std::string;
-using std::map;
+#include <vector>
 using std::vector;
+#include <map>
+using std::map;
+#include <string>
+using std::string;
+
 #endif
+
 
 void printy23( Int_t ievnt=100, const char* filename="da130_95_200.root" ) {
 

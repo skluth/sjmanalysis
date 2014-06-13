@@ -20,6 +20,12 @@ LIB= libNtupleReader.so
 
 all: $(DICTLIB)
 
+AnalysisDict.cc: Analysis.hh AnalysisLinkDef.h
+	$(RC) -f $@ -c $^
+
+libAnalysisDict.so: AnalysisDict.o Analysis.o
+	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) -o $@ $^
+
 $(DICT): $(SRCS:.cc=.hh) $(DICT:Dict.cc=LinkDef.h)
 	$(RC) -f $@ -c $^
 

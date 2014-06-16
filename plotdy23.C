@@ -1,36 +1,19 @@
 
-#if defined(__CINT__)
-//#include "Observable.hh"
-//#include "ObsThrust.hh"
-//#include "ObsFastJetR.hh"
-//#include "ObsFastJetEmin.hh"
-//#include "ObsFastJetDiff.hh"
-//#include <vector>
-//using std::vector;
-#endif
-
 #if !defined(__CINT__) || defined(__MAKECINT__)
-
 #include "TLorentzVector.h"
-#include "TROOT.h"
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TMath.h"
 #include "TCanvas.h"
 #include "TGraphErrors.h"
-
-#include "JetrateDataStructure.hh"
+#include "DataStructure.hh"
 #include "Analysis.hh"
 #include "Observable.hh"
-#include "ObsThrust.hh"
-#include "ObsFastJetR.hh"
-#include "ObsFastJetEmin.hh"
-#include "ObsFastJetDiff.hh"
+#include "ObservableFactory.hh"
 #include "Unfolder.hh"
 #include "OutputWriter.hh"
 #include "NtupleReader.hh"
 #include "TFastJet.hh"
-
 #include <iostream>
 using std::cout;
 using std::endl;
@@ -40,9 +23,7 @@ using std::vector;
 using std::map;
 #include <string>
 using std::string;
-
 #endif
-
 
 void printy23( Int_t ievnt=100, const char* filename="da91_96_200.root" ) {
   // Load libs in root before loading this macro
@@ -90,185 +71,6 @@ void processDurhamJade( const vector<TLorentzVector>& vtlv, Double_t& y23d, Doub
   return;
 }
 
-void processAnalyses( const vector<Analysis>& analyses,
-		      const vector<Observable*>& vobs,
-		      const string& filename,
-		      Int_t maxevt ) {
-  cout << "processAnalyses: file " << filename << ", analyses:" << endl;
-  for( size_t i= 0; i < analyses.size(); i++ ) {
-    cout << analyses[i].getTag() << endl;
-  }
-  NtupleReader* ntr= new NtupleReader( filename.c_str() );
-  Int_t nevnt= ntr->GetNumberEntries();
-  for( Int_t ievnt= 0; ievnt < TMath::Min( nevnt, maxevt ); ievnt++ ) {
-    if( ntr->GetEvent( ievnt ) == 0 ) {
-      cout << "event " << ievnt << " not found, skip" << endl;
-      continue;
-    }
-    map<string,Bool_t> selections= ntr->LEP1Selections();
-    bool MCnonrad= ntr->MCNonRad();
-    for( size_t i= 0; i < analyses.size(); i++ ) {
-      string cuts= analyses[i].getCuts();
-      string mccuts= analyses[i].getMccuts();
-      if( ( cuts == "none" || selections[cuts] ) &&
-	  ( mccuts == "none" || MCnonrad ) ) {
-	for( size_t j= 0; j < vobs.size(); j++ ) {
-	  vobs[j]->fill( ntr, analyses[i] );
-	}
-      }
-    }
-  }
-  delete ntr;
-  return;
-}
-
-void processUnfolding( const vector<Analysis>& measuredAnalyses, string unfoldsource,
-		       vector<Observable*>& vobs ) {
-  cout << "processUnfolding: bin-by-bin unfolding for analyses:" << endl;
-  Analysis hadronlevel( unfoldsource, "hadron", "none", "nonrad" );
-  for( size_t ianal= 0; ianal < measuredAnalyses.size(); ianal++ ) {
-    Analysis measured= measuredAnalyses[ianal];
-    cout << measured.getTag() << endl;
-    Analysis measuredMC( unfoldsource, measured.getReco(), measured.getCuts() );
-    Unfolder unfolder( measured, measuredMC, hadronlevel );
-    for( size_t iobs= 0; iobs < vobs.size(); iobs++ ) {
-      unfolder.unfold( vobs[iobs] );
-    }
-  }
-  cout << "Hadron level: " << hadronlevel.getTag() << endl;
-  return;
-}
-
-void LEP1Analysis( Int_t maxevt=1000, 
-		   const char* datafilename="da91_96_200.root",
-		   const char* pyfilename="mc5025_1_200.root", 
-		   const char* hwfilename="mc12406_1_200.root" ) {
-
-  // Load libs in root before loading this macro
-  // gROOT->LoadMacro("libNtupleReaderDict.so");
-
-  // Define analysis variations:
-  vector<Analysis> measuredAnalyses;
-  measuredAnalyses.push_back( Analysis( "data", "mt", "stand" ) );
-  measuredAnalyses.push_back( Analysis( "data", "tc", "stand" ) );
-  measuredAnalyses.push_back( Analysis( "data", "mt", "costt07" ) );
-  measuredAnalyses.push_back( Analysis( "data", "mt", "nch7" ) );
-  vector<Analysis> pyAnalyses;
-  pyAnalyses.push_back( Analysis( "py", "mt", "stand" ) );
-  pyAnalyses.push_back( Analysis( "py", "tc", "stand" ) );
-  pyAnalyses.push_back( Analysis( "py", "mt", "costt07" ) );
-  pyAnalyses.push_back( Analysis( "py", "mt", "nch7" ) );
-  pyAnalyses.push_back( Analysis( "py", "hadron", "none", "nonrad" ) );
-  pyAnalyses.push_back( Analysis( "py", "mt", "stand", "nonrad" ) );
-  vector<Analysis> hwAnalyses;
-  hwAnalyses.push_back( Analysis( "hw", "mt", "stand" ) );
-  hwAnalyses.push_back( Analysis( "hw", "hadron", "none", "nonrad" ) );
-  vector<Analysis> allAnalyses( measuredAnalyses );
-  allAnalyses.insert( allAnalyses.end(), pyAnalyses.begin(), pyAnalyses.end() );
-  allAnalyses.insert( allAnalyses.end(), hwAnalyses.begin(), hwAnalyses.end() );
-
-  // Define observables:
-  // Thrust
-  vector<Double_t> thrustbins( 13 );
-  thrustbins[0]= 0.00;
-  thrustbins[1]= 0.01;
-  thrustbins[2]= 0.02;
-  thrustbins[3]= 0.03;
-  thrustbins[4]= 0.04;
-  thrustbins[5]= 0.05;
-  thrustbins[6]= 0.07;
-  thrustbins[7]= 0.09;
-  thrustbins[8]= 0.12;
-  thrustbins[9]= 0.15;
-  thrustbins[10]= 0.22;
-  thrustbins[11]= 0.30;
-  thrustbins[12]= 0.50;
-  ObsThrust* obsthrust= new ObsThrust( thrustbins, allAnalyses );
-  // y23 Durham and JadeE0
-  vector<Double_t> y23bins( 11 );
-  for( size_t i= 0; i < y23bins.size(); i++ ) {
-    y23bins[i]= 0.5*i;
-  }
-  ObsFastJetDiff* obsy23d= new ObsFastJetDiff( "y23d", "eekt", 2, y23bins, allAnalyses );
-  ObsFastJetDiff* obsy23j= new ObsFastJetDiff( "y23j", "jade", 2, y23bins, allAnalyses );
-  // anti-kt 3-jet rate vs Emin/Evis for R=0.7
-  vector<Double_t> eminFraction( 9 );
-  eminFraction[0]= 0.02;
-  eminFraction[1]= 0.04;
-  eminFraction[2]= 0.06;
-  eminFraction[3]= 0.08;
-  eminFraction[4]= 0.10;
-  eminFraction[5]= 0.12;
-  eminFraction[6]= 0.14;
-  eminFraction[7]= 0.16;
-  eminFraction[8]= 0.18;
-  ObsFastJetEmin* obsakteminR3= new ObsFastJetEmin( "antikteminR3", "eeantikt", 3, 0.7, 
-						    eminFraction, allAnalyses );
-  // anti-kt 3-jet rate vs R for Emin/Evis= 0.06
-  vector<Double_t> Rvalues( 8 );
-  Rvalues[0]= 0.2;
-  Rvalues[1]= 0.4;
-  Rvalues[2]= 0.6;
-  Rvalues[3]= 0.7;
-  Rvalues[4]= 0.8;
-  Rvalues[5]= 1.0;
-  Rvalues[6]= 1.2;
-  Rvalues[7]= 1.4;
-  ObsFastJetR* obsaktRR3= new ObsFastJetR( "antiktRR3", "eeantikt", 3, 0.06, 
-					   Rvalues, allAnalyses );
-  // All observables in vector
-  vector<Observable*> vobs;
-  vobs.push_back( obsthrust );
-  vobs.push_back( obsy23d );
-  vobs.push_back( obsy23j );
-  vobs.push_back( obsakteminR3 );
-  vobs.push_back( obsaktRR3 );
-  cout << "LEP1Analysis: observables:" << endl;
-  for( size_t iobs= 0; iobs < vobs.size(); iobs++ ) {
-    cout << vobs[iobs]->getName() << " ";
-  }
-  cout << endl;
-
-  // Fill from data and mc (PYTHIA and HERWIG) ntuples:
-  processAnalyses( measuredAnalyses, vobs, datafilename, maxevt );
-  processAnalyses( pyAnalyses, vobs, pyfilename, maxevt );
-  processAnalyses( hwAnalyses, vobs, hwfilename, maxevt );
-
-  // Unfolding bin-by-bin
-  // PYHTHIA based
-  processUnfolding( measuredAnalyses, "py", vobs );
-  // HERWIG based for systematic
-  vector<Analysis> measuredAnalysesHw;
-  measuredAnalysesHw.push_back( measuredAnalyses[0] );
-  processUnfolding( measuredAnalysesHw, "hw", vobs );
-  // MC detector level with MC as cross check for PYTHIA and HERWIG
-  vector<Analysis> measuredPyAnalyses;
-  measuredPyAnalyses.push_back( Analysis( "py", "mt", "stand" ) );
-  measuredPyAnalyses.push_back( Analysis( "py", "tc", "stand" ) );
-  measuredPyAnalyses.push_back( Analysis( "py", "mt", "costt07" ) );
-  measuredPyAnalyses.push_back( Analysis( "py", "mt", "nch7" ) );
-  processUnfolding( measuredPyAnalyses, "py", vobs );
-  vector<Analysis> measuredHwAnalyses;
-  measuredHwAnalyses.push_back( Analysis( "hw", "mt", "stand" ) );
-  processUnfolding( measuredHwAnalyses, "hw", vobs );
-
-  // Normalise and calculate stat errors, print
-  for( size_t i= 0; i < vobs.size(); i++ ) {
-    vobs[i]->finalise();
-    vobs[i]->print();
-  }
-
-  // no systematics yet
-
-  OutputWriter writer( "LEP1Analysis.root" );
-  writer.write( vobs );
-
-  // The End:
-  return;
-
-}
-
-
 void makeplots( Int_t maxevt=1000, 
 		const char* pyfilename="mc5025_1_200.root" ) {
 
@@ -291,32 +93,11 @@ void makeplots( Int_t maxevt=1000,
   allAnalyses.push_back( Analysis( "py", "mt", "stand" ) );
   allAnalyses.push_back( Analysis( "py", "hadron", "none", "nonrad" ) );
 
-  vector<Double_t> eminFraction( 9 );
-  eminFraction[0]= 0.02;
-  eminFraction[1]= 0.04;
-  eminFraction[2]= 0.06;
-  eminFraction[3]= 0.08;
-  eminFraction[4]= 0.10;
-  eminFraction[5]= 0.12;
-  eminFraction[6]= 0.14;
-  eminFraction[7]= 0.16;
-  eminFraction[8]= 0.18;
-  ObsFastJetEmin* obsakteminR3= new ObsFastJetEmin( "antikteminR3", "eeantikt", 3, 0.7, 
-						    eminFraction, allAnalyses );
-  vector<Double_t> Rvalues( 8 );
-  Rvalues[0]= 0.2;
-  Rvalues[1]= 0.4;
-  Rvalues[2]= 0.6;
-  Rvalues[3]= 0.7;
-  Rvalues[4]= 0.8;
-  Rvalues[5]= 1.0;
-  Rvalues[6]= 1.2;
-  Rvalues[7]= 1.4;
-  ObsFastJetR* obsaktRR3= new ObsFastJetR( "antiktRR3", "eeantikt", 3, 0.06, 
-					   Rvalues, allAnalyses );
-  vector<Observable*> vobs;
-  vobs.push_back( obsakteminR3 );
-  vobs.push_back( obsaktRR3 );
+  vector<string> obsnames;
+  obsnames.push_back( "antikteminR3" );
+  obsnames.push_back( "antiktRR3" );
+  ObservableFactory obsfac;
+  vector<Observable*> vobs= obsfac.createObservables( obsnames, allAnalyses );
 
   vector<string> selections;
   selections.push_back( "stand" );
@@ -324,9 +105,10 @@ void makeplots( Int_t maxevt=1000,
   selections.push_back( "nch7" );
   selections.push_back( "nonrad" );
   selections.push_back( "both" );
-  map<string,int> Nselected;
+  map<TString,int> Nselected;
   for( size_t isel= 0; isel < selections.size(); isel++ ) {
-    Nselected[selections[isel]]= 0;
+    string sel= selections[isel];
+    Nselected[sel]= 0;
   }
 
   NtupleReader* ntr= new NtupleReader( pyfilename );
@@ -341,8 +123,10 @@ void makeplots( Int_t maxevt=1000,
     for( size_t i= 0; i < allAnalyses.size(); i++ ) {
       string cuts= allAnalyses[i].getCuts();
       string mccuts= allAnalyses[i].getMccuts();
-      if( ( cuts == "none" || (ntr->LEP1Selections())[cuts] ) &&
-	  ( mccuts == "none" || ntr->MCNonRad() ) ) {
+      map<string,Bool_t> LEP1selections= ntr->LEP1Selections();
+      bool MCnonrad= ntr->MCNonRad();
+      if( ( cuts == "none" || LEP1selections[cuts] ) &&
+	  ( mccuts == "none" || MCnonrad ) ) {
 	for( size_t j= 0; j < vobs.size(); j++ ) {
 	  vobs[j]->fill( ntr, allAnalyses[i] );
 	}
@@ -428,13 +212,13 @@ void makeplots( Int_t maxevt=1000,
   TCanvas* canva= new TCanvas( "canva", "ee anti-kt plots", 900, 900 );
   canva->Divide( 2, 2 );
   canva->cd( 1 );
-  JetratePlot( obsakteminR3, a );
+  JetratePlot( vobs[0], a );
   canva->cd( 2 );
-  JetratePlot( obsaktRR3, a );
+  JetratePlot( vobs[1], a );
   canva->cd( 3 );
-  JetratePlot( obsakteminR3, b );
+  JetratePlot( vobs[0], b );
   canva->cd( 4 );
-  JetratePlot( obsaktRR3, b );
+  JetratePlot( vobs[1], b );
 
   // canv->Print( "plot.pdf" );
     

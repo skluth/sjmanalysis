@@ -95,8 +95,8 @@ void LEP1Analysis( Int_t maxevt=1000,
   // Define observables:
   vector<string> obsnames;
   obsnames.push_back( "thrust" );
-  obsnames.push_back( "durhamymerge23" );
-  obsnames.push_back( "jadeymerge23" );
+  obsnames.push_back( "durhamymergefj23" );
+  obsnames.push_back( "jadeymergefj23" );
   obsnames.push_back( "antikteminR3" );
   obsnames.push_back( "antiktRR3" );
   obsnames.push_back( "sisconeeminR3" );

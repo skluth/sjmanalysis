@@ -1,6 +1,5 @@
 
 #include "ObsFastJetEmin.hh"
-#include "JetrateDataStructure.hh"
 #include "NtupleReader.hh"
 #include "TFastJet.hh"
 
@@ -22,19 +21,7 @@ void ObsFastJetEmin::fill( NtupleReader* ntr, const Analysis& variation ) {
     vector<TLorentzVector> incljets= tfj.inclusive_jets( EminFractions[i]*Evis );
     NJets[i]= incljets.size();
   }
-
-  map<string,DataStructure*>::iterator iter= datastructures.find( variation.getTag() );
-  if( iter != datastructures.end() ) {
-    JetrateDataStructure* jrds= dynamic_cast<JetrateDataStructure*>( iter->second );
-    if( jrds ) {
-      jrds->fill( NJets, Jetrate );
-    }
-    else {
-      std::cout << "ObsFastJetEmin::fill: dynamic_cast to JetrateDataStructure failed" << std::endl;
-    }
-  }
-  else {
-    std::cout << "ObsFastEmin::fill: " << variation.getTag() << " not found" << std::endl;
-  }
-
+  getAndFillJetrateDataStructure( NJets, Jetrate, variation.getTag() );
+  return;
 }
+

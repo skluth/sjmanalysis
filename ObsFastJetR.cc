@@ -1,10 +1,7 @@
 
 #include "ObsFastJetR.hh"
-#include "JetrateDataStructure.hh"
-//#include "DataStructure.hh"
 #include "NtupleReader.hh"
 #include "TFastJet.hh"
-#include <iostream>
 
 ObsFastJetR::ObsFastJetR( const string& name, const string& algo, Int_t njet, Double_t eminfrac,
 			  const vector<Double_t>& rvals, 
@@ -24,18 +21,7 @@ void ObsFastJetR::fill( NtupleReader* ntr, const Analysis& variation ) {
     vector<TLorentzVector> incljets= tfjakt.inclusive_jets( EminFraction*Evis );
     NJets[i]= incljets.size();
   }
-  map<string,DataStructure*>::iterator iter= datastructures.find( variation.getTag() );
-  if( iter != datastructures.end() ) {
-    JetrateDataStructure* jrds= dynamic_cast<JetrateDataStructure*>( iter->second );
-    if( jrds ) {
-      jrds->fill( NJets, Jetrate );
-    }
-    else {
-      std::cout << "ObsFastJetR::fill: dynamic_cast to JetrateDataStructure failed" << std::endl;
-    }
-  }
-  else {
-    std::cout << "ObsFastR::fill: " << variation.getTag() << " not found" << std::endl;
-  }
+  getAndFillJetrateDataStructure( NJets, Jetrate, variation.getTag() );
+  return;
 }
 

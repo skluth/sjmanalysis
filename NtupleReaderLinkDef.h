@@ -15,6 +15,7 @@
 #pragma link C++ class ObsFastJetR;
 #pragma link C++ class ObsFastJetEmin;
 #pragma link C++ class ObsFastJetDiff;
+#pragma link C++ class ObsFastJetYcut;
 #pragma link C++ class ObsThrust;
 #pragma link C++ class TFastJet;
 #pragma link C++ class Unfolder;

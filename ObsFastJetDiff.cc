@@ -16,7 +16,7 @@ ObsFastJetDiff::ObsFastJetDiff( const string& name, const string& algo, Int_t nj
   ObsDifferential(name,bins,variations), Algorithm(algo), Jetlower(njet) {}
 
 void ObsFastJetDiff::fill( NtupleReader* ntr, const Analysis& variation ) {
-  vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( variation.getReco() );
+  const vector<TLorentzVector>& vtlv= ntr->GetLorentzVectors( variation.getReco() );
   TFastJet tfj( vtlv, Algorithm.c_str() );
   Double_t yflip= tfj.ymerge( Jetlower );
   getAndFillDifferentialDataStructure( -TMath::Log10( yflip ), variation.getTag() );

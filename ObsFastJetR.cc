@@ -12,7 +12,7 @@ ObsFastJetR::ObsFastJetR( const string& name, const string& algo, Int_t njet, Do
 }
 
 void ObsFastJetR::fill( NtupleReader* ntr, const Analysis& variation ) {
-  vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( variation.getReco() );
+  const vector<TLorentzVector>& vtlv= ntr->GetLorentzVectors( variation.getReco() );
   size_t n= Rvalues.size();
   vector<Double_t> NJets( n );
   for( size_t i= 0; i < n; i++ ) {

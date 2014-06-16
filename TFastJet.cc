@@ -101,27 +101,28 @@ TFastJet::~TFastJet() {
   if( plugin ) delete plugin;
 }
 
-vector<TLorentzVector>& TFastJet::inclusive_jets( const double& ptmin ) {
+const vector<TLorentzVector>& TFastJet::inclusive_jets( const double& ptmin ) {
   vector<fastjet::PseudoJet> incljets= clusseq->inclusive_jets( ptmin );
   *pjets= sorted_by_pt( incljets );
   return copyPseudoJetsToLorentzVectors();
 }
 
-vector<TLorentzVector>& TFastJet::exclusive_jets( const int njets ) {
+const vector<TLorentzVector>& TFastJet::exclusive_jets( const int njets ) {
   vector<fastjet::PseudoJet> excljets= clusseq->exclusive_jets( njets );
   *pjets= sorted_by_E( excljets );
   return copyPseudoJetsToLorentzVectors();
 }
 
-vector<TLorentzVector>& TFastJet::copyPseudoJetsToLorentzVectors() {
-  vector<TLorentzVector>* jetstlv= new vector<TLorentzVector>();
-  fastjet::PseudoJet pj;
+const vector<TLorentzVector>& TFastJet::copyPseudoJetsToLorentzVectors() {
+  static vector<TLorentzVector> jetstlv;
+  jetstlv.clear();
+  jetstlv.reserve( pjets->size() );
   for( UInt_t i= 0; i < pjets->size(); i++ ) {
-    pj= (*pjets)[i];
+    fastjet::PseudoJet pj= (*pjets)[i];
     TLorentzVector tlv( pj.px(), pj.py(), pj.pz(), pj.E() );
-    jetstlv->push_back( tlv );
+    jetstlv.push_back( tlv );
   }
-  return *jetstlv;
+  return jetstlv;
 }
 
 vector< vector<int> >& TFastJet::constituents() {
@@ -150,10 +151,4 @@ int TFastJet::njets( double ycut ) {
 double TFastJet::Evis() {
   return clusseq->Q();
 }
-
-// g++ -c TFastJet.cc -I ../fastjet/fastjet-2.4.2/include/ -I /usr/include/root/
-
-// g++ -shared -fPIC -o TFastJet.so -I /usr/include/root/ -I ../fastjet/fastjet-2.4.2/install/include/ -L ../fastjet/fastjet-2.4.2/install/lib -lfastjet -lSISConePlugin -lsiscone TFastJet.cc TFastJetDict.cc
-
-// and don't forget to set LD_LIBRARY_PATH for python
 

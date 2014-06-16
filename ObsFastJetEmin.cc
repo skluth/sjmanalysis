@@ -12,7 +12,7 @@ ObsFastJetEmin::ObsFastJetEmin( const string& name, const string& algo, Int_t nj
 }
 
 void ObsFastJetEmin::fill( NtupleReader* ntr, const Analysis& variation ) {
-  vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( variation.getReco() );
+  const vector<TLorentzVector>& vtlv= ntr->GetLorentzVectors( variation.getReco() );
   size_t n= EminFractions.size();
   vector<Double_t> NJets( n );
   TFastJet tfj( vtlv, Algorithm.c_str(), Rvalue );

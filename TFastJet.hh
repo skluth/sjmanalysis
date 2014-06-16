@@ -36,8 +36,8 @@ public:
 
   virtual ~TFastJet();
 
-  vector<TLorentzVector>& inclusive_jets( const double& ptmin=0.0 );
-  vector<TLorentzVector>& exclusive_jets( const int njets );
+  const vector<TLorentzVector>& inclusive_jets( const double& ptmin=0.0 );
+  const vector<TLorentzVector>& exclusive_jets( const int njets );
   vector< vector<int> >& constituents();
   double ymerge( int );
   int njets( double );
@@ -45,7 +45,7 @@ public:
 
 private:
 
-  vector<TLorentzVector>& copyPseudoJetsToLorentzVectors();
+  const vector<TLorentzVector>& copyPseudoJetsToLorentzVectors();
   fastjet::ClusterSequence* clusseq;
   fastjet::JetDefinition::Plugin* plugin;
   vector<fastjet::PseudoJet>* pjets;

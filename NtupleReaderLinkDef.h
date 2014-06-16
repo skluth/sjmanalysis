@@ -1,13 +1,17 @@
 #ifdef __MAKECINT__
 #pragma link C++ class vector<TLorentzVector>+;
 #pragma link C++ class map<string,Bool_t>+;
+#pragma link C++ class map<TString,Int_t>+;
 #pragma link C++ class vector<Analysis>+;
 #pragma link C++ class vector<Observable*>+;
+#pragma link C++ class map<string,DataStructure*>+;
 #pragma link C++ class NtupleReader;
 #pragma link C++ class Analysis;
+#pragma link C++ class DataStructure;
 #pragma link C++ class JetrateDataStructure;
 #pragma link C++ class DifferentialDataStructure;
 #pragma link C++ class Observable;
+#pragma link C++ class ObservableFactory;
 #pragma link C++ class ObsFastJetR;
 #pragma link C++ class ObsFastJetEmin;
 #pragma link C++ class ObsFastJetDiff;

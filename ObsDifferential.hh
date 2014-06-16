@@ -25,10 +25,10 @@ public:
   ~ObsDifferential() {}
   virtual void fill( NtupleReader* ntr, const Analysis& variation ) = 0;
   void addAnalyses( const vector<Analysis>& variations, const vector<Double_t>& bins );
-  void getAndFillDifferentialDataStructure( Double_t value, const string& tag );
 
 protected:
   
+  void getAndFillDifferentialDataStructure( Double_t value, const string& tag );
   vector<Double_t> binedges;
 
 };

@@ -5,8 +5,8 @@
 #include "Analysis.hh"
 
 #include <vector>
-#include <string>
 using std::vector;
+#include <string>
 using std::string;
 
 class NtupleReader;

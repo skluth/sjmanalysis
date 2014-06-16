@@ -9,17 +9,17 @@ ObsFastJetEmin::ObsFastJetEmin( const string& name, const string& algo, Int_t nj
 				const vector<Double_t>& eminfrac, 
 				const vector<Analysis>& variations ) :
   ObsJetrate( name ), Algorithm(algo), Jetrate(njet), Rvalue(rval), EminFractions(eminfrac) {
-addAnalyses( variations, EminFractions );
+  addAnalyses( variations, EminFractions );
 }
 
 void ObsFastJetEmin::fill( NtupleReader* ntr, const Analysis& variation ) {
   vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( variation.getReco() );
   size_t n= EminFractions.size();
   vector<Double_t> NJets( n );
-  TFastJet tfjakt( vtlv, "eeantikt", Rvalue );
-  Double_t Evis= tfjakt.Evis();
+  TFastJet tfj( vtlv, Algorithm.c_str(), Rvalue );
+  Double_t Evis= tfj.Evis();
   for( size_t i= 0; i < n; i++ ) {
-    vector<TLorentzVector> incljets= tfjakt.inclusive_jets( EminFractions[i]*Evis );
+    vector<TLorentzVector> incljets= tfj.inclusive_jets( EminFractions[i]*Evis );
     NJets[i]= incljets.size();
   }
 

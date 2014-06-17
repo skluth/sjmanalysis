@@ -13,7 +13,7 @@ ROOTLIBS = $(shell root-config --libs )
 
 CPPFLAGS = $(ROOTINC) $(FASTJETINC)
 
-SRCS = NtupleReader.cc TFastJet.cc JetrateDataStructure.cc Observable.cc Analysis.cc ObsFastJetR.cc ObsFastJetEmin.cc DifferentialDataStructure.cc ObsDifferential.cc ObsFastJetDiff.cc ObsJetrate.cc ObsThrust.cc Unfolder.cc OutputWriter.cc ObservableFactory.cc ObsFastJetYcut.cc FilledObservable.cc
+SRCS = NtupleReader.cc TFastJet.cc JetrateDataStructure.cc Observable.cc Analysis.cc ObsFastJetR.cc ObsFastJetEmin.cc DifferentialDataStructure.cc ObsDifferential.cc ObsFastJetDiff.cc ObsJetrate.cc ObsThrust.cc Unfolder.cc OutputWriter.cc ObservableFactory.cc ObsFastJetYcut.cc FilledObservable.cc ObsDurhamYmerge23.cc ObsJadeYmerge23.cc
 DICT = NtupleReaderDict.cc
 DICTLIB = libNtupleReaderDict.so
 LIB= libNtupleReader.so

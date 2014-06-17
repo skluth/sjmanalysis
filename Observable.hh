@@ -3,33 +3,29 @@
 
 #include "Rtypes.h"
 #include "Analysis.hh"
-
 #include <vector>
-#include <string>
-#include <map>
 using std::vector;
+#include <string>
 using std::string;
+#include <map>
 using std::map;
 
 class NtupleReader;
 class DataStructure;
+class FilledObservable;
 
 class Observable {
 
 public:
 
-  Observable( string namein );
+  Observable( const string& );
   Observable() {}
   ~Observable() {}
-  virtual void addAnalyses( const vector<Analysis>& variations, 
-			    const vector<Double_t>& points ) = 0;
-  virtual void fill( NtupleReader* ntr, const Analysis& variation ) = 0;
-  void finalise();
-  void print();
-  virtual map<string,DataStructure*> getData();
-  virtual DataStructure* getDataStructure( const Analysis& );
-  virtual void setDataStructure( DataStructure*, const Analysis&  );
-  string getName();
+  virtual void addAnalyses( const vector<Analysis>& ) = 0;
+  virtual void fill( NtupleReader*, const Analysis& ) = 0;
+  virtual void print() const;
+  virtual vector<FilledObservable*> getFilledObservables() const;
+  string getName() const { return name; }
 
 protected:
 
@@ -37,6 +33,5 @@ protected:
   map<string,DataStructure*> datastructures;
 
 };
-
 
 #endif

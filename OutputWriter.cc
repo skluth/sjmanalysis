@@ -1,7 +1,7 @@
 
 #include "OutputWriter.hh"
 
-#include "Observable.hh"
+#include "FilledObservable.hh"
 #include "DataStructure.hh"
 #include "JetrateDataStructure.hh"
 #include "DifferentialDataStructure.hh"
@@ -25,7 +25,7 @@ OutputWriter::~OutputWriter() {
   delete outputfile;
 }
 
-void OutputWriter::write( const vector<Observable*>& vobs ) {
+void OutputWriter::write( const vector<FilledObservable*>& vobs ) {
   for( size_t iobs= 0; iobs < vobs.size(); iobs++ ) {
     map<string,DataStructure*> data= vobs[iobs]->getData();
     for( map<string,DataStructure*>::iterator iter= data.begin();

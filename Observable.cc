@@ -1,42 +1,27 @@
 
 #include "Observable.hh"
+#include "FilledObservable.hh"
 #include "DataStructure.hh"
 #include <iostream>
 using std::cout;
 using std::endl;
 
-Observable::Observable( string namein ) : name( namein ) {}
+Observable::Observable( const string& namein ) : name( namein ) {}
 
-void Observable::finalise() {
-  map<string,DataStructure*> data= getData();
-  for( map<string,DataStructure*>::iterator iter= data.begin();
-       iter != data.end(); iter++ ) {
-    (iter->second)->normalise();
-  }
-}
-
-void Observable::print() {
-  map<string,DataStructure*> data= getData();
-  for( map<string,DataStructure*>::iterator iter= data.begin();
-       iter != data.end(); iter++ ) {
+void Observable::print() const {
+  for( map<string,DataStructure*>::const_iterator iter= datastructures.begin();
+       iter != datastructures.end(); iter++ ) {
     cout << name << " " << iter->first << " events " << (iter->second)->getNEvents() << endl;
     (iter->second)->print();
   }
 }
 
-string Observable::getName() { return name; }
-
-map<string,DataStructure*> Observable::getData() { 
-  map<string,DataStructure*> result( datastructures.begin(), datastructures.end() );
-  return result; 
+vector<FilledObservable*> Observable::getFilledObservables() const { 
+  cout << "Observable::getFilledObservables: " << name 
+       << ": create FilledObservable" << endl;
+  FilledObservable* fobs= new FilledObservable( name, datastructures );
+  vector<FilledObservable*> vfobs;
+  vfobs.push_back( fobs );
+  return vfobs;
 }
 
-DataStructure* Observable::getDataStructure( const Analysis& anal ) {
-  string tag= anal.getTag();
-  return datastructures[tag];
-}
-
-void Observable::setDataStructure( DataStructure* dsp, const Analysis& anal ) {
-  string tag= anal.getTag();
-  datastructures[tag]= dsp;
-}

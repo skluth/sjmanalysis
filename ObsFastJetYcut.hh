@@ -15,7 +15,7 @@ class ObsFastJetYcut : public ObsJetrate {
 
 public:
 
-  ObsFastJetYcut( const string& name, const string& algo, Int_t njet,
+  ObsFastJetYcut( const string& name, const string& algo,
 		  const vector<Double_t>& ycuts, 
 		  const vector<Analysis>& variations );
   ~ObsFastJetYcut() {}
@@ -24,7 +24,6 @@ public:
 private:
   
   string Algorithm;
-  Int_t Jetrate;
   vector<Double_t> YcutPoints;
 
 };

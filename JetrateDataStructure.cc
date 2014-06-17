@@ -5,8 +5,8 @@
 using std::cout;
 using std::endl;
 
-JetrateDataStructure::JetrateDataStructure( const vector<Double_t>& p ) :
-  DataStructure() {
+JetrateDataStructure::JetrateDataStructure( const vector<Double_t>& p, Int_t njet ) :
+  DataStructure(), Jetrate(njet) {
   size_t n= p.size();
   points.resize( n );
   values.resize( n );
@@ -19,10 +19,10 @@ JetrateDataStructure::JetrateDataStructure( const vector<Double_t>& p ) :
 }
 
 DataStructure* JetrateDataStructure::clone() {
-  return new JetrateDataStructure( points );
+  return new JetrateDataStructure( points, Jetrate );
 }
 
-void JetrateDataStructure::fill( const vector<Double_t>& NJets, Int_t Jetrate ) {
+void JetrateDataStructure::fill( const vector<Double_t>& NJets ) {
   Ntotal++;
   for( size_t i= 0; i < NJets.size(); i++ ) {
     if( NJets[i] == Jetrate ) {

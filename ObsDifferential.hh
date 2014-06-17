@@ -20,15 +20,15 @@ class ObsDifferential : public Observable {
 public:
 
   ObsDifferential( const string& name,
-		   const vector<Double_t>& bins, 
-		   const vector<Analysis>& variations );
+		   const vector<Double_t>& bins );
   ~ObsDifferential() {}
   virtual void fill( NtupleReader* ntr, const Analysis& variation ) = 0;
-  void addAnalyses( const vector<Analysis>& variations, const vector<Double_t>& bins );
+  virtual void addAnalyses( const vector<Analysis>& variations );
 
 protected:
   
-  void getAndFillDifferentialDataStructure( Double_t value, const string& tag );
+  void getAndFillDifferentialDataStructure( Double_t, const string&,
+					    map<string,DataStructure*>& );
   vector<Double_t> binedges;
 
 };

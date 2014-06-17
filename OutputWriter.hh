@@ -7,7 +7,7 @@ using std::vector;
 using std::string;
 class TFile;
 
-class Observable;
+class FilledObservable;
 
 class OutputWriter {
 
@@ -16,7 +16,7 @@ public:
   OutputWriter( const string& filename );
   ~OutputWriter();
 
-  void write( const vector<Observable*>& );
+  void write( const vector<FilledObservable*>& );
 
 private:
 

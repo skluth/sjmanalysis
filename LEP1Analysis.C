@@ -2,6 +2,7 @@
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include "Analysis.hh"
 #include "Observable.hh"
+#include "FilledObservable.hh"
 #include "ObservableFactory.hh"
 #include "Unfolder.hh"
 #include "OutputWriter.hh"
@@ -48,7 +49,8 @@ void processAnalyses( const vector<Analysis>& analyses,
 }
 
 void processUnfolding( const vector<Analysis>& measuredAnalyses, string unfoldsource,
-		       vector<Observable*>& vobs ) {
+		       // vector<Observable*>& vobs ) {
+		       vector<FilledObservable*>& vobs ) {
   cout << "processUnfolding: bin-by-bin unfolding for analyses:" << endl;
   Analysis hadronlevel( unfoldsource, "hadron", "none", "nonrad" );
   for( size_t ianal= 0; ianal < measuredAnalyses.size(); ianal++ ) {
@@ -57,6 +59,7 @@ void processUnfolding( const vector<Analysis>& measuredAnalyses, string unfoldso
     Analysis measuredMC( unfoldsource, measured.getReco(), measured.getCuts() );
     Unfolder unfolder( measured, measuredMC, hadronlevel );
     for( size_t iobs= 0; iobs < vobs.size(); iobs++ ) {
+      cout << "processUnfolding: observable " << vobs[iobs]->getName() << endl;
       unfolder.unfold( vobs[iobs] );
     }
   }
@@ -95,12 +98,12 @@ void LEP1Analysis( Int_t maxevt=1000,
   // Define observables:
   vector<string> obsnames;
   obsnames.push_back( "thrust" );
-  obsnames.push_back( "durhamymergefj23" );
-  obsnames.push_back( "jadeymergefj23" );
-  obsnames.push_back( "antikteminR3" );
-  obsnames.push_back( "antiktRR3" );
-  obsnames.push_back( "sisconeeminR3" );
-  obsnames.push_back( "sisconeRR3" );
+  obsnames.push_back( "durhamymergefj" );
+  obsnames.push_back( "jadeymergefj" );
+  obsnames.push_back( "antiktemin" );
+  obsnames.push_back( "antiktR" );
+  obsnames.push_back( "sisconeemin" );
+  obsnames.push_back( "sisconeR" );
   ObservableFactory obsfac;
   vector<Observable*> vobs= obsfac.createObservables( obsnames, allAnalyses );
 
@@ -109,34 +112,40 @@ void LEP1Analysis( Int_t maxevt=1000,
   processAnalyses( pyAnalyses, vobs, pyfilename, maxevt );
   processAnalyses( hwAnalyses, vobs, hwfilename, maxevt );
 
+  // Get FilledObservables for further processing:
+  vector<FilledObservable*> vfobs;
+  for( size_t iobs= 0; iobs < vobs.size(); iobs++ ) {
+    vector<FilledObservable*> vfobspart= vobs[iobs]->getFilledObservables();
+    vfobs.insert( vfobs.end(), vfobspart.begin(), vfobspart.end() );
+  }
+
   // Unfolding bin-by-bin
   // PYHTHIA based
-  processUnfolding( measuredAnalyses, "py", vobs );
+  processUnfolding( measuredAnalyses, "py", vfobs );
   // HERWIG based for systematic
   vector<Analysis> measuredAnalysesHw;
   measuredAnalysesHw.push_back( measuredAnalyses[0] );
-  processUnfolding( measuredAnalysesHw, "hw", vobs );
+  processUnfolding( measuredAnalysesHw, "hw", vfobs );
   // MC detector level with MC as cross check for PYTHIA and HERWIG
   vector<Analysis> measuredPyAnalyses;
   measuredPyAnalyses.push_back( Analysis( "py", "mt", "stand" ) );
   measuredPyAnalyses.push_back( Analysis( "py", "tc", "stand" ) );
   measuredPyAnalyses.push_back( Analysis( "py", "mt", "costt07" ) );
   measuredPyAnalyses.push_back( Analysis( "py", "mt", "nch7" ) );
-  processUnfolding( measuredPyAnalyses, "py", vobs );
+  processUnfolding( measuredPyAnalyses, "py", vfobs );
   vector<Analysis> measuredHwAnalyses;
   measuredHwAnalyses.push_back( Analysis( "hw", "mt", "stand" ) );
-  processUnfolding( measuredHwAnalyses, "hw", vobs );
+  processUnfolding( measuredHwAnalyses, "hw", vfobs );
 
   // Normalise and calculate stat errors, print
-  for( size_t i= 0; i < vobs.size(); i++ ) {
-    vobs[i]->finalise();
-    vobs[i]->print();
+  for( size_t i= 0; i < vfobs.size(); i++ ) {
+    vfobs[i]->finalise();
+    vfobs[i]->print();
   }
 
-  // no systematics yet
-
+  // Write root objects (TH1D or TGraphErrors):
   OutputWriter writer( "LEP1Analysis.root" );
-  writer.write( vobs );
+  writer.write( vfobs );
 
   // The End:
   return;

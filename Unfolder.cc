@@ -1,6 +1,7 @@
 
 #include "Unfolder.hh"
-#include "Observable.hh"
+// #include "Observable.hh"
+#include "FilledObservable.hh"
 #include "DataStructure.hh"
 
 Unfolder::Unfolder( const Analysis& measured, 
@@ -10,7 +11,8 @@ Unfolder::Unfolder( const Analysis& measured,
   measuredMCAnalysis(measuredmc),
   hadronlevelAnalysis(hadronlevel) {}
 
-void Unfolder::unfold( Observable* obs ) const {
+// void Unfolder::unfold( Observable* obs ) const {
+void Unfolder::unfold( FilledObservable* obs ) const {
   DataStructure* hadronlevel= obs->getDataStructure( hadronlevelAnalysis );
   vector<Double_t> valuesHadronlevel= hadronlevel->getValues();
   DataStructure* measuredMC= obs->getDataStructure( measuredMCAnalysis  );

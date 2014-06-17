@@ -11,11 +11,12 @@ class JetrateDataStructure : public DataStructure {
 
 public:
 
-  JetrateDataStructure( const vector<Double_t>& p );
+  JetrateDataStructure( const vector<Double_t>&, Int_t );
   JetrateDataStructure() {}
   ~JetrateDataStructure() {}
 
-  void fill( const vector<Double_t>& NJets, Int_t Jetrate );
+  //  void fill( const vector<Double_t>& NJets, Int_t Jetrate );
+  void fill( const vector<Double_t>& NJets );
   void normalise();
 
   const vector<Double_t>& getPoints() const { return points; }
@@ -28,6 +29,7 @@ public:
 
 private:
 
+  Int_t Jetrate;
   vector<Double_t> points;
   vector<Double_t> values;
   vector<Double_t> errors;

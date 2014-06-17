@@ -15,8 +15,8 @@ class ObsFastJetEmin : public ObsJetrate {
 
 public:
 
-  ObsFastJetEmin( const string& name, const string& algo, Int_t njet, Double_t rval, 
-		  const vector<Double_t>& eminfrac, 
+  ObsFastJetEmin( const string& name, const string& algo, Double_t rval, 
+		  const vector<Double_t>& eminfractions, 
 		  const vector<Analysis>& variations );
   ~ObsFastJetEmin() {}
   virtual void fill( NtupleReader* ntr, const Analysis& variation );
@@ -24,9 +24,7 @@ public:
 private:
   
   string Algorithm;
-  Int_t Jetrate;
   Double_t Rvalue;
-  vector<Double_t> EminFractions;
 
 };
 

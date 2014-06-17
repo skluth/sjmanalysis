@@ -9,10 +9,12 @@ using std::endl;
 
 ObsThrust::ObsThrust( const vector<Double_t>& bins, 
 		      const vector<Analysis>& variations ) :
-  ObsDifferential("thrust",bins,variations) {}
+  ObsDifferential( "thrust", bins ) {
+  addAnalyses( variations );
+}
 
 void ObsThrust::fill( NtupleReader* ntr, const Analysis& variation ) {
   Double_t thrustvalue= ntr->getThrust( variation.getReco() );
-  getAndFillDifferentialDataStructure( thrustvalue, variation.getTag() );
+  getAndFillDifferentialDataStructure( thrustvalue, variation.getTag(), datastructures );
 }
 

@@ -5,7 +5,8 @@
 #include <vector>
 using std::vector;
 
-class Observable;
+// class Observable;
+class FilledObservable;
 
 class Unfolder {
 
@@ -14,7 +15,8 @@ public:
   Unfolder( const Analysis& measured, const Analysis& measuredmc,
 	    const Analysis& hadronlevel );
   ~Unfolder() {}
-  void unfold( Observable* ) const;
+  //  void unfold( Observable* ) const;
+  void unfold( FilledObservable* ) const;
 
 private:
 

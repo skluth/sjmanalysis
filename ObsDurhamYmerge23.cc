@@ -1,10 +1,6 @@
 
 #include "ObsDurhamYmerge23.hh"
 #include "NtupleReader.hh"
-
-#include <iostream>
-using std::cout;
-using std::endl;
 #include "TMath.h"
 
 ObsDurhamYmerge23::ObsDurhamYmerge23( const vector<Double_t>& bins, 

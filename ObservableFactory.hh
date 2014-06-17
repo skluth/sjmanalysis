@@ -22,21 +22,10 @@ public:
 
 private:
 
-  Observable* createThrust( const vector<Analysis>& analyses );
-  Observable* createFastJetYcut( const string& obsname, 
-				 const string& algo,
-				 const vector<Analysis>& analyses );
-  Observable* createFastJetEmin( const string& obsname,
-				 const string& algo,
-				 const vector<Analysis>& analyses,
-				 Double_t rvalue=0.7 );
-  Observable* createFastJetR( const string& obsname,
-			      const string& algo,
-			      const vector<Analysis>& analyses,
-			      Double_t eminfrac=0.06 );
-  Int_t getNjetFromName( const string& name );
-
+  vector<Double_t> thrustbins;
   vector<Double_t> yNMbins;
+  vector<Double_t> eminFraction;
+  vector<Double_t> Rvalues;
 
 };
 

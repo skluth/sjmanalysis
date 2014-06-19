@@ -32,18 +32,16 @@ void OutputWriter::writeJetrate( JetrateDataStructure* jrds, const string& txt )
   vector<Double_t> values= jrds->getValues();
   vector<Double_t> errors= jrds->getErrors();
   Int_t n= points.size();
-  Double_t* xerrors= new Double_t[n];
-  for( Int_t i= 0; i < n; i++ ) {
-    xerrors[i]= 0.0;
-  }
+  Double_t xerrors[n];
+  for( Int_t i= 0; i < n; i++ ) xerrors[i]= 0.0;
   TGraphErrors tge( n, &(points[0]), &(values[0]), xerrors, &(errors[0]) );
   tge.SetTitle( txt.c_str() );
   tge.SetMarkerStyle( 20 );
   tge.SetMarkerSize( 1.0 );
   cout << "OutputWriter::writeJetrate: writing TGraphErrors " << txt << endl;
   tge.Write( txt.c_str() );
+  return;
 }
-
 
 void OutputWriter::writeDifferentialDistribution( DifferentialDataStructure* dds, 
 						  const string& txt ) {
@@ -55,8 +53,8 @@ void OutputWriter::writeDifferentialDistribution( DifferentialDataStructure* dds
   hist.SetError( &(errors[0]) );
   cout << "OutputWriter::writeDifferentialDistribution: writing TH1D " << txt << endl;
   hist.Write();
+  return;
 }
-
 
 void OutputWriter::writeMatrix( MatrixDataStructure* mds, 
 				const string& txt ) {
@@ -70,6 +68,7 @@ void OutputWriter::writeMatrix( MatrixDataStructure* mds,
   }
   cout << "OutputWriter::writeMatrix: writing TH2D " << txt << endl;
   hist.Write();
+  return;
 }
 
 void OutputWriter::write( const vector<FilledObservable*>& vobs ) {
@@ -79,8 +78,8 @@ void OutputWriter::write( const vector<FilledObservable*>& vobs ) {
 	 iter != data.end(); iter++ ) {
       string txt= vobs[iobs]->getName() + " " + iter->first;
       DataStructure* ds= iter->second;
-      DifferentialDataStructure* dds= dynamic_cast<DifferentialDataStructure*>( ds );
       JetrateDataStructure* jrds= dynamic_cast<JetrateDataStructure*>( ds );
+      DifferentialDataStructure* dds= dynamic_cast<DifferentialDataStructure*>( ds );
       if( jrds ) writeJetrate( jrds, txt );
       else if( dds ) writeDifferentialDistribution( dds, txt );
       else cout << "OutputWriter::write: dynamic_cast failed, no output" << endl;

@@ -9,15 +9,15 @@
 
 #include "TParticle.h"
 #include "TLorentzVector.h"
+#include "TMath.h"
 
 #include <map>
+using std::map;
 #include <string>
+using std::string;
 #include <iostream>
-
 using std::cout;
 using std::endl;
-using std::string;
-using std::map;
 
 TFastJet::TFastJet( const vector<TParticle>& vtp ) : clusseq(0),
 						     plugin(0),
@@ -70,18 +70,24 @@ TFastJet::TFastJet( const vector<TLorentzVector>& vtl,
   fastjet::JetAlgorithm ja= jamap[jetalgString];
   //  cout << "TFastJet::TFastJet: " << jetalg << " enum " << ja << endl;
   fastjet::JetDefinition jetdef;
+  fastjet::JetDefinition::Recombiner* recombiner= 0;
   if( ja == 99 ) {
     if( jetalgString == "siscone" ) {
       plugin= new fastjet::SISConePlugin( R, 0.75 );
     }
     else if( jetalgString == "jade" ) {
       plugin= new fastjet::JadePlugin();
+      recombiner= new EEE0Recombiner();
     }
     else {
       cout << "TFastJet::TFastJet: jet plugin not known: " << ja << endl;
       return;
     }
     jetdef= fastjet::JetDefinition( plugin );
+    if( recombiner ) {
+      jetdef.set_recombiner( recombiner );
+      jetdef.delete_recombiner_when_unused();
+    }
   }
   else if( ja == jamap["eekt"] ) {
     jetdef= fastjet::JetDefinition( ja );
@@ -150,5 +156,21 @@ int TFastJet::njets( double ycut ) {
 
 double TFastJet::Evis() {
   return clusseq->Q();
+}
+
+
+
+string EEE0Recombiner::description() const {
+  return "E0 scheme for EE"; 
+}
+
+void EEE0Recombiner::recombine( const fastjet::PseudoJet& pa,
+				const fastjet::PseudoJet& pb, 
+				fastjet::PseudoJet& pab ) const {
+  pab.reset( pa.px() + pb.px(), pa.py() + pb.py(),
+	     pa.pz() + pb.pz(), pa.E() + pb.E() );
+  // double rescale= pab.E()/TMath::Sqrt( pab.perp2() + pab.pz()*pab.pz() );
+  // pab.reset_momentum( rescale*pab.px(), rescale*pab.py(), rescale*pab.pz(), pab.E() );
+  return;
 }
 

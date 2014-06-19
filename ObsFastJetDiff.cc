@@ -69,3 +69,7 @@ vector<FilledObservable*> ObsFastJetDiff::getFilledObservables() const {
   return vfobs;
 }
 
+bool ObsFastJetDiff::containsAnalysis( const Analysis& anal ) {
+  return containsAnalysisInDataStructure( anal, ymerge23 );
+}
+

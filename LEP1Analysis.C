@@ -16,6 +16,7 @@ using std::vector;
 using std::string;
 #endif
 
+
 void processAnalyses( const vector<Analysis>& analyses,
 		      const vector<Observable*>& vobs,
 		      const string& filename,
@@ -33,13 +34,15 @@ void processAnalyses( const vector<Analysis>& analyses,
     }
     map<string,Bool_t> selections= ntr->LEP1Selections();
     bool MCnonrad= ntr->MCNonRad();
-    for( size_t i= 0; i < analyses.size(); i++ ) {
-      string cuts= analyses[i].getCuts();
-      string mccuts= analyses[i].getMccuts();
-      if( ( cuts == "none" || selections[cuts] ) &&
-	  ( mccuts == "none" || MCnonrad ) ) {
-	for( size_t j= 0; j < vobs.size(); j++ ) {
-	  vobs[j]->fill( ntr, analyses[i] );
+    for( size_t ianal= 0; ianal < analyses.size(); ianal++ ) {
+      Analysis analysis= analyses[ianal];
+      string cuts= analysis.getCuts();
+      string mccuts= analysis.getMccuts();
+      if( ( cuts == "none" or selections[cuts] ) and
+	  ( mccuts == "none" or MCnonrad ) ) {
+	for( size_t iobs= 0; iobs < vobs.size(); iobs++ ) {
+	  Observable* obs= vobs[iobs];
+	  if( obs->containsAnalysis( analysis ) ) obs->fill( ntr, analysis );
 	}
       }
     }
@@ -48,9 +51,9 @@ void processAnalyses( const vector<Analysis>& analyses,
   return;
 }
 
+
 void processUnfolding( const vector<Analysis>& measuredAnalyses, string unfoldsource,
-		       // vector<Observable*>& vobs ) {
-		       vector<FilledObservable*>& vobs ) {
+		       const vector<FilledObservable*>& vobs ) {
   cout << "processUnfolding: bin-by-bin unfolding for analyses:" << endl;
   Analysis hadronlevel( unfoldsource, "hadron", "none", "nonrad" );
   for( size_t ianal= 0; ianal < measuredAnalyses.size(); ianal++ ) {
@@ -98,13 +101,9 @@ void LEP1Analysis( Int_t maxevt=1000,
   pyAnalyses.push_back( Analysis( "py", "mt", "costt07" ) );
   pyAnalyses.push_back( Analysis( "py", "mt", "nch7" ) );
   pyAnalyses.push_back( Analysis( "py", "hadron", "none", "nonrad" ) );
-  pyAnalyses.push_back( Analysis( "py", "hadron", "stand", "nonrad" ) );
-  pyAnalyses.push_back( Analysis( "py", "mt", "stand", "nonrad", "hadron" ) );
   vector<Analysis> hwAnalyses;
   hwAnalyses.push_back( Analysis( "hw", "mt", "stand" ) );
   hwAnalyses.push_back( Analysis( "hw", "hadron", "none", "nonrad" ) );
-  hwAnalyses.push_back( Analysis( "hw", "hadron", "stand", "nonrad" ) );
-  hwAnalyses.push_back( Analysis( "hw", "mt", "stand", "nonrad", "hadron" ) );
   vector<Analysis> allAnalyses( measuredAnalyses );
   allAnalyses.insert( allAnalyses.end(), pyAnalyses.begin(), pyAnalyses.end() );
   allAnalyses.insert( allAnalyses.end(), hwAnalyses.begin(), hwAnalyses.end() );
@@ -126,6 +125,25 @@ void LEP1Analysis( Int_t maxevt=1000,
   obsnames.push_back( "sisconeR" );
   ObservableFactory obsfac;
   vector<Observable*> vobs= obsfac.createObservables( obsnames, allAnalyses );
+
+  // Add extras for migration matrices where needed:
+  vector<Analysis> pyMatrixExtras;
+  pyMatrixExtras.push_back( Analysis( "py", "hadron", "stand", "nonrad" ) );
+  pyMatrixExtras.push_back( Analysis( "py", "mt", "stand", "nonrad", "hadron" ) );
+  pyAnalyses.insert( pyAnalyses.end(), pyMatrixExtras.begin(), pyMatrixExtras.end() );
+  vector<Analysis> hwMatrixExtras;
+  hwMatrixExtras.push_back( Analysis( "hw", "hadron", "stand", "nonrad" ) );
+  hwMatrixExtras.push_back( Analysis( "hw", "mt", "stand", "nonrad", "hadron" ) );
+  hwAnalyses.insert( hwAnalyses.end(), hwMatrixExtras.begin(), hwMatrixExtras.end() );
+  for( size_t iobs= 0; iobs < vobs.size(); iobs++ ) {
+    Observable* obs= vobs[iobs];
+    if( obs->getName() == "thrust" or
+	obs->getName() == "durhamymerge23" or
+	obs->getName() == "jadeymerge23" ) {
+      obs->addAnalyses( pyMatrixExtras );
+      obs->addAnalyses( hwMatrixExtras );
+    }
+  }
 
   // Fill from data and mc (PYTHIA and HERWIG) ntuples:
   processAnalyses( measuredAnalyses, vobs, datafilename, maxevt );

@@ -24,10 +24,11 @@ public:
   ObsJetrate( string, const vector<Double_t>& );
   ObsJetrate() {}
   virtual ~ObsJetrate();
-  void addAnalyses( const vector<Analysis>& variations );
+  virtual void addAnalyses( const vector<Analysis>& variations );
   virtual void fill( NtupleReader* ntr, const Analysis& variation ) = 0;
   virtual vector<FilledObservable*> getFilledObservables() const;
   virtual void print() const;
+  virtual bool containsAnalysis( const Analysis& );
 
 protected:
 
@@ -41,7 +42,7 @@ private:
   JetrateDataStructure* getJetrateDataStructure( DataStructure* ds ) const;
   void getAndFillJetrateDataStructure( const vector<Double_t>&, 
 				       const string&,
-				       map<string,DataStructure*>& );
+				       const map<string,DataStructure*>& );
   void printDatastructures( const map<string,DataStructure*>& ) const;
 
   map<string,DataStructure*> jetrates2;

@@ -53,7 +53,7 @@ Int_t NtupleReader::GetNumberEntries() {
 
 bool NtupleReader::GetEvent( Int_t ievnt ) {
   bool result= false;
-  if( nt_tree && nt_tree->GetEvent( ievnt ) > 0 ) {
+  if( nt_tree and nt_tree->GetEvent( ievnt ) > 0 ) {
     result= true;
     nt_vtlvcache= false;
   }
@@ -65,7 +65,7 @@ bool NtupleReader::LEP1Preselection() {
   Int_t icjst= nt_Icjst;
   Int_t iebst= nt_Iebst;
   Int_t itkmh= nt_Itkmh;
-  if( icjst != 3 || iebst != 3 || itkmh != 1 ) result= false;
+  if( icjst != 3 or iebst != 3 or itkmh != 1 ) result= false;
   return result;
 }
 
@@ -83,60 +83,79 @@ std::map<std::string,bool> NtupleReader::LEP1Selections() {
   selections["costt07"]= false;
   selections["nch7"]= false;
   bool preselection= LEP1Selection();
-  if( preselection && nt_Ntkd02 >= 5 && costt() < 0.9 ) selections["stand"]= true;
-  if( preselection && nt_Ntkd02 >= 7 && costt() < 0.9 ) selections["nch7"]= true;
-  if( preselection && nt_Ntkd02 >= 5 && costt() < 0.7 ) selections["costt07"]= true;
+  if( preselection and nt_Ntkd02 >= 5 and costt() < 0.9 ) selections["stand"]= true;
+  if( preselection and nt_Ntkd02 >= 7 and costt() < 0.9 ) selections["nch7"]= true;
+  if( preselection and nt_Ntkd02 >= 5 and costt() < 0.7 ) selections["costt07"]= true;
   return selections;
 }
 
 bool NtupleReader::MCNonRad() {
   bool result= false;
   Int_t inonr= nt_Inonr;
-  if( nt_isMC && inonr == 1 ) result= true;
+  if( nt_isMC and inonr == 1 ) result= true;
   return result;
 }
 
-Double_t NtupleReader::getYmergeD( const TString& reco, Int_t njet ) {
+bool NtupleReader::inRange( Int_t njet, Int_t max ) {
+  return njet > 0 and njet <= max;
+}
+
+Double_t NtupleReader::getRecoYmergeValue( const TString& reco, Int_t njet,
+					   Int_t maxmt, Float_t* Ymt, 
+					   Int_t maxtc, Float_t* Ytc, 
+					   Int_t maxt, Float_t* Yt, 
+					   Int_t maxc, Float_t* Yc, 
+					   Int_t maxh, Float_t* Yh, 
+					   Int_t maxp, Float_t* Yp ) {
   Double_t result= -1.0;
-  if( reco == "mt" && njet > 0 && njet <= nt_Nxjdmt ) return nt_Yddmt[njet-1];
-  else if( reco == "tracks" && njet > 0 && njet <= nt_Nxjdt ) return nt_Yddt[njet-1];
-  else if( reco == "cluster" && njet > 0 && njet <= nt_Nxjdc ) return nt_Yddc[njet-1];
-  else if( reco == "tc" && njet > 0 && njet <= nt_Nxjdtc ) return nt_Yddtc[njet-1];
-  else if( reco == "hadron" && njet > 0 && njet <= nt_Nxjdh ) return nt_Ydh[njet-1];
-  else if( reco == "parton" && njet > 0 && njet <= nt_Nxjdp ) return nt_Ydp[njet-1];
+  if( reco == "mt" and inRange( njet, maxmt ) ) result= Ymt[njet-1];
+  else if( reco == "tc" and inRange( njet, maxtc ) ) result= Ytc[njet-1];
+  else if( reco == "tracks" and inRange( njet, maxt ) ) result= Yt[njet-1];
+  else if( reco == "cluster" and inRange( njet, maxc ) ) result= Yc[njet-1];
+  else if( reco == "hadron" and inRange( njet, maxh ) ) result= Yh[njet-1];
+  else if( reco == "parton" and inRange( njet, maxp ) ) result= Yp[njet-1];
   else {
-    std::cout << "NtupleReader::getYmergeD: reco method " << reco << " not recognised " 
-	      << njet << " " << nt_Nxjdh << std::endl;
-    return result;
+    std::cout << "NtupleReader::getRecoYmergeValue: no value found " << reco << "  " 
+	      << njet << " " << maxmt << std::endl;
   }
+  return result;
+}
+
+Double_t NtupleReader::getRecoValue( const TString& reco, 
+				     Float_t mt,
+				     Float_t tc,
+				     Float_t tracks,
+				     Float_t cluster,
+				     Float_t hadron,
+				     Float_t parton ) {
+  Double_t value= -1.0;
+  if( reco == "mt" ) value= mt;
+  else if( reco == "tc" ) value= tc;
+  else if( reco == "tracks" ) value= tracks;
+  else if( reco == "clusters" ) value= cluster;
+  else if( reco == "hadron" ) value= hadron;
+  else if( reco == "parton" ) value= parton;
+  else std::cout << "NtupleReader::getRecoValue: reco method " << reco << " not recognised" 
+		 << std::endl;
+  return value;
+}
+
+Double_t NtupleReader::getYmergeD( const TString& reco, Int_t njet ) {
+  return getRecoYmergeValue( reco, njet, 
+			     nt_Nxjdmt, nt_Yddmt, nt_Nxjdtc, nt_Yddtc,
+			     nt_Nxjdt, nt_Yddt, nt_Nxjdc, nt_Yddc,
+			     nt_Nxjdh, nt_Ydh, nt_Nxjdp, nt_Ydp );
 }
 
 Double_t NtupleReader::getYmergeE( const TString& reco, Int_t njet ) {
-  Double_t result= -1.0;
-  if( reco == "mt" && njet > 0 && njet <= nt_Nxjemt ) return nt_Yedmt[njet-1];
-  else if( reco == "tracks" && njet > 0 && njet <= nt_Nxjet ) return nt_Yedt[njet-1];
-  else if( reco == "cluster" && njet > 0 && njet <= nt_Nxjec ) return nt_Yedc[njet-1];
-  else if( reco == "tc" && njet > 0 && njet <= nt_Nxjetc ) return nt_Yedtc[njet-1];
-  else if( reco == "hadron" && njet > 0 && njet <= nt_Nxjeh ) return nt_Yeh[njet-1];
-  else if( reco == "parton" && njet > 0 && njet <= nt_Nxjep ) return nt_Yep[njet-1];
-  else {
-    std::cout << "NtupleReader::getYmergeE: no value found " << reco << "  " 
-	      << njet << " " << nt_Nxjdh << std::endl;
-    return result;
-  }
+  return getRecoYmergeValue( reco, njet, 
+			     nt_Nxjemt, nt_Yedmt, nt_Nxjetc, nt_Yedtc,
+			     nt_Nxjet, nt_Yedt, nt_Nxjec, nt_Yedc,
+			     nt_Nxjeh, nt_Yeh, nt_Nxjep, nt_Yep );
 }
 
 Double_t NtupleReader::getThrust( const TString& reco ) {
-  Double_t value= -1.0;
-  if( reco == "mt" ) value= nt_Tdmt;
-  else if( reco == "tracks" ) value= nt_Tdt;
-  else if( reco == "clusters" ) value= nt_Tdc;
-  else if( reco == "tc" ) value= nt_Tdtc;
-  else if( reco == "hadron" ) value= nt_Th;
-  else if( reco == "parton" ) value= nt_Tp;
-  else std::cout << "NtupleReader::getThrust: reco method " << reco << " not recognised" 
-		 << std::endl;
-  return value;
+  return getRecoValue( reco, nt_Tdmt, nt_Tdtc, nt_Tdt, nt_Tdc, nt_Th, nt_Tp );
 }
 
 void NtupleReader::SetBranchAddressChecked( const char* branchname, void* address ) {
@@ -228,7 +247,7 @@ void NtupleReader::Init() {
 const std::vector<TLorentzVector>& NtupleReader::GetLorentzVectors( const std::string & opt ) {
   static std::vector<TLorentzVector> vtlv;
   static std::string lastopt= "none";
-  if( nt_vtlvcache && lastopt == opt ) return vtlv;
+  if( nt_vtlvcache and lastopt == opt ) return vtlv;
   static Float_t ptrack[nt_maxtrk][4];
   Int_t ntrack;
   if( opt == "parton" ) {

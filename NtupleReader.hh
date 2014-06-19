@@ -48,6 +48,16 @@ private:
 
   void Init();
   void SetBranchAddressChecked( const char*, void* );
+  bool inRange( Int_t, Int_t );
+  Double_t getRecoValue( const TString&, 
+			 Float_t, Float_t, Float_t, Float_t, Float_t, Float_t );
+  Double_t getRecoYmergeValue( const TString& reco, Int_t njet,
+			       Int_t maxmt, Float_t* Ymt, 
+			       Int_t maxtc, Float_t* Ytc, 
+			       Int_t maxt, Float_t* Yt, 
+			       Int_t maxc, Float_t* Yc, 
+			       Int_t maxh, Float_t* Yh, 
+			       Int_t maxp, Float_t* Yp );
 
   TFile* nt_file;
   TTree* nt_tree;

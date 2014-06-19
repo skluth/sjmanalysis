@@ -27,6 +27,7 @@ public:
   virtual void addAnalyses( const vector<Analysis>& variations );
   virtual void fill( NtupleReader* ntr, const Analysis& variation );
   virtual vector<FilledObservable*> getFilledObservables() const;
+  virtual bool containsAnalysis( const Analysis& );  
 
 private:
   

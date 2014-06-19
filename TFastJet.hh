@@ -1,9 +1,11 @@
 #ifndef TFASTJET_HH
 #define TFASTJET_HH
 
-#include <vector>
 #include "TLorentzVector.h"
+#include <vector>
 using std::vector;
+#include <string>
+using std::string;
 
 class TParticle;
 
@@ -18,6 +20,7 @@ namespace fastjet {
 namespace fastjet {
   namespace JetDefinition {
     class Plugin;
+    class Recombiner;
   }
 }
 #else
@@ -49,6 +52,19 @@ private:
   fastjet::ClusterSequence* clusseq;
   fastjet::JetDefinition::Plugin* plugin;
   vector<fastjet::PseudoJet>* pjets;
+
+};
+
+class EEE0Recombiner: public fastjet::JetDefinition::Recombiner {
+
+public:
+
+  EEE0Recombiner() {}
+  ~EEE0Recombiner() {}
+  virtual string description() const;
+  virtual void recombine( const fastjet::PseudoJet& pa,
+			  const fastjet::PseudoJet& pb, 
+			  fastjet::PseudoJet& pab ) const;
 
 };
 

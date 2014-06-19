@@ -19,6 +19,7 @@ ObsJetrate::~ObsJetrate() {
 }
 
 void ObsJetrate::addAnalyses( const vector<Analysis>& variations ) {
+  //  analyses.insert( analyses.end(), variations.begin(), variations.end() );
   for( size_t i= 0; i < variations.size(); i++ ) {      
     string tag= variations[i].getTag();
     jetrates2[tag]= new JetrateDataStructure( points, 2 );
@@ -41,7 +42,7 @@ void ObsJetrate::getAndFillJetrateDataStructures( const vector<Double_t>& NJets,
 
 void ObsJetrate::getAndFillJetrateDataStructure( const vector<Double_t>& NJets,
 						 const string& tag,
-						 map<string,DataStructure*>& jetrates ) {
+						 const map<string,DataStructure*>& jetrates ) {
   DataStructure* ds= getDataStructure( tag, jetrates );
   if( ds ) {
     JetrateDataStructure* jrds= getJetrateDataStructure( ds );
@@ -90,3 +91,6 @@ void ObsJetrate::printDatastructures( const map<string,DataStructure*>& dss ) co
   }
 }
 
+bool ObsJetrate::containsAnalysis( const Analysis& anal ) {
+  return containsAnalysisInDataStructure( anal, jetrates2 );
+}

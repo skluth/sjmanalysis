@@ -1,6 +1,7 @@
 
 #include "ObsDurhamYmerge23.hh"
 #include "NtupleReader.hh"
+#include "MatrixDataStructure.hh"
 #include "TMath.h"
 
 ObsDurhamYmerge23::ObsDurhamYmerge23( const vector<Double_t>& bins, 
@@ -10,8 +11,12 @@ ObsDurhamYmerge23::ObsDurhamYmerge23( const vector<Double_t>& bins,
 }
 
 void ObsDurhamYmerge23::fill( NtupleReader* ntr, const Analysis& variation ) {
-  Double_t yflip23= ntr->getYmergeD( variation.getReco(), 2 );
-  getAndFillDifferentialDataStructure( -TMath::Log10( yflip23 ), variation.getTag(), 
-				       datastructures );
+  string tag= variation.getTag();
+  Double_t log10yflip23= -TMath::Log10( ntr->getYmergeD( variation.getReco(), 2 ) );
+  getAndFillDifferentialDataStructure( log10yflip23, tag, datastructures );
+  if( variation.getReco2() != "none" and ntr->isMC() ) {
+    Double_t MClog10yflip23= -TMath::Log10( ntr->getYmergeD( variation.getReco2(), 2 ) );
+    matrices[tag]->fill( MClog10yflip23, log10yflip23 );
+  }
 }
 

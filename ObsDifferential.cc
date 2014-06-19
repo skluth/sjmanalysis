@@ -3,6 +3,7 @@
 #include "NtupleReader.hh"
 #include "DataStructure.hh"
 #include "DifferentialDataStructure.hh"
+#include "MatrixDataStructure.hh"
 
 #include <iostream>
 using std::cout;
@@ -12,23 +13,29 @@ ObsDifferential::ObsDifferential( const string& name,
 				  const vector<Double_t>& bins ) :
   Observable(name), binedges(bins) {}
 
-// Call in derived class ctors
+// Call this method in derived class ctors:
 void ObsDifferential::addAnalyses( const vector<Analysis>& variations ) {
   cout << "ObsDifferential::addAnalyses: adding analyses for " << getName() << endl;
-  for( size_t i= 0; i < variations.size(); i++ ) {      
-    string tag= variations[i].getTag();
+  //  analyses.insert( analyses.end(), variations.begin(), variations.end() );
+  for( size_t ivar= 0; ivar < variations.size(); ivar++ ) {      
+    string tag= variations[ivar].getTag();
     datastructures[tag]= new DifferentialDataStructure( binedges );
+    if( variations[ivar].getReco2() != "none" ) {
+      matrices[tag]= new MatrixDataStructure( binedges );
+    }
   }
+  return;
 }
 
 void ObsDifferential::getAndFillDifferentialDataStructure( Double_t value, 
 							   const string& tag,
-							   map<string,DataStructure*>& dss ) {
+							   const map<string,DataStructure*>& dss ) {
   DataStructure* ds= getDataStructure( tag, dss );
   if( ds ) {
     DifferentialDataStructure* dds= getDifferentialDataStructure( ds );
     if( dds ) dds->fill( value );
   }
+  return;
 }
 
 DifferentialDataStructure* 

@@ -57,3 +57,16 @@ Observable::getDataStructure( const string& tag,
   }
   return ds;
 }
+
+bool Observable::containsAnalysis( const Analysis& anal ) {
+  return containsAnalysisInDataStructure( anal, datastructures );
+}
+
+bool Observable::containsAnalysisInDataStructure( const Analysis& anal,
+						  const map<string,DataStructure*>& dss ) {
+  string tag= anal.getTag();
+  bool result= true;
+  if( dss.find( tag ) == dss.end() ) result= false;
+  return result;
+}
+

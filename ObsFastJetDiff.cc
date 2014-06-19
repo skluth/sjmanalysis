@@ -18,6 +18,13 @@ ObsFastJetDiff::ObsFastJetDiff( const string& name, const string& algo,
   addAnalyses( variations );
 }
 
+ObsFastJetDiff::~ObsFastJetDiff() {
+  deleteDataStructures( ymerge23 );
+  deleteDataStructures( ymerge34 );
+  deleteDataStructures( ymerge45 );
+  deleteDataStructures( ymerge56 );
+}
+
 void ObsFastJetDiff::addAnalyses( const vector<Analysis>& variations ) {
   cout << "ObsFastJetDiff::addAnalyses: adding analyses for " << getName() << endl;
   for( size_t i= 0; i < variations.size(); i++ ) {      

@@ -10,6 +10,14 @@ using std::endl;
 ObsJetrate::ObsJetrate( string name, const vector<Double_t>& pts ) : 
   Observable( name ), points(pts) {}
 
+ObsJetrate::~ObsJetrate() {
+  deleteDataStructures( jetrates2 );
+  deleteDataStructures( jetrates3 );
+  deleteDataStructures( jetrates4 );
+  deleteDataStructures( jetrates5 );
+  deleteDataStructures( jetrates6 );
+}
+
 void ObsJetrate::addAnalyses( const vector<Analysis>& variations ) {
   for( size_t i= 0; i < variations.size(); i++ ) {      
     string tag= variations[i].getTag();
@@ -34,23 +42,20 @@ void ObsJetrate::getAndFillJetrateDataStructures( const vector<Double_t>& NJets,
 void ObsJetrate::getAndFillJetrateDataStructure( const vector<Double_t>& NJets,
 						 const string& tag,
 						 map<string,DataStructure*>& jetrates ) {
-  map<string,DataStructure*>::iterator iter= jetrates.find( tag );
-  if( iter != jetrates.end() ) {
-    JetrateDataStructure* jrds= 
-      dynamic_cast<JetrateDataStructure*>( iter->second );
-    if( jrds ) {
-      jrds->fill( NJets );
-    }
-    else {
-      std::cout << "ObsJetrate::getAndFillJetrateDataStructure: dynamic_cast to JetrateDataStructure failed for observable " 
-		<< this->getName() << std::endl;
-    }
+  DataStructure* ds= getDataStructure( tag, jetrates );
+  if( ds ) {
+    JetrateDataStructure* jrds= getJetrateDataStructure( ds );
+    if( jrds ) jrds->fill( NJets );
   }
-  else {
-    std::cout << "ObsJetrate::getAndFillJetrateDataStructures: analysis " 
-	      << tag << " not found" << std::endl;
+}
+
+JetrateDataStructure* ObsJetrate::getJetrateDataStructure( DataStructure* ds ) const {
+  JetrateDataStructure* jrds= dynamic_cast<JetrateDataStructure*>( ds );
+  if( not jrds ) {
+    cout << "ObsJetrate::getJetrateDataStructure: dynamic_cast to JetrateDataStructure failed for observable " 
+	 << name << endl;
   }
-  return; 
+  return jrds;
 }
 
 vector<FilledObservable*> ObsJetrate::getFilledObservables() const {

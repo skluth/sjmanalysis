@@ -67,6 +67,15 @@ void processUnfolding( const vector<Analysis>& measuredAnalyses, string unfoldso
   return;
 }
 
+vector<FilledObservable*> getFilled( const vector<Observable*>& vobs ) {
+  vector<FilledObservable*> vfobs;
+  for( size_t iobs= 0; iobs < vobs.size(); iobs++ ) {
+    vector<FilledObservable*> vfobspart= vobs[iobs]->getFilledObservables();
+    vfobs.insert( vfobs.end(), vfobspart.begin(), vfobspart.end() );
+  }
+  return vfobs;
+}
+
 void LEP1Analysis( Int_t maxevt=1000, 
 		   const char* datafilename="da91_96_200.root",
 		   const char* pyfilename="mc5025_1_200.root", 
@@ -74,6 +83,8 @@ void LEP1Analysis( Int_t maxevt=1000,
 
   // Load libs in root before loading this macro
   // gROOT->LoadMacro("libNtupleReaderDict.so");
+  // gROOT->ProcessLine(".include /home/skluth/qcd/fastjet/fastjet-3.0.6/install/include")
+  // to allow ACLIC
 
   // Define analysis variations:
   vector<Analysis> measuredAnalyses;
@@ -87,10 +98,13 @@ void LEP1Analysis( Int_t maxevt=1000,
   pyAnalyses.push_back( Analysis( "py", "mt", "costt07" ) );
   pyAnalyses.push_back( Analysis( "py", "mt", "nch7" ) );
   pyAnalyses.push_back( Analysis( "py", "hadron", "none", "nonrad" ) );
-  pyAnalyses.push_back( Analysis( "py", "mt", "stand", "nonrad" ) );
+  pyAnalyses.push_back( Analysis( "py", "hadron", "stand", "nonrad" ) );
+  pyAnalyses.push_back( Analysis( "py", "mt", "stand", "nonrad", "hadron" ) );
   vector<Analysis> hwAnalyses;
   hwAnalyses.push_back( Analysis( "hw", "mt", "stand" ) );
   hwAnalyses.push_back( Analysis( "hw", "hadron", "none", "nonrad" ) );
+  hwAnalyses.push_back( Analysis( "hw", "hadron", "stand", "nonrad" ) );
+  hwAnalyses.push_back( Analysis( "hw", "mt", "stand", "nonrad", "hadron" ) );
   vector<Analysis> allAnalyses( measuredAnalyses );
   allAnalyses.insert( allAnalyses.end(), pyAnalyses.begin(), pyAnalyses.end() );
   allAnalyses.insert( allAnalyses.end(), hwAnalyses.begin(), hwAnalyses.end() );
@@ -119,11 +133,7 @@ void LEP1Analysis( Int_t maxevt=1000,
   processAnalyses( hwAnalyses, vobs, hwfilename, maxevt );
 
   // Get FilledObservables for further processing:
-  vector<FilledObservable*> vfobs;
-  for( size_t iobs= 0; iobs < vobs.size(); iobs++ ) {
-    vector<FilledObservable*> vfobspart= vobs[iobs]->getFilledObservables();
-    vfobs.insert( vfobs.end(), vfobspart.begin(), vfobspart.end() );
-  }
+  vector<FilledObservable*> vfobs= getFilled( vobs );
 
   // Unfolding bin-by-bin
   // PYHTHIA based

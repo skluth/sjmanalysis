@@ -5,7 +5,8 @@
 using std::cout;
 using std::endl;
 
-JetrateDataStructure::JetrateDataStructure( const vector<Double_t>& p, Int_t njet ) :
+JetrateDataStructure::JetrateDataStructure( const vector<Double_t>& p, 
+					    Int_t njet ) :
   DataStructure(), Jetrate(njet) {
   size_t n= p.size();
   points.resize( n );

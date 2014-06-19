@@ -37,6 +37,7 @@ public:
   bool LEP1Selection();
   std::map<std::string,bool> LEP1Selections();
   bool MCNonRad();
+  bool isMC() { return nt_isMC; }
 
   Float_t costt() { return nt_Tvectc[2]; }
   Double_t getYmergeD( const TString& reco, Int_t njet );

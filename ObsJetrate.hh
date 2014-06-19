@@ -14,6 +14,7 @@ using std::map;
 
 class NtupleReader;
 class DataStructure;
+class JetrateDataStructure;
 class FilledObservable;
 
 class ObsJetrate : public Observable {
@@ -22,7 +23,7 @@ public:
 
   ObsJetrate( string, const vector<Double_t>& );
   ObsJetrate() {}
-  ~ObsJetrate() {}
+  virtual ~ObsJetrate();
   void addAnalyses( const vector<Analysis>& variations );
   virtual void fill( NtupleReader* ntr, const Analysis& variation ) = 0;
   virtual vector<FilledObservable*> getFilledObservables() const;
@@ -31,12 +32,13 @@ public:
 protected:
 
   void getAndFillJetrateDataStructures( const vector<Double_t>& NJets, 
-					const string& tag );
+   					const string& tag );
 
   vector<Double_t> points;
 
 private:
 
+  JetrateDataStructure* getJetrateDataStructure( DataStructure* ds ) const;
   void getAndFillJetrateDataStructure( const vector<Double_t>&, 
 				       const string&,
 				       map<string,DataStructure*>& );

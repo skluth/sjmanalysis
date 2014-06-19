@@ -9,25 +9,31 @@ using std::string;
 using std::map;
 
 class DataStructure;
+//class MatrixDataStructure;
+#include "MatrixDataStructure.hh"
+
 
 class FilledObservable {
 
 public:
 
-  FilledObservable( const string&, const map<string,DataStructure*>& );
-  FilledObservable() {}
+  FilledObservable( const string&, 
+		    const map<string,DataStructure*>&,
+		    const map<string,MatrixDataStructure*>& mds= map<string,MatrixDataStructure*>() );
   ~FilledObservable() {}
   void finalise();
-  void print();
-  map<string,DataStructure*> getData();
-  DataStructure* getDataStructure( const Analysis& );
+  void print() const;
+  const map<string,DataStructure*>& getData() const;
+  const map<string,MatrixDataStructure*>& getMatrices() const;
+  DataStructure* getDataStructure( const Analysis& ) const;
   void setDataStructure( DataStructure*, const Analysis&  );
-  string getName() { return name; }
+  string getName() const { return name; }
 
 private:
 
   string name;
   map<string,DataStructure*> datastructures;
+  map<string,MatrixDataStructure*> matrices;
 
 };
 

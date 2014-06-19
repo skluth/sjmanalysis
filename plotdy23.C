@@ -9,6 +9,7 @@
 #include "DataStructure.hh"
 #include "Analysis.hh"
 #include "Observable.hh"
+#include "FilledObservable.hh"
 #include "ObservableFactory.hh"
 #include "Unfolder.hh"
 #include "OutputWriter.hh"
@@ -42,7 +43,7 @@ void printy23( Int_t ievnt=100, const char* filename="da91_96_200.root" ) {
   return;
 }
 
-void JetratePlot( Observable* obs, const Analysis& anal ) {
+void JetratePlot( FilledObservable* obs, const Analysis& anal ) {
   map<string,DataStructure*> data= obs->getData();
   string tag= anal.getTag();
   DataStructure* jrds= data[tag];
@@ -71,6 +72,29 @@ void processDurhamJade( const vector<TLorentzVector>& vtlv, Double_t& y23d, Doub
   return;
 }
 
+vector<FilledObservable*> getFilled( const vector<Observable*>& vobs ) {
+  vector<FilledObservable*> vfobs;
+  for( size_t iobs= 0; iobs < vobs.size(); iobs++ ) {
+    vector<FilledObservable*> vfobspart= vobs[iobs]->getFilledObservables();
+    vfobs.insert( vfobs.end(), vfobspart.begin(), vfobspart.end() );
+  }
+  return vfobs;
+}
+
+FilledObservable* findFilledObservable( TString name, 
+					const vector<FilledObservable*>& vfobs ) {
+  FilledObservable* fobs= 0;
+  for( size_t ifobs= 0; ifobs < vfobs.size(); ifobs++ ) {
+    TString obsname= vfobs[ifobs]->getName();
+    if( obsname == name ) {
+      fobs= vfobs[ifobs];
+      break;
+    }
+  }
+  if( fobs == 0 ) cout << "FilledObservable " << name << " not found" << endl;
+  return fobs;
+}
+
 void makeplots( Int_t maxevt=1000, 
 		const char* pyfilename="mc5025_1_200.root" ) {
 
@@ -94,8 +118,8 @@ void makeplots( Int_t maxevt=1000,
   allAnalyses.push_back( Analysis( "py", "hadron", "none", "nonrad" ) );
 
   vector<string> obsnames;
-  obsnames.push_back( "antikteminR3" );
-  obsnames.push_back( "antiktRR3" );
+  obsnames.push_back( "antiktemin" );
+  obsnames.push_back( "antiktR" );
   ObservableFactory obsfac;
   vector<Observable*> vobs= obsfac.createObservables( obsnames, allAnalyses );
 
@@ -120,6 +144,7 @@ void makeplots( Int_t maxevt=1000,
       continue;
     }
 
+    // Fill Observables:
     for( size_t i= 0; i < allAnalyses.size(); i++ ) {
       string cuts= allAnalyses[i].getCuts();
       string mccuts= allAnalyses[i].getMccuts();
@@ -185,6 +210,13 @@ void makeplots( Int_t maxevt=1000,
   cout << "MC non-rad selected events " <<  Nselected["nonrad"] << endl;
   cout << "LEP1 and MC non-rad selected events " << Nselected["both"] << endl;
 
+  // Get filled observables for plots:
+  vector<FilledObservable*> vfobs= getFilled( vobs );
+  FilledObservable* antikteminR3= findFilledObservable( "antikteminR3", vfobs );
+  FilledObservable* antiktRR3= findFilledObservable( "antiktRR3", vfobs );
+  if( antikteminR3 == 0 || antiktRR3 == 0 ) return;
+
+  // Plots:
   TCanvas* canvd= new TCanvas( "canvd", "y23 Durham plots", 900, 900 );
   canvd->Divide( 2, 2 );
   canvd->cd( 1 );
@@ -207,18 +239,18 @@ void makeplots( Int_t maxevt=1000,
   canvj->cd( 4 );
   y23jmthad->Draw( "box" );
 
-  Analysis a( "py", "mt", "stand" );
-  Analysis b( "py", "hadron", "none", "nonrad" );
+  Analysis detectorLevel( "py", "mt", "stand" );
+  Analysis hadronLevel( "py", "hadron", "none", "nonrad" );
   TCanvas* canva= new TCanvas( "canva", "ee anti-kt plots", 900, 900 );
   canva->Divide( 2, 2 );
   canva->cd( 1 );
-  JetratePlot( vobs[0], a );
+  JetratePlot( antikteminR3, hadronLevel );
   canva->cd( 2 );
-  JetratePlot( vobs[1], a );
+  JetratePlot( antiktRR3, hadronLevel );
   canva->cd( 3 );
-  JetratePlot( vobs[0], b );
+  JetratePlot( antikteminR3, detectorLevel );
   canva->cd( 4 );
-  JetratePlot( vobs[1], b );
+  JetratePlot( antiktRR3, detectorLevel );
 
   // canv->Print( "plot.pdf" );
     

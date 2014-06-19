@@ -6,9 +6,11 @@
 #pragma link C++ class vector<Observable*>+;
 #pragma link C++ class vector<FilledObservable*>+;
 #pragma link C++ class map<string,DataStructure*>+;
+#pragma link C++ class map<string,MatrixDataStructure*>+;
 #pragma link C++ class NtupleReader;
 #pragma link C++ class Analysis;
 #pragma link C++ class DataStructure;
+#pragma link C++ class MatrixDataStructure;
 #pragma link C++ class JetrateDataStructure;
 #pragma link C++ class DifferentialDataStructure;
 #pragma link C++ class Observable;

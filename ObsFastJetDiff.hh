@@ -23,7 +23,7 @@ public:
   ObsFastJetDiff( const string& name, const string& algo,
 		  const vector<Double_t>& bins, 
 		  const vector<Analysis>& variations );
-  ~ObsFastJetDiff() {}
+  ~ObsFastJetDiff();
   virtual void addAnalyses( const vector<Analysis>& variations );
   virtual void fill( NtupleReader* ntr, const Analysis& variation );
   virtual vector<FilledObservable*> getFilledObservables() const;

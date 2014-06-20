@@ -15,7 +15,6 @@ public:
   JetrateDataStructure() {}
   ~JetrateDataStructure() {}
 
-  //  void fill( const vector<Double_t>& NJets, Int_t Jetrate );
   void fill( const vector<Double_t>& NJets );
   void normalise();
 

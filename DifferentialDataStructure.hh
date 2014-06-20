@@ -15,7 +15,7 @@ public:
   DifferentialDataStructure() {}
   ~DifferentialDataStructure() {}
 
-  void fill( Double_t value );
+  void fill( Double_t value, Double_t weight=1.0 );
   void normalise();
 
   const vector<Double_t>& getPoints() const { return points; }

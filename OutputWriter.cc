@@ -51,6 +51,7 @@ void OutputWriter::writeDifferentialDistribution( DifferentialDataStructure* dds
   TH1D hist( txt.c_str(), txt.c_str(), binedges.size()-1, &(binedges[0]) );
   hist.SetContent( &(values[0]) );
   hist.SetError( &(errors[0]) );
+  hist.SetEntries( dds->getNEvents() );
   cout << "OutputWriter::writeDifferentialDistribution: writing TH1D " << txt << endl;
   hist.Write();
   return;
@@ -66,6 +67,7 @@ void OutputWriter::writeMatrix( MatrixDataStructure* mds,
       hist.SetBinContent( jbin, ibin, mds->getElement( jbin, ibin ) );
     }
   }
+  hist.SetEntries( mds->getNEvents() );
   cout << "OutputWriter::writeMatrix: writing TH2D " << txt << endl;
   hist.Write();
   return;

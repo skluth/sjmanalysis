@@ -16,7 +16,6 @@ using std::vector;
 using std::string;
 #endif
 
-
 void processAnalyses( const vector<Analysis>& analyses,
 		      const vector<Observable*>& vobs,
 		      const string& filename,
@@ -50,7 +49,6 @@ void processAnalyses( const vector<Analysis>& analyses,
   delete ntr;
   return;
 }
-
 
 void processUnfolding( const vector<Analysis>& measuredAnalyses, string unfoldsource,
 		       const vector<FilledObservable*>& vobs ) {
@@ -92,14 +90,14 @@ void LEP1Analysis( Int_t maxevt=1000,
   // Define analysis variations:
   vector<Analysis> measuredAnalyses;
   measuredAnalyses.push_back( Analysis( "data", "mt", "stand" ) );
-  measuredAnalyses.push_back( Analysis( "data", "tc", "stand" ) );
   measuredAnalyses.push_back( Analysis( "data", "mt", "costt07" ) );
   measuredAnalyses.push_back( Analysis( "data", "mt", "nch7" ) );
+  measuredAnalyses.push_back( Analysis( "data", "tc", "stand" ) );
   vector<Analysis> pyAnalyses;
   pyAnalyses.push_back( Analysis( "py", "mt", "stand" ) );
-  pyAnalyses.push_back( Analysis( "py", "tc", "stand" ) );
   pyAnalyses.push_back( Analysis( "py", "mt", "costt07" ) );
   pyAnalyses.push_back( Analysis( "py", "mt", "nch7" ) );
+  pyAnalyses.push_back( Analysis( "py", "tc", "stand" ) );
   pyAnalyses.push_back( Analysis( "py", "hadron", "none", "nonrad" ) );
   vector<Analysis> hwAnalyses;
   hwAnalyses.push_back( Analysis( "hw", "mt", "stand" ) );
@@ -115,10 +113,8 @@ void LEP1Analysis( Int_t maxevt=1000,
   obsnames.push_back( "jadeymerge23" );
   obsnames.push_back( "durhamymergefj" );
   obsnames.push_back( "jadeymergefj" );
-
   obsnames.push_back( "durhamycutfj" );
   obsnames.push_back( "jadeycutfj" );
-
   obsnames.push_back( "antiktemin" );
   obsnames.push_back( "antiktR" );
   obsnames.push_back( "sisconeemin" );
@@ -158,14 +154,14 @@ void LEP1Analysis( Int_t maxevt=1000,
   processUnfolding( measuredAnalyses, "py", vfobs );
   // HERWIG based for systematic
   vector<Analysis> measuredAnalysesHw;
-  measuredAnalysesHw.push_back( measuredAnalyses[0] );
+  measuredAnalysesHw.push_back( Analysis( "data", "mt", "stand" ) );
   processUnfolding( measuredAnalysesHw, "hw", vfobs );
   // MC detector level with MC as cross check for PYTHIA and HERWIG
   vector<Analysis> measuredPyAnalyses;
   measuredPyAnalyses.push_back( Analysis( "py", "mt", "stand" ) );
-  measuredPyAnalyses.push_back( Analysis( "py", "tc", "stand" ) );
   measuredPyAnalyses.push_back( Analysis( "py", "mt", "costt07" ) );
   measuredPyAnalyses.push_back( Analysis( "py", "mt", "nch7" ) );
+  measuredPyAnalyses.push_back( Analysis( "py", "tc", "stand" ) );
   processUnfolding( measuredPyAnalyses, "py", vfobs );
   vector<Analysis> measuredHwAnalyses;
   measuredHwAnalyses.push_back( Analysis( "hw", "mt", "stand" ) );
@@ -173,11 +169,11 @@ void LEP1Analysis( Int_t maxevt=1000,
 
   // Normalise and calculate stat errors, print
   for( size_t i= 0; i < vfobs.size(); i++ ) {
-    vfobs[i]->finalise();
+    //    vfobs[i]->finalise();
     vfobs[i]->print();
   }
 
-  // Write root objects (TH1D or TGraphErrors):
+  // Write root objects (TH1D or TGraphErrors, and TH2D):
   OutputWriter writer( "LEP1Analysis.root" );
   writer.write( vfobs );
 

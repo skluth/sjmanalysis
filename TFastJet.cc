@@ -158,8 +158,6 @@ double TFastJet::Evis() {
   return clusseq->Q();
 }
 
-
-
 string EEE0Recombiner::description() const {
   return "E0 scheme for EE"; 
 }

@@ -226,7 +226,7 @@ void makeplots( Int_t maxevt=1000,
   canvd->cd( 3 );
   y23dmtnr->Draw();
   canvd->cd( 4 );
-  y23dmthad->Draw( "box" );
+  y23dmthad->Draw( "text" );
 
   TCanvas* canvj= new TCanvas( "canvj", "y23 Jade plots", 900, 900 );
   canvj->Divide( 2, 2 );

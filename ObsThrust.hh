@@ -6,11 +6,15 @@
 #include "Analysis.hh"
 
 #include <vector>
-#include <string>
 using std::vector;
+#include <string>
 using std::string;
+#include <map>
+using std::map;
 
 class NtupleReader;
+class DataStructrue;
+class FilledObservable;
 
 class ObsThrust : public ObsDifferential {
 
@@ -20,6 +24,13 @@ public:
 	     const vector<Analysis>& variations );
   ~ObsThrust() {}
   virtual void fill( NtupleReader* ntr, const Analysis& variation );
+  virtual vector<FilledObservable*> getFilledObservables() const;
+  void addAnalyses( const vector<Analysis>& variations );
+
+private:
+
+  map<string,DataStructure*> weighted1;
+  map<string,DataStructure*> weighted2;
 
 };
 

@@ -28,7 +28,7 @@ void JetrateDataStructure::fill( const vector<Double_t>& NJets ) {
   for( size_t i= 0; i < NJets.size(); i++ ) {
     if( NJets[i] == Jetrate ) {
       values[i]++;
-      errors[i]= TMath::Sqrt( TMath::Power( errors[i], 2 ) + 1 );
+      errors[i]= TMath::Sqrt( TMath::Power( errors[i], 2 ) + 1.0 );
     }
   }
 }

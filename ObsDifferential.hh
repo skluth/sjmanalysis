@@ -30,7 +30,8 @@ protected:
   
   DifferentialDataStructure* getDifferentialDataStructure( DataStructure* ) const;
   void getAndFillDifferentialDataStructure( Double_t, const string&,
-					    const map<string,DataStructure*>& );
+					    const map<string,DataStructure*>&,
+					    Double_t weight=1.0 );
 
   vector<Double_t> binedges;
 

@@ -13,8 +13,6 @@ public:
   DataStructure() : Ntotal(0) {}
   ~DataStructure() {}
 
-  virtual void normalise() = 0;
-
   virtual const vector<Double_t>& getPoints() const { return points; }
   virtual const vector<Double_t>& getValues() const { return values; }
   virtual const vector<Double_t>& getErrors() const { return errors; }
@@ -22,6 +20,7 @@ public:
   virtual void setErrors( const vector<Double_t>& e ) { errors=e; }
   void setNEvents( Double_t nevents ) { Ntotal= nevents; }
   Double_t getNEvents() const { return Ntotal; }
+  virtual void normalise() = 0;
   virtual void print() = 0;
   virtual DataStructure* clone() = 0;
 

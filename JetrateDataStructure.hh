@@ -19,19 +19,12 @@ public:
   void normalise();
 
   const vector<Double_t>& getPoints() const { return points; }
-  vector<Double_t> getValues() const { return values; }
-  vector<Double_t> getErrors() const { return errors; }
-  void setValues( const vector<Double_t>& valuesin ) { values= valuesin; }
-  void setErrors( const vector<Double_t>& errorsin ) { errors= errorsin; }
   void print();
   DataStructure* clone();
 
 private:
 
   Int_t Jetrate;
-  vector<Double_t> points;
-  vector<Double_t> values;
-  vector<Double_t> errors;
 
 };
 

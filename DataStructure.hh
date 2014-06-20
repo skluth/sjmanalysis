@@ -15,11 +15,11 @@ public:
 
   virtual void normalise() = 0;
 
-  virtual const vector<Double_t>& getPoints() const = 0;
-  virtual vector<Double_t> getValues() const = 0;
-  virtual vector<Double_t> getErrors() const = 0;
-  virtual void setValues( const vector<Double_t>& ) = 0;
-  virtual void setErrors( const vector<Double_t>& ) = 0;
+  virtual const vector<Double_t>& getPoints() const { return points; }
+  virtual const vector<Double_t>& getValues() const { return values; }
+  virtual const vector<Double_t>& getErrors() const { return errors; }
+  virtual void setValues( const vector<Double_t>& v ) { values=v; }
+  virtual void setErrors( const vector<Double_t>& e ) { errors=e; }
   void setNEvents( Double_t nevents ) { Ntotal= nevents; }
   Double_t getNEvents() const { return Ntotal; }
   virtual void print() = 0;
@@ -28,6 +28,9 @@ public:
 protected:
 
   Double_t Ntotal;
+  vector<Double_t> points;
+  vector<Double_t> values;
+  vector<Double_t> errors;
 
 };
 

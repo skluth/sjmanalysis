@@ -26,37 +26,6 @@ DataStructure* DifferentialDataStructure::clone() {
   return new DifferentialDataStructure( binedges );
 }
 
-// Return w/o under- and overflows, i.e. proper data points only:
-// under discussion ...
-vector<Double_t> DifferentialDataStructure::getValues() const { 
-  // vector<Double_t> result( values.begin()+1, values.end()-1 );
-  // return result; 
-  return values;
-}
-vector<Double_t> DifferentialDataStructure::getErrors() const { 
-  // vector<Double_t> result( errors.begin()+1, errors.end()-1 );
-  // return result;
-  return errors;
-}
-void DifferentialDataStructure::setValues( const vector<Double_t>& valuesin ) {
-  // values[0]= 0.0;
-  // size_t n= valuesin.size();
-  // values[n+2]= 0.0;
-  // for( size_t i= 0; i < n; i++ ) {
-  //   values[i+1]= valuesin[i];
-  // }    
-  values= valuesin;
-} 
-void DifferentialDataStructure::setErrors( const vector<Double_t>& errorsin ) {
-  // errors[0]= 0.0;
-  // size_t n= errorsin.size();
-  // errors[n+2]= 0.0;
-  // for( size_t i= 0; i < n; i++ ) {
-  //   errors[i+1]= errorsin[i];
-  // }    
-  errors= errorsin;
-} 
-
 // Underflow goes in value[0], overflow goes in values[n+1]:
 void DifferentialDataStructure::fill( Double_t value, Double_t weight ) {
   Ntotal++;

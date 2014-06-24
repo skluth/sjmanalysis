@@ -1,4 +1,6 @@
 
+# Makefile for sjmanalysis package
+
 CXX      = g++
 RC       = rootcint
 OPT      = -g
@@ -13,12 +15,25 @@ ROOTLIBS = $(shell root-config --libs )
 
 CPPFLAGS = $(ROOTINC) $(FASTJETINC)
 
-SRCS = NtupleReader.cc TFastJet.cc JetrateDataStructure.cc Observable.cc Analysis.cc ObsFastJetR.cc ObsFastJetEmin.cc DifferentialDataStructure.cc ObsDifferential.cc ObsFastJetDiff.cc ObsJetrate.cc ObsThrust.cc Unfolder.cc OutputWriter.cc ObservableFactory.cc ObsFastJetYcut.cc FilledObservable.cc ObsDurhamYmerge23.cc ObsJadeYmerge23.cc MatrixDataStructure.cc
+SRCS = NtupleReader.cc TFastJet.cc Analysis.cc \
+JetrateDataStructure.cc DifferentialDataStructure.cc MatrixDataStructure.cc \
+Observable.cc ObsDifferential.cc ObsJetrate.cc \
+ObsFastJetR.cc ObsFastJetEmin.cc ObsFastJetYcut.cc \
+ObsFastJetDiff.cc ObsDurhamYmerge23.cc ObsJadeYmerge23.cc \
+ObsThrust.cc ObservableFactory.cc \
+FilledObservable.cc \
+Unfolder.cc OutputWriter.cc 
+
 DICT = NtupleReaderDict.cc
 DICTLIB = libNtupleReaderDict.so
 LIB= libNtupleReader.so
+DEPS = $(SRCS:.cc=.d)
 
 all: $(DICTLIB)
+
+$(DEPS): %.d: %.cc
+	$(CXX) $(CPPFLAGS) -MM $< -MF $@
+-include $(DEPS)
 
 AnalysisDict.cc: Analysis.hh AnalysisLinkDef.h
 	$(RC) -f $@ -c $^
@@ -35,9 +50,7 @@ $(DICTLIB): $(DICT:.cc=.o) $(SRCS:.cc=.o)
 $(LIB): $(SRCS:.cc=.o)
 	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) -o $@ $^
 
-
 clean:
-	rm -f $(DICTLIB) $(DICT:.cc=.*) $(SRCS:.cc=.o) $(LIB)
+	rm -f $(DICTLIB) $(DICT:.cc=.*) $(SRCS:.cc=.o) $(LIB) $(DEPS) AnalysisDict.*
 
-INTERMEDIATE: $(DICTS)
-
+INTERMEDIATE: $(DICTS) AnalysisDict.*

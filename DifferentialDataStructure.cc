@@ -50,12 +50,12 @@ void DifferentialDataStructure::print() {
   size_t n= binedges.size();
   cout << "Under- and overflow: " << values[0] << " +/- " << errors[0] 
        << ", " << values[n] << " +/- " << errors[n] << endl;
-  Double_t sum= 0.0;
   for( size_t i= 0; i < n-1; i++ ) {
-    sum+= values[i+1];
-    cout << binedges[i] << " " << binedges[i+1] << " " << values[i+1] << " " 
+    cout << binedges[i] << " " << binedges[i+1] << ": " << values[i+1] << " +/- " 
 	 << errors[i+1] << endl;
   }
-  cout << "Sum of bins: " << sum << endl;
+  Double_t sum= 0.0;
+  for( size_t i= 0; i < n+1; i++ ) sum+= values[i];
+  cout << "Sum of bins incl. under- and overflow: " << sum << endl;
 }
 

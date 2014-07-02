@@ -15,7 +15,7 @@ ObsMr::ObsMr( const vector<Double_t>& bins,
   addAnalyses( variations );
   cout << "ObsMr::ObsMr: create " << getName() << " with cuts y34cut=" 
        << y34cut << " and y34y23cut=" << y34y23cut << endl;
-  printBinedges();
+  printVectorD( "Binedges:", bins );
 }
 
 void ObsMr::fill( NtupleReader* ntr, const Analysis& variation ) {

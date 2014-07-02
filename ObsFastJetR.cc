@@ -14,7 +14,7 @@ ObsFastJetR::ObsFastJetR( const string& name, const string& algo,
   addAnalyses( variations );
   cout << "ObsFastJetR::ObsFastJetR: create " << getName() 
        << " with algorithm " << algo << " and Emin/Evis=" << eminfrac << endl;
-  printPoints();
+  printVectorD( "R points:", rvalues );
 }
 
 void ObsFastJetR::fill( NtupleReader* ntr, const Analysis& variation ) {

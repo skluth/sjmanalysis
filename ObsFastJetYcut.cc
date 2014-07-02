@@ -14,7 +14,7 @@ ObsFastJetYcut::ObsFastJetYcut( const string& name, const string& algo,
   addAnalyses( variations );
   cout << "ObsFastJetYcut::ObsFastJetYcut: create " << getName() 
        << " with algorithm " << algo << endl;
-  printPoints();
+  printVectorD( "Ycut points:", ycutpoints );
 }
 
 void ObsFastJetYcut::fill( NtupleReader* ntr, const Analysis& variation ) {

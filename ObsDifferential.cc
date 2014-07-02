@@ -26,12 +26,6 @@ void ObsDifferential::addAnalyses( const vector<Analysis>& variations ) {
   return;
 }
 
-void ObsDifferential::printBinedges() {
-  cout << "Binedges:";
-  for( size_t i= 0; i < binedges.size(); i++ ) cout << " " << binedges[i];
-  cout << endl;
-}
-
 void 
 ObsDifferential::getAndFillDifferentialDataStructure( Double_t value, 
 						      const string& tag,

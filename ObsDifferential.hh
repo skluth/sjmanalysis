@@ -32,7 +32,7 @@ protected:
   void getAndFillDifferentialDataStructure( Double_t, const string&,
 					    const map<string,DataStructure*>&,
 					    Double_t weight=1.0 );
-  void printBinedges();
+  //  void printBinedges();
 
   vector<Double_t> binedges;
 

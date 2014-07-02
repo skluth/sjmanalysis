@@ -3,6 +3,7 @@
 #include "Observable.hh"
 #include "ObsThrust.hh"
 #include "ObsMr.hh"
+#include "ObsPartonShower.hh"
 #include "ObsDurhamYmerge23.hh"
 #include "ObsJadeYmerge23.hh"
 #include "ObsFastJetR.hh"
@@ -42,6 +43,29 @@ ObservableFactory::ObservableFactory() {
   mrbins[4]= 0.69;
   mrbins[5]= 1.00;
 
+  // A14
+  for( size_t i= 0; i < 21; i++ ) a14bins.push_back( i*0.05 );
+
+  // Double_t bins[] = { 0.355, 0.402, 0.424, 0.446, 0.468, 0.495 };
+  c202bins.resize( 6 );
+  c202bins[0]= 0.355;
+  c202bins[1]= 0.402;
+  c202bins[2]= 0.424;
+  c202bins[3]= 0.446;
+  c202bins[4]= 0.468;
+  c202bins[5]= 0.495;
+
+  //{ -0.05, 0.04, 0.10, 0.16, 0.22, 0.28, 0.34, 0.43 };
+  asbins.resize( 8 );
+  asbins[0]= -0.05;
+  asbins[1]= 0.04;
+  asbins[2]= 0.10;
+  asbins[3]= 0.16;
+  asbins[4]= 0.22;
+  asbins[5]= 0.28;
+  asbins[6]= 0.34;
+  asbins[7]= 0.43;
+
   yNMbins.resize( 11 );
   for( size_t i= 0; i < yNMbins.size(); i++ ) {
     yNMbins[i]= 0.5*i;
@@ -80,6 +104,11 @@ vector<Observable*> ObservableFactory::createObservables( const vector<string>& 
       vobs.push_back( new ObsThrust( thrustbins, analyses ) );
     else if( name == "mr" )
       vobs.push_back( new ObsMr( mrbins, analyses ) );
+    else if( name == "partonshower" )
+      vobs.push_back( new ObsPartonShower( a14bins, 
+					   c202bins,
+					   asbins,
+					   analyses ) );
     else if( name.find( "durhamymerge23" ) != string::npos ) 
       vobs.push_back( new ObsDurhamYmerge23( yNMbins, analyses ) );
     else if( name.find( "jadeymerge23" ) != string::npos ) 

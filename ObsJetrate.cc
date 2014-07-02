@@ -31,12 +31,6 @@ void ObsJetrate::addAnalyses( const vector<Analysis>& variations ) {
   }
 }
 
-void ObsJetrate::printPoints() {
-  cout << "Points:";
-  for( size_t i= 0; i < points.size(); i++ ) cout << " " << points[i];
-  cout << endl;
-}
-
 void ObsJetrate::getAndFillJetrateDataStructures( const vector<Double_t>& NJets,
 						  const string& tag ) {
   getAndFillJetrateDataStructure( NJets, tag, jetrates2 );

@@ -15,7 +15,7 @@ ObsThrust::ObsThrust( const vector<Double_t>& bins,
   addAnalyses( variations );
   cout << "ObsThrust::ObsThrust: create " << getName() 
        << " with 1-T and (1-T)^2 weighted distributions" << endl;
-  printBinedges();
+  printVectorD( "Binedges:", bins );
 }
 
 void ObsThrust::addAnalyses( const vector<Analysis>& variations ) {

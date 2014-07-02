@@ -70,3 +70,9 @@ bool Observable::containsAnalysisInDataStructure( const Analysis& anal,
   return result;
 }
 
+void Observable::printVectorD( const string& txt, const vector<Double_t>& vd ) {
+  cout << txt;
+  for( size_t i= 0; i < vd.size(); i++ ) cout << " " << vd[i];
+  cout << endl;
+}
+

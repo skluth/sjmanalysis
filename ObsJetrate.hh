@@ -34,7 +34,7 @@ protected:
 
   void getAndFillJetrateDataStructures( const vector<Double_t>& NJets, 
    					const string& tag );
-  void printPoints();
+  //void printPoints();
 
   vector<Double_t> points;
 

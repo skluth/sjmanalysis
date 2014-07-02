@@ -14,7 +14,7 @@ ObsFastJetEmin::ObsFastJetEmin( const string& name, const string& algo,
   addAnalyses( variations );
   cout << "ObsFastJetEmin::ObsFastJetEmin: create " << getName() 
        << " with algorithm " << algo << " and R=" << rval << endl;
-  printPoints();
+  printVectorD( "Emin/Evis points:", eminfractions );
 }
 
 void ObsFastJetEmin::fill( NtupleReader* ntr, const Analysis& variation ) {

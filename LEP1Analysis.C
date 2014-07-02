@@ -110,6 +110,7 @@ void LEP1Analysis( Int_t maxevt=1000,
   vector<string> obsnames;
   obsnames.push_back( "thrust" );
   obsnames.push_back( "mr" );
+  obsnames.push_back( "partonshower" );
   obsnames.push_back( "durhamymerge23" );
   obsnames.push_back( "jadeymerge23" );
   obsnames.push_back( "durhamymergefj" );
@@ -137,7 +138,8 @@ void LEP1Analysis( Int_t maxevt=1000,
     if( obs->getName() == "thrust" or
 	obs->getName() == "durhamymerge23" or
 	obs->getName() == "jadeymerge23" or
-	obs->getName() == "mr" ) {
+	obs->getName() == "mr" or
+	obs->getName() == "a14" ) {
       obs->addAnalyses( pyMatrixExtras );
       obs->addAnalyses( hwMatrixExtras );
     }

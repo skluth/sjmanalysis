@@ -28,6 +28,7 @@ public:
   virtual vector<FilledObservable*> getFilledObservables() const;
   string getName() const { return name; }
   virtual bool containsAnalysis( const Analysis& );
+  void printVectorD( const string&, const vector<Double_t>& );
 
 protected:
 

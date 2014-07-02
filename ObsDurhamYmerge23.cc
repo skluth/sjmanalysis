@@ -12,7 +12,7 @@ ObsDurhamYmerge23::ObsDurhamYmerge23( const vector<Double_t>& bins,
   ObsDifferential( "durhamymerge23", bins ) {
   addAnalyses( variations );
   cout << "ObsDurhamYmerge23::ObsDurhamYmerge23: create " << getName() << endl;
-  printBinedges();
+  printVectorD( "Binedges:", bins );
 }
 
 void ObsDurhamYmerge23::fill( NtupleReader* ntr, const Analysis& variation ) {

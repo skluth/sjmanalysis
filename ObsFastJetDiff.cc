@@ -18,7 +18,7 @@ ObsFastJetDiff::ObsFastJetDiff( const string& name, const string& algo,
   addAnalyses( variations );
   cout << "ObsFastJetDiff::ObsFastJetDiff: create " << getName() 
        << " with algorithm " << algo << " for y23, y34, y45, y56" << endl;
-  printBinedges();
+  printVectorD( "Binedges:", binedges );
 }
 
 ObsFastJetDiff::~ObsFastJetDiff() {

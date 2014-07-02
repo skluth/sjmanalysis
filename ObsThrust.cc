@@ -47,7 +47,7 @@ vector<FilledObservable*> ObsThrust::getFilledObservables() const {
   cout << "ObsThrust::getFilledObservables: " 
        << "create FilledObservables " << name << " and " << name+"W1" << endl;  
   vector<FilledObservable*> vfobs;
-  vfobs.push_back( new FilledObservable( name, datastructures ) );
+  vfobs.push_back( new FilledObservable( name, datastructures, matrices ) );
   vfobs.push_back( new FilledObservable( name+"W1", weighted1 ) );
   vfobs.push_back( new FilledObservable( name+"W2", weighted2 ) );
   return vfobs;

@@ -22,6 +22,8 @@ public:
 
 private:
 
+  Double_t getMrvalue( NtupleReader* ntr, const string& reco );
+
   Double_t y34cut;
   Double_t y34y23cut;
 

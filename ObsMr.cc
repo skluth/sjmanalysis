@@ -2,6 +2,7 @@
 #include "ObsMr.hh"
 #include "NtupleReader.hh"
 #include "TFastJet.hh"
+#include "MatrixDataStructure.hh"
 #include "TMath.h"
 #include <iostream>
 using std::cout;
@@ -19,15 +20,25 @@ ObsMr::ObsMr( const vector<Double_t>& bins,
 
 void ObsMr::fill( NtupleReader* ntr, const Analysis& variation ) {
   string reco= variation.getReco();
-  const vector<TLorentzVector>& vtlv= ntr->GetLorentzVectors( reco );
-  TFastJet tfj( vtlv, "eekt" );
-  vector<TLorentzVector> jets= tfj.exclusive_jets( 2 );
-  if( tfj.ymerge( 3 ) > y34cut and 
-      tfj.ymerge( 3 )/tfj.ymerge( 2 ) > y34y23cut ) {
-    Double_t mrvalue= TMath::Min( jets[1].M2(), jets[0].M2() ) /
-      TMath::Max( jets[1].M2(), jets[0].M2() );
-    string tag= variation.getTag();
-    getAndFillDifferentialDataStructure( mrvalue, tag, datastructures );
+  Double_t mrvalue= getMrvalue( ntr, reco );
+  string tag= variation.getTag();
+  getAndFillDifferentialDataStructure( mrvalue, tag, datastructures );
+  string reco2= variation.getReco2();
+  if( reco2 != "none" and ntr->isMC() ) {
+    Double_t MCmrvalue= getMrvalue( ntr, reco2 );
+    matrices[tag]->fill( MCmrvalue, mrvalue );
   }
 }
 
+Double_t ObsMr::getMrvalue( NtupleReader* ntr, const string& reco ) {
+  const vector<TLorentzVector>& vtlv= ntr->GetLorentzVectors( reco );
+  TFastJet tfj( vtlv, "eekt" );
+  Double_t mrvalue= -1.0;
+  if( tfj.ymerge( 3 ) > y34cut and 
+      tfj.ymerge( 3 )/tfj.ymerge( 2 ) > y34y23cut ) {
+    vector<TLorentzVector> jets= tfj.exclusive_jets( 2 );
+    mrvalue= TMath::Min( jets[1].M2(), jets[0].M2() ) /
+      TMath::Max( jets[1].M2(), jets[0].M2() );
+  }
+  return mrvalue;
+}

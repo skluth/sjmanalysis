@@ -136,7 +136,8 @@ void LEP1Analysis( Int_t maxevt=1000,
     Observable* obs= vobs[iobs];
     if( obs->getName() == "thrust" or
 	obs->getName() == "durhamymerge23" or
-	obs->getName() == "jadeymerge23" ) {
+	obs->getName() == "jadeymerge23" or
+	obs->getName() == "mr" ) {
       obs->addAnalyses( pyMatrixExtras );
       obs->addAnalyses( hwMatrixExtras );
     }

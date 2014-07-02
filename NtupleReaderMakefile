@@ -20,7 +20,7 @@ JetrateDataStructure.cc DifferentialDataStructure.cc MatrixDataStructure.cc \
 Observable.cc ObsDifferential.cc ObsJetrate.cc \
 ObsFastJetR.cc ObsFastJetEmin.cc ObsFastJetYcut.cc \
 ObsFastJetDiff.cc ObsDurhamYmerge23.cc ObsJadeYmerge23.cc \
-ObsThrust.cc ObservableFactory.cc \
+ObsThrust.cc ObsMr.cc ObservableFactory.cc \
 FilledObservable.cc \
 Unfolder.cc OutputWriter.cc 
 

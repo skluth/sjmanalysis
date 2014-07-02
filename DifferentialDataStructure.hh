@@ -20,6 +20,7 @@ public:
 
   const vector<Double_t>& getBinedges() const { return binedges; }
   void print();
+  void printBinedges();
   DataStructure* clone();
 
 private:

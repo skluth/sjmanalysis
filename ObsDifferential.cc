@@ -15,7 +15,7 @@ ObsDifferential::ObsDifferential( const string& name,
 
 // Call this method in derived class ctors:
 void ObsDifferential::addAnalyses( const vector<Analysis>& variations ) {
-  cout << "ObsDifferential::addAnalyses: adding analyses for " << getName() << endl;
+  //cout << "ObsDifferential::addAnalyses: adding analyses for " << getName() << endl;
   for( size_t ivar= 0; ivar < variations.size(); ivar++ ) {      
     string tag= variations[ivar].getTag();
     datastructures[tag]= new DifferentialDataStructure( binedges );
@@ -24,6 +24,12 @@ void ObsDifferential::addAnalyses( const vector<Analysis>& variations ) {
     }
   }
   return;
+}
+
+void ObsDifferential::printBinedges() {
+  cout << "Binedges:";
+  for( size_t i= 0; i < binedges.size(); i++ ) cout << " " << binedges[i];
+  cout << endl;
 }
 
 void 

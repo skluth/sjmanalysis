@@ -2,6 +2,9 @@
 #include "ObsFastJetEmin.hh"
 #include "NtupleReader.hh"
 #include "TFastJet.hh"
+#include <iostream>
+using std::cout;
+using std::endl;
 
 ObsFastJetEmin::ObsFastJetEmin( const string& name, const string& algo,
 				Double_t rval, 
@@ -9,6 +12,9 @@ ObsFastJetEmin::ObsFastJetEmin( const string& name, const string& algo,
 				const vector<Analysis>& variations ) :
   ObsJetrate( name, eminfractions ), Algorithm(algo), Rvalue(rval) {
   addAnalyses( variations );
+  cout << "ObsFastJetEmin::ObsFastJetEmin: create " << getName() 
+       << " with algorithm " << algo << " and R=" << rval << endl;
+  printPoints();
 }
 
 void ObsFastJetEmin::fill( NtupleReader* ntr, const Analysis& variation ) {

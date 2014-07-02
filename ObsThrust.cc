@@ -13,12 +13,14 @@ ObsThrust::ObsThrust( const vector<Double_t>& bins,
 		      const vector<Analysis>& variations ) :
   ObsDifferential( "thrust", bins ) {
   addAnalyses( variations );
+  cout << "ObsThrust::ObsThrust: create " << getName() 
+       << " with 1-T and (1-T)^2 weighted distributions" << endl;
+  printBinedges();
 }
 
 void ObsThrust::addAnalyses( const vector<Analysis>& variations ) {
   // Unweighted thrust and migration matrices
   ObsDifferential::addAnalyses( variations );
-  cout << "ObsThrust::addAnalyses: add weighted" << endl;
   for( size_t ivar= 0; ivar < variations.size(); ivar++ ) {      
     string tag= variations[ivar].getTag();
     weighted1[tag]= new DifferentialDataStructure( binedges );

@@ -2,6 +2,9 @@
 #include "ObsFastJetR.hh"
 #include "NtupleReader.hh"
 #include "TFastJet.hh"
+#include <iostream>
+using std::cout;
+using std::endl;
 
 ObsFastJetR::ObsFastJetR( const string& name, const string& algo,
 			  Double_t eminfrac,
@@ -9,6 +12,9 @@ ObsFastJetR::ObsFastJetR( const string& name, const string& algo,
 			  const vector<Analysis>& variations ) :
   ObsJetrate( name, rvalues ), Algorithm(algo), EminFraction(eminfrac) {
   addAnalyses( variations );
+  cout << "ObsFastJetR::ObsFastJetR: create " << getName() 
+       << " with algorithm " << algo << " and Emin/Evis=" << eminfrac << endl;
+  printPoints();
 }
 
 void ObsFastJetR::fill( NtupleReader* ntr, const Analysis& variation ) {

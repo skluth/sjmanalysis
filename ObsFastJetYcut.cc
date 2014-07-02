@@ -3,12 +3,18 @@
 #include "NtupleReader.hh"
 #include "TFastJet.hh"
 #include "TMath.h"
+#include <iostream>
+using std::cout;
+using std::endl;
 
 ObsFastJetYcut::ObsFastJetYcut( const string& name, const string& algo,
 				const vector<Double_t>& ycutpoints, 
 				const vector<Analysis>& variations ) :
   ObsJetrate( name, ycutpoints ), Algorithm( algo ) {
   addAnalyses( variations );
+  cout << "ObsFastJetYcut::ObsFastJetYcut: create " << getName() 
+       << " with algorithm " << algo << endl;
+  printPoints();
 }
 
 void ObsFastJetYcut::fill( NtupleReader* ntr, const Analysis& variation ) {

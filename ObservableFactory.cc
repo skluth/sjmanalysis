@@ -2,6 +2,7 @@
 #include "ObservableFactory.hh"
 #include "Observable.hh"
 #include "ObsThrust.hh"
+#include "ObsMr.hh"
 #include "ObsDurhamYmerge23.hh"
 #include "ObsJadeYmerge23.hh"
 #include "ObsFastJetR.hh"
@@ -32,6 +33,14 @@ ObservableFactory::ObservableFactory() {
   thrustbins[10]= 0.22;
   thrustbins[11]= 0.30;
   thrustbins[12]= 0.50;
+
+  mrbins.resize( 6 );
+  mrbins[0]= 0.00;
+  mrbins[1]= 0.06;
+  mrbins[2]= 0.15;
+  mrbins[3]= 0.38;
+  mrbins[4]= 0.69;
+  mrbins[5]= 1.00;
 
   yNMbins.resize( 11 );
   for( size_t i= 0; i < yNMbins.size(); i++ ) {
@@ -69,6 +78,8 @@ vector<Observable*> ObservableFactory::createObservables( const vector<string>& 
     string name= obsnames[iobs];
     if( name == "thrust" )
       vobs.push_back( new ObsThrust( thrustbins, analyses ) );
+    else if( name == "mr" )
+      vobs.push_back( new ObsMr( mrbins, analyses ) );
     else if( name.find( "durhamymerge23" ) != string::npos ) 
       vobs.push_back( new ObsDurhamYmerge23( yNMbins, analyses ) );
     else if( name.find( "jadeymerge23" ) != string::npos ) 

@@ -3,11 +3,16 @@
 #include "NtupleReader.hh"
 #include "MatrixDataStructure.hh"
 #include "TMath.h"
+#include <iostream>
+using std::cout;
+using std::endl;
 
 ObsDurhamYmerge23::ObsDurhamYmerge23( const vector<Double_t>& bins, 
 				      const vector<Analysis>& variations ) :
   ObsDifferential( "durhamymerge23", bins ) {
   addAnalyses( variations );
+  cout << "ObsDurhamYmerge23::ObsDurhamYmerge23: create " << getName() << endl;
+  printBinedges();
 }
 
 void ObsDurhamYmerge23::fill( NtupleReader* ntr, const Analysis& variation ) {

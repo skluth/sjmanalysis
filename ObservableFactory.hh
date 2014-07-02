@@ -23,6 +23,7 @@ public:
 private:
 
   vector<Double_t> thrustbins;
+  vector<Double_t> mrbins;
   vector<Double_t> yNMbins;
   vector<Double_t> eminFraction;
   vector<Double_t> Rvalues;

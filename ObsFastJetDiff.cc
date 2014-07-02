@@ -16,6 +16,9 @@ ObsFastJetDiff::ObsFastJetDiff( const string& name, const string& algo,
 				const vector<Analysis>& variations ) :
   ObsDifferential( name, bins ), Algorithm( algo ) {
   addAnalyses( variations );
+  cout << "ObsFastJetDiff::ObsFastJetDiff: create " << getName() 
+       << " with algorithm " << algo << " for y23, y34, y45, y56" << endl;
+  printBinedges();
 }
 
 ObsFastJetDiff::~ObsFastJetDiff() {
@@ -26,7 +29,7 @@ ObsFastJetDiff::~ObsFastJetDiff() {
 }
 
 void ObsFastJetDiff::addAnalyses( const vector<Analysis>& variations ) {
-  cout << "ObsFastJetDiff::addAnalyses: adding analyses for " << getName() << endl;
+  // cout << "ObsFastJetDiff::addAnalyses: adding analyses for " << getName() << endl;
   for( size_t i= 0; i < variations.size(); i++ ) {      
     string tag= variations[i].getTag();
     ymerge23[tag]= new DifferentialDataStructure( binedges );

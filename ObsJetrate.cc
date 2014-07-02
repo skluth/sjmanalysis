@@ -7,8 +7,10 @@
 using std::cout;
 using std::endl;
 
-ObsJetrate::ObsJetrate( string name, const vector<Double_t>& pts ) : 
-  Observable( name ), points(pts) {}
+ObsJetrate::ObsJetrate( string name, const vector<Double_t>& pts ) :
+  Observable( name ), points(pts) {
+  cout << "ObsJetrate::ObsJetrate: 2, 3, 4, 5, 6-jet fractions" << endl;
+}
 
 ObsJetrate::~ObsJetrate() {
   deleteDataStructures( jetrates2 );
@@ -19,8 +21,7 @@ ObsJetrate::~ObsJetrate() {
 }
 
 void ObsJetrate::addAnalyses( const vector<Analysis>& variations ) {
-  //  analyses.insert( analyses.end(), variations.begin(), variations.end() );
-  for( size_t i= 0; i < variations.size(); i++ ) {      
+  for( size_t i= 0; i < variations.size(); i++ ) {
     string tag= variations[i].getTag();
     jetrates2[tag]= new JetrateDataStructure( points, 2 );
     jetrates3[tag]= new JetrateDataStructure( points, 3 );
@@ -28,6 +29,12 @@ void ObsJetrate::addAnalyses( const vector<Analysis>& variations ) {
     jetrates5[tag]= new JetrateDataStructure( points, 5 );
     jetrates6[tag]= new JetrateDataStructure( points, 6 );
   }
+}
+
+void ObsJetrate::printPoints() {
+  cout << "Points:";
+  for( size_t i= 0; i < points.size(); i++ ) cout << " " << points[i];
+  cout << endl;
 }
 
 void ObsJetrate::getAndFillJetrateDataStructures( const vector<Double_t>& NJets,

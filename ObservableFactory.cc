@@ -2,7 +2,6 @@
 #include "ObservableFactory.hh"
 #include "Observable.hh"
 #include "ObsThrust.hh"
-#include "ObsMr.hh"
 #include "ObsPartonShower.hh"
 #include "ObsDurhamYmerge23.hh"
 #include "ObsJadeYmerge23.hh"

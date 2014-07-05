@@ -21,7 +21,6 @@
 #pragma link C++ class ObsFastJetDiff;
 #pragma link C++ class ObsFastJetYcut;
 #pragma link C++ class ObsThrust;
-#pragma link C++ class ObsMr;
 #pragma link C++ class ObsPartonShower;
 #pragma link C++ class ObsDurhamYmerge23;
 #pragma link C++ class ObsJadeYmerge23;

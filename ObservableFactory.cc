@@ -20,6 +20,7 @@ using std::stringstream;
 
 ObservableFactory::ObservableFactory() {
 
+  // Thrust
   thrustbins.resize( 13 );
   thrustbins[0]= 0.00;
   thrustbins[1]= 0.01;
@@ -35,6 +36,7 @@ ObservableFactory::ObservableFactory() {
   thrustbins[11]= 0.30;
   thrustbins[12]= 0.50;
 
+  // MR:
   mrbins.resize( 6 );
   mrbins[0]= 0.00;
   mrbins[1]= 0.06;
@@ -43,10 +45,10 @@ ObservableFactory::ObservableFactory() {
   mrbins[4]= 0.69;
   mrbins[5]= 1.00;
 
-  // A14
+  // A14:
   for( size_t i= 0; i < 21; i++ ) a14bins.push_back( i*0.05 );
 
-  // Double_t bins[] = { 0.355, 0.402, 0.424, 0.446, 0.468, 0.495 };
+  // C202:
   c202bins.resize( 6 );
   c202bins[0]= 0.355;
   c202bins[1]= 0.402;
@@ -55,7 +57,7 @@ ObservableFactory::ObservableFactory() {
   c202bins[4]= 0.468;
   c202bins[5]= 0.495;
 
-  //{ -0.05, 0.04, 0.10, 0.16, 0.22, 0.28, 0.34, 0.43 };
+  // AS:
   asbins.resize( 8 );
   asbins[0]= -0.05;
   asbins[1]= 0.04;
@@ -66,11 +68,13 @@ ObservableFactory::ObservableFactory() {
   asbins[6]= 0.34;
   asbins[7]= 0.43;
 
+  // incl. Jetrates and ynm distributions log scale:
   yNMbins.resize( 11 );
   for( size_t i= 0; i < yNMbins.size(); i++ ) {
     yNMbins[i]= 0.5*i;
   }
 
+  // excl. jets Emin/Evis points:
   eminFraction.resize( 9 );
   eminFraction[0]= 0.02;
   eminFraction[1]= 0.04;
@@ -82,6 +86,7 @@ ObservableFactory::ObservableFactory() {
   eminFraction[7]= 0.16;
   eminFraction[8]= 0.18;
 
+  // excl. jets R points:
   Rvalues.resize( 8 );
   Rvalues[0]= 0.2;
   Rvalues[1]= 0.4;
@@ -100,14 +105,15 @@ vector<Observable*> ObservableFactory::createObservables( const vector<string>& 
   vector<Observable*> vobs;
   for( size_t iobs= 0; iobs < obsnames.size(); iobs++ ) {
     string name= obsnames[iobs];
-    if( name == "thrust" )
+    if( name.find( "thrust" ) != string::npos )
       vobs.push_back( new ObsThrust( thrustbins, analyses ) );
-    else if( name == "mr" )
-      vobs.push_back( new ObsMr( mrbins, analyses ) );
-    else if( name == "partonshower" )
+    // else if( name == "mr" )
+    //   vobs.push_back( new ObsMr( mrbins, analyses ) );
+    else if( name.find( "partonshower" ) != string::npos )
       vobs.push_back( new ObsPartonShower( a14bins, 
 					   c202bins,
 					   asbins,
+					   mrbins,
 					   analyses ) );
     else if( name.find( "durhamymerge23" ) != string::npos ) 
       vobs.push_back( new ObsDurhamYmerge23( yNMbins, analyses ) );

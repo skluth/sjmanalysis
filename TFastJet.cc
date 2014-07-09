@@ -18,24 +18,26 @@ using std::string;
 #include <iostream>
 using std::cout;
 using std::endl;
+#include <stdexcept>
+using std::logic_error;
 
-TFastJet::TFastJet( const vector<TParticle>& vtp ) : clusseq(0),
-						     plugin(0),
-						     pjets(0) {
-  pjets= new vector<fastjet::PseudoJet>();
-  vector<fastjet::PseudoJet> particles;
-  for( UInt_t i= 0; i < vtp.size(); i++ ) {
-    const TParticle& tp= vtp[i];
-    fastjet::PseudoJet pj= fastjet::PseudoJet( tp.Px(), tp.Py(), 
-					       tp.Pz(), tp.Energy() );
-    pj.set_user_index( i );
-    particles.push_back( pj );
-  }
-  double R= 0.4;
-  fastjet::JetDefinition jetdef( fastjet::antikt_algorithm, R );
-  clusseq= new fastjet::ClusterSequence( particles, jetdef );  
-  return;
-}
+// TFastJet::TFastJet( const vector<TParticle>& vtp ) : clusseq(0),
+// 						     plugin(0),
+// 						     pjets(0) {
+//   pjets= new vector<fastjet::PseudoJet>();
+//   vector<fastjet::PseudoJet> particles;
+//   for( UInt_t i= 0; i < vtp.size(); i++ ) {
+//     const TParticle& tp= vtp[i];
+//     fastjet::PseudoJet pj= fastjet::PseudoJet( tp.Px(), tp.Py(), 
+// 					       tp.Pz(), tp.Energy() );
+//     pj.set_user_index( i );
+//     particles.push_back( pj );
+//   }
+//   double R= 0.4;
+//   fastjet::JetDefinition jetdef( fastjet::antikt_algorithm, R );
+//   clusseq= new fastjet::ClusterSequence( particles, jetdef );  
+//   return;
+// }
 
 TFastJet::TFastJet( const vector<TLorentzVector>& vtl, 
 		    const char* jetalg, 
@@ -43,18 +45,7 @@ TFastJet::TFastJet( const vector<TLorentzVector>& vtl,
 		    const vector<int>* vindx ) : clusseq(0),
 						 plugin(0),
 						 pjets(0) {
-  pjets= new vector<fastjet::PseudoJet>();
-  vector<fastjet::PseudoJet> particles;
-  for( UInt_t i= 0; i < vtl.size(); i++ ) {
-    fastjet::PseudoJet pj( vtl[i] );
-    if( vindx==0 ) {
-      pj.set_user_index( i );
-    }
-    else {
-      pj.set_user_index( vindx->at(i) );
-    }
-    particles.push_back( pj );
-  }
+  // Hide map from rootcint
   static map<string,fastjet::JetAlgorithm> jamap;
   if( jamap.size() == 0 ) {
     jamap["kt"]= fastjet::kt_algorithm;
@@ -66,9 +57,14 @@ TFastJet::TFastJet( const vector<TLorentzVector>& vtl,
     jamap["jade"]= fastjet::plugin_algorithm;
     jamap["eeantikt"]= fastjet::ee_genkt_algorithm;
   }
+  // Check input:
   string jetalgString( jetalg );
+  if( jamap.find( jetalgString ) == jamap.end() ) {
+    string txt= "TFastJet::TFastJet: wrong algorithm: " + jetalgString;
+    throw logic_error( txt );
+  }
+  // Setup fastjet:
   fastjet::JetAlgorithm ja= jamap[jetalgString];
-  //  cout << "TFastJet::TFastJet: " << jetalg << " enum " << ja << endl;
   fastjet::JetDefinition jetdef;
   fastjet::JetDefinition::Recombiner* recombiner= 0;
   if( ja == 99 ) {
@@ -80,8 +76,8 @@ TFastJet::TFastJet( const vector<TLorentzVector>& vtl,
       recombiner= new EEE0Recombiner();
     }
     else {
-      cout << "TFastJet::TFastJet: jet plugin not known: " << ja << endl;
-      return;
+      string txt= "TFastJet::TFastJet: wrong plugin: " + jetalgString;
+      throw logic_error( txt );
     }
     jetdef= fastjet::JetDefinition( plugin );
     if( recombiner ) {
@@ -98,27 +94,41 @@ TFastJet::TFastJet( const vector<TLorentzVector>& vtl,
   else {
     jetdef= fastjet::JetDefinition( ja, R );
   }
+  // Prepare input 4-vectors:
+  vector<fastjet::PseudoJet> particles;
+  for( UInt_t i= 0; i < vtl.size(); i++ ) {
+    fastjet::PseudoJet pj( vtl[i] );
+    if( vindx == 0 ) pj.set_user_index( i );
+    else pj.set_user_index( vindx->at(i) );
+    particles.push_back( pj );
+  }
+  // Run jet algorithm:
   clusseq= new fastjet::ClusterSequence( particles, jetdef );
+  // For receiving output from fastjet:
+  pjets= new vector<fastjet::PseudoJet>();
 }
 
 TFastJet::~TFastJet() {
+  if( plugin ) delete plugin;
   if( clusseq ) delete clusseq;
   if( pjets ) delete pjets;
-  if( plugin ) delete plugin;
 }
 
+// All jets with p_t > p_t,min (or E < Emin for e+e-):
 const vector<TLorentzVector>& TFastJet::inclusive_jets( const double& ptmin ) {
   vector<fastjet::PseudoJet> incljets= clusseq->inclusive_jets( ptmin );
   *pjets= sorted_by_pt( incljets );
   return copyPseudoJetsToLorentzVectors();
 }
 
+// Fixed number of jets (e+e-):
 const vector<TLorentzVector>& TFastJet::exclusive_jets( const int njets ) {
   vector<fastjet::PseudoJet> excljets= clusseq->exclusive_jets( njets );
   *pjets= sorted_by_E( excljets );
   return copyPseudoJetsToLorentzVectors();
 }
 
+// Internal helper:
 const vector<TLorentzVector>& TFastJet::copyPseudoJetsToLorentzVectors() {
   static vector<TLorentzVector> jetstlv;
   jetstlv.clear();
@@ -131,6 +141,7 @@ const vector<TLorentzVector>& TFastJet::copyPseudoJetsToLorentzVectors() {
   return jetstlv;
 }
 
+// Jet constituents index map into array of input 4-vectors:
 vector< vector<int> >& TFastJet::constituents() {
   vector< vector<int> >* cnstmap= new vector< vector<int> >();
   fastjet::PseudoJet pj;
@@ -146,17 +157,22 @@ vector< vector<int> >& TFastJet::constituents() {
   return *cnstmap;
 }
 
+// Ymerge for transition n+1 -> n jets (e+e-):
 double TFastJet::ymerge( int njets ) {
   return clusseq->exclusive_ymerge_max( njets );
 }
 
+// Number of jets when all ymerge > ycut (e+e-):
 int TFastJet::njets( double ycut ) {
   return clusseq->n_exclusive_jets_ycut( ycut );
 }
 
+// Visible energy a la fastjet:
 double TFastJet::Evis() {
   return clusseq->Q();
 }
+
+// class EEE0Recombiner to study remobination effects with Jade:
 
 string EEE0Recombiner::description() const {
   return "E0 scheme for EE"; 

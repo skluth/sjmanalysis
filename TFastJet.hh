@@ -33,7 +33,7 @@ public:
 
   TFastJet() {}
 
-  TFastJet( const vector<TParticle>& );
+  //  TFastJet( const vector<TParticle>& );
   TFastJet( const vector<TLorentzVector>&, const char* jetalg="antikt",
 	    const double& R=0.4, const vector<int>* vindx= 0 );
 
@@ -49,6 +49,7 @@ public:
 private:
 
   const vector<TLorentzVector>& copyPseudoJetsToLorentzVectors();
+
   fastjet::ClusterSequence* clusseq;
   fastjet::JetDefinition::Plugin* plugin;
   vector<fastjet::PseudoJet>* pjets;

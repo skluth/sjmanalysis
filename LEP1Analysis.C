@@ -54,6 +54,7 @@ void processUnfolding( const vector<Analysis>& measuredAnalyses, string unfoldso
 		       const vector<FilledObservable*>& vobs ) {
   cout << "processUnfolding: bin-by-bin unfolding for analyses:" << endl;
   Analysis hadronlevel( unfoldsource, "hadron", "none", "nonrad" );
+  cout << "Hadron level: " << hadronlevel.getTag() << endl;
   for( size_t ianal= 0; ianal < measuredAnalyses.size(); ianal++ ) {
     Analysis measured= measuredAnalyses[ianal];
     cout << measured.getTag() << endl;
@@ -64,7 +65,6 @@ void processUnfolding( const vector<Analysis>& measuredAnalyses, string unfoldso
       unfolder.unfold( vobs[iobs] );
     }
   }
-  cout << "Hadron level: " << hadronlevel.getTag() << endl;
   return;
 }
 
@@ -121,7 +121,14 @@ void LEP1Analysis( Int_t maxevt=1000,
   obsnames.push_back( "sisconeemin" );
   obsnames.push_back( "sisconeR" );
   ObservableFactory obsfac;
-  vector<Observable*> vobs= obsfac.createObservables( obsnames, allAnalyses );
+  vector<Observable*> vobs;
+  try {
+    vobs= obsfac.createObservables( obsnames, allAnalyses );
+  }
+  catch( const std::exception& e ) {
+    cout << "Cought exception: " << e.what() << endl;
+    return;
+  }
 
   // Add extras for migration matrices where needed:
   vector<Analysis> pyMatrixExtras;
@@ -171,6 +178,7 @@ void LEP1Analysis( Int_t maxevt=1000,
   processUnfolding( measuredHwAnalyses, "hw", vfobs );
 
   // Normalise and calculate stat errors, print
+  // Normalisation only during postprocessing
   for( size_t i= 0; i < vfobs.size(); i++ ) {
     //    vfobs[i]->finalise();
     vfobs[i]->print();

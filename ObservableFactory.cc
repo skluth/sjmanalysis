@@ -16,6 +16,7 @@ using std::endl;
 #include <sstream>
 using std::stringstream;
 #include <cctype>
+#include <stdexcept>
 
 ObservableFactory::ObservableFactory() {
 
@@ -106,8 +107,6 @@ vector<Observable*> ObservableFactory::createObservables( const vector<string>& 
     string name= obsnames[iobs];
     if( name.find( "thrust" ) != string::npos )
       vobs.push_back( new ObsThrust( thrustbins, analyses ) );
-    // else if( name == "mr" )
-    //   vobs.push_back( new ObsMr( mrbins, analyses ) );
     else if( name.find( "partonshower" ) != string::npos )
       vobs.push_back( new ObsPartonShower( a14bins, 
 					   c202bins,
@@ -134,8 +133,10 @@ vector<Observable*> ObservableFactory::createObservables( const vector<string>& 
       vobs.push_back( new ObsFastJetEmin( name, "siscone", 0.7, eminFraction, analyses ) );
     else if( name.find( "sisconeR" ) != string::npos ) 
       vobs.push_back( new ObsFastJetR( name, "siscone", 0.06, Rvalues, analyses ) );
-    else cout << "ObservableFactory::createObservables: name " << name
-	      << " not recognised" << endl;
+    else {
+      string txt= "ObservableFactory::createObservables: wrong class name: " + name;
+      throw std::logic_error( txt );
+    }
   }
   cout << "ObservableFactory::createObservables:" << endl;
   for( size_t iobs= 0; iobs < vobs.size(); iobs++ ) {

@@ -168,7 +168,7 @@ void printResults( TString obs="thrust" ) {
     cout << "Cought exception: " << e.what() << endl;
   }
 
-  // Try matrix object which throuws error
+  // Try matrix object which throws error
   try {
     Analysis matrix( "py", "mt", "stand", "nonrad", "hadron" );
     AnalysisObject* ao= getAnalysisObjectFromFile( f, obs, matrix );

@@ -7,9 +7,13 @@
 #include "FilledObservable.hh"
 #include "TLorentzVector.h"
 #include "TMath.h"
+#include <sstream>
+using std::ostringstream;
 #include <iostream>
 using std::cout;
 using std::endl;
+#include <stdexcept>
+using std::logic_error;
 
 ObsPartonShower::ObsPartonShower( const vector<Double_t>& a14bins,
 				  const vector<Double_t>& c202bins,
@@ -138,9 +142,9 @@ Double_t ObsPartonShower::EnergyCorrelator( const vector<TLorentzVector>& jets,
     } 
   }
   else {
-    cout << "ObsPartonShower::EnergyCorrelator: N= " << N 
-	 << " not recognised, return -1" << endl;
-    answer= -1.0;
+    ostringstream txt;
+    txt << "ObsPartonShower::EnergyCorrelator: wrong N: " << N;
+    throw logic_error( txt.str() );
   }
   return answer;
 }

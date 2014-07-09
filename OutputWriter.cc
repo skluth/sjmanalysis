@@ -15,6 +15,8 @@ using std::map;
 #include <iostream>
 using std::cout;
 using std::endl;
+#include <stdexcept>
+using std::logic_error;
 
 OutputWriter::OutputWriter( const string& filename ) {
   cout << "OutputWriter::OutputWriter: opening for writing: " << filename << endl;
@@ -86,7 +88,7 @@ void OutputWriter::write( const vector<FilledObservable*>& vobs ) {
       DifferentialDataStructure* dds= dynamic_cast<DifferentialDataStructure*>( ds );
       if( jrds ) writeJetrate( jrds, txt );
       else if( dds ) writeDifferentialDistribution( dds, txt );
-      else cout << "OutputWriter::write: dynamic_cast failed, no output" << endl;
+      else throw logic_error( "OutputWriter::write: wrong class" );
     }
     map<string,MatrixDataStructure*> matrices= vobs[iobs]->getMatrices();
     for( map<string,MatrixDataStructure*>::iterator iter= matrices.begin();

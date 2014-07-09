@@ -4,14 +4,16 @@
 #include "TFile.h"
 #include "TMath.h"
 #include <iostream>
+#include <sstream>
 #include <string>
-
+#include <stdexcept>
 
 // extern "C" {
 //   void pxlth4_( Int_t*, Int_t*, Float_t*, Float_t*, Float_t*, Int_t* );
 // };
 
-NtupleReader::NtupleReader() : nt_file(0), nt_tree(0), nt_isMC(false), nt_vtlvcache(false) {}
+NtupleReader::NtupleReader() : nt_file(0), nt_tree(0), nt_isMC(false), 
+			       nt_vtlvcache(false) {}
 
 NtupleReader::NtupleReader( const char* filename, const char* ntid ) :
   nt_file(0), nt_tree(0), nt_isMC(false), nt_vtlvcache(false) {
@@ -23,19 +25,25 @@ NtupleReader::~NtupleReader() {
   CloseFile();
 }
 
-bool NtupleReader::OpenFileAndLoadNtuple( const char* filename, const char* ntid ) {
-  std::cout << "NtupleReader::OpenFileAndLoadNtuple: opening " << filename << std::endl;
+void NtupleReader::OpenFileAndLoadNtuple( const char* filename, const char* ntid ) {
+  std::cout << "NtupleReader::OpenFileAndLoadNtuple: opening file: " 
+	    << filename << std::endl;
   nt_file= new TFile( filename );
+  if( not nt_file->IsOpen() ) {
+    TString txt= "NtupleReader::OpenFileAndLoadNtuple: file not open: ";
+    txt.Append( filename );
+    throw std::logic_error( txt.Data() );
+  }
   nt_tree= (TTree*) nt_file->Get( ntid );
   if( nt_tree == 0 ) {
-    std::cout << "NtupleReader::OpenFileAndLoadNtuple: tree " << ntid 
-	      << " not found in file " << filename << std::endl;
-    return false;
+    TString txt= "NtupleReader::OpenFileAndLoadNtuple: tree not found: ";
+    txt.Append( ntid );
+    throw std::logic_error( txt.Data() );
   }
   std::string sfilename( filename );
   if( sfilename.find( "mc" ) != std::string::npos ) nt_isMC= true;
   Init();
-  return true;
+  return;
 }
 
 void NtupleReader::CloseFile() {

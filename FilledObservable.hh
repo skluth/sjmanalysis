@@ -28,6 +28,7 @@ public:
   DataStructure* getDataStructure( const Analysis& ) const;
   void setDataStructure( DataStructure*, const Analysis&  );
   string getName() const { return name; }
+  bool containsAnalysis( const Analysis& );
 
 private:
 

@@ -56,3 +56,11 @@ void FilledObservable::setDataStructure( DataStructure* dsp, const Analysis& ana
   string tag= anal.getTag();
   datastructures[tag]= dsp;
 }
+
+bool FilledObservable::containsAnalysis( const Analysis& anal ) {
+  string tag= anal.getTag();
+  bool result= true;
+  if( datastructures.find( tag ) == datastructures.end() ) result= false;
+  return result;
+}
+

@@ -7,6 +7,8 @@
 #include "Unfolder.hh"
 #include "OutputWriter.hh"
 #include "NtupleReader.hh"
+#include <sstream>
+using std::ostringstream;
 #include <iostream>
 using std::cout;
 using std::endl;
@@ -14,6 +16,8 @@ using std::endl;
 using std::vector;
 #include <string>
 using std::string;
+#include <stdexcept>
+using std::logic_error;
 #endif
 
 void processAnalyses( const vector<Analysis>& analyses,
@@ -28,8 +32,9 @@ void processAnalyses( const vector<Analysis>& analyses,
   Int_t nevnt= ntr->GetNumberEntries();
   for( Int_t ievnt= 0; ievnt < TMath::Min( nevnt, maxevt ); ievnt++ ) {
     if( ntr->GetEvent( ievnt ) == 0 ) {
-      cout << "event " << ievnt << " not found, skip" << endl;
-      continue;
+      ostringstream txt;
+      txt << "processAnalyses: event not found: " << ievnt;
+      throw logic_error( txt.str() );
     }
     map<string,Bool_t> selections= ntr->LEP1Selections();
     bool MCnonrad= ntr->MCNonRad();
@@ -144,7 +149,6 @@ void LEP1Analysis( Int_t maxevt=1000,
     if( obs->getName() == "thrust" or
 	obs->getName() == "durhamymerge23" or
 	obs->getName() == "jadeymerge23" or
-	obs->getName() == "mr" or
 	obs->getName() == "partonshower" ) {
       obs->addAnalyses( pyMatrixExtras );
       obs->addAnalyses( hwMatrixExtras );
@@ -152,30 +156,42 @@ void LEP1Analysis( Int_t maxevt=1000,
   }
 
   // Fill from data and mc (PYTHIA and HERWIG) ntuples:
-  processAnalyses( measuredAnalyses, vobs, datafilename, maxevt );
-  processAnalyses( pyAnalyses, vobs, pyfilename, maxevt );
-  processAnalyses( hwAnalyses, vobs, hwfilename, maxevt );
+  try {
+    processAnalyses( measuredAnalyses, vobs, datafilename, maxevt );
+    processAnalyses( pyAnalyses, vobs, pyfilename, maxevt );
+    processAnalyses( hwAnalyses, vobs, hwfilename, maxevt );
+  }
+  catch( const std::exception& e ) {
+    cout << "Cought exception: " << e.what() << endl;
+    return;
+  }
 
   // Get FilledObservables for further processing:
   vector<FilledObservable*> vfobs= getFilled( vobs );
 
-  // Unfolding bin-by-bin
-  // PYHTHIA based
-  processUnfolding( measuredAnalyses, "py", vfobs );
-  // HERWIG based for systematic
-  vector<Analysis> measuredAnalysesHw;
-  measuredAnalysesHw.push_back( Analysis( "data", "mt", "stand" ) );
-  processUnfolding( measuredAnalysesHw, "hw", vfobs );
-  // MC detector level with MC as cross check for PYTHIA and HERWIG
-  vector<Analysis> measuredPyAnalyses;
-  measuredPyAnalyses.push_back( Analysis( "py", "mt", "stand" ) );
-  measuredPyAnalyses.push_back( Analysis( "py", "mt", "costt07" ) );
-  measuredPyAnalyses.push_back( Analysis( "py", "mt", "nch7" ) );
-  measuredPyAnalyses.push_back( Analysis( "py", "tc", "stand" ) );
-  processUnfolding( measuredPyAnalyses, "py", vfobs );
-  vector<Analysis> measuredHwAnalyses;
-  measuredHwAnalyses.push_back( Analysis( "hw", "mt", "stand" ) );
-  processUnfolding( measuredHwAnalyses, "hw", vfobs );
+  // Unfolding bin-by-bin:
+  try {
+    // PYHTHIA based:
+    processUnfolding( measuredAnalyses, "py", vfobs );
+    // HERWIG based for systematic:
+    vector<Analysis> measuredAnalysesHw;
+    measuredAnalysesHw.push_back( Analysis( "data", "mt", "stand" ) );    
+    processUnfolding( measuredAnalysesHw, "hw", vfobs );
+    // MC detector level with MC as cross check for PYTHIA and HERWIG:
+    vector<Analysis> measuredPyAnalyses;
+    measuredPyAnalyses.push_back( Analysis( "py", "mt", "stand" ) );
+    measuredPyAnalyses.push_back( Analysis( "py", "mt", "costt07" ) );
+    measuredPyAnalyses.push_back( Analysis( "py", "mt", "nch7" ) );
+    measuredPyAnalyses.push_back( Analysis( "py", "tc", "stand" ) );
+    processUnfolding( measuredPyAnalyses, "py", vfobs );
+    vector<Analysis> measuredHwAnalyses;
+    measuredHwAnalyses.push_back( Analysis( "hw", "mt", "stand" ) );
+    processUnfolding( measuredHwAnalyses, "hw", vfobs );
+  }
+  catch( const std::exception& e ) {
+    cout << "Cought exception: " << e.what() << endl;
+    return;
+  }
 
   // Normalise and calculate stat errors, print
   // Normalisation only during postprocessing

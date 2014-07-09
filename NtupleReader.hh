@@ -19,7 +19,7 @@ public:
   NtupleReader( const char* filename, const char* ntid="h10");
   ~NtupleReader();
 
-  bool OpenFileAndLoadNtuple( const char* filename, const char* ntid="h10" );
+  void OpenFileAndLoadNtuple( const char* filename, const char* ntid="h10" );
   void CloseFile();
 
   Int_t GetNumberEntries();

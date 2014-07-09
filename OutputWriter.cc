@@ -21,6 +21,10 @@ using std::logic_error;
 OutputWriter::OutputWriter( const string& filename ) {
   cout << "OutputWriter::OutputWriter: opening for writing: " << filename << endl;
   outputfile= new TFile( filename.c_str(), "RECREATE" );
+  if( not outputfile->IsOpen() ) {
+    string txt= "OutputWriter::OutputWriter: file not open: " + filename;
+    throw std::logic_error( txt );
+  }
 }
 
 OutputWriter::~OutputWriter() {

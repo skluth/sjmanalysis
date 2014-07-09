@@ -7,6 +7,7 @@
 #include "TVectorD.h"
 #include "TMath.h"
 #include <iostream>
+#include <stdexcept>
 using std::cout;
 using std::endl;
 #endif
@@ -92,31 +93,30 @@ TObject* getTObjFromFile( TFile* f, const TString& obs, const Analysis& anal ) {
   TString key= obs + " " + tag;
   TObject* tobj= (TObject*) f->Get( key );
   if( tobj == 0 ) {
-    cout << "getTObjFromFile: object with key  " << key << "  not found" << endl;
+    key.Prepend( "getTObjFromFile: no object with key: " );
+    throw std::logic_error( key.Data() );
   }
   return tobj;
 }
 
 AnalysisObject* getAnalysisObjectFromFile( TFile* f, const TString& obs, 
 					   const Analysis& anal ) {
-  AnalysisObject* ao= 0;
+  cout << "getAnalysisObjectFromFile: create " << obs << " "    
+       << anal.getTag() << endl;
   TObject* tobj= getTObjFromFile( f, obs, anal );
-  if( tobj ) {
-    cout << "getAnalysisObjectFromFile: create " << obs << " "    
-	 << anal.getTag() << endl;
-    TString tobjclass= tobj->ClassName();
-    if( tobjclass == "TH1D" ) {
-      TH1D* hist= dynamic_cast<TH1D*>( tobj );
-      if( hist ) ao= new TH1DAnalysisObject( hist );
-    }
-    else if( tobjclass == "TGraphErrors" ) {
-      TGraphErrors* tge= dynamic_cast<TGraphErrors*>( tobj );
-      if( tge ) ao= new TGEAnalysisObject( tge );
-    }
+  TString tobjclass= tobj->ClassName();
+  AnalysisObject* ao= 0;
+  if( tobjclass == "TH1D" ) {
+    TH1D* hist= dynamic_cast<TH1D*>( tobj );
+    if( hist ) ao= new TH1DAnalysisObject( hist );
+  }
+  else if( tobjclass == "TGraphErrors" ) {
+    TGraphErrors* tge= dynamic_cast<TGraphErrors*>( tobj );
+    if( tge ) ao= new TGEAnalysisObject( tge );
   }
   else {
-    cout << "getAnalysisObjectFromFile: TObject for " << obs << " and "
-	 << anal.getTag() << " not found, return 0, expect crash" << endl;
+    tobjclass.Prepend( "getAnalysisObjectFromFile: wrong class: " );
+    throw std::logic_error( tobjclass.Data() );
   }
   return ao;
 }
@@ -139,25 +139,45 @@ void printResults( TString obs="thrust" ) {
   // Analysis hw( "hw", "mt", "stand", "none", "none", "hw", "bbb" );
 
   TFile* f= new TFile( "LEP1Analysis.root" );
-  TVectorD standtvd= getAnalysisObjectFromFile( f, obs, stand )->getTVectorD( "vn" );
-  TVectorD standerrtvd= getAnalysisObjectFromFile( f, obs, stand )->getTVectorD( "en" );
-  TVectorD tctvd= getAnalysisObjectFromFile( f, obs, tc )->getTVectorD( "vn" );
-  TVectorD costt07tvd= getAnalysisObjectFromFile( f, obs, costt07 )->getTVectorD( "vn" );
-  TVectorD nch7tvd= getAnalysisObjectFromFile( f, obs, nch7 )->getTVectorD( "vn" );
-  TVectorD hwtvd= getAnalysisObjectFromFile( f, obs, hw )->getTVectorD( "vn" );
 
-  TVectorD tcdelta= tctvd - standtvd;
-  TVectorD costt07delta= costt07tvd - standtvd;
-  TVectorD nch7delta= nch7tvd - standtvd;
-  TVectorD hwdelta= hwtvd - standtvd;
+  try {
 
-  TVectorD systerr= tcdelta.Sqr() + costt07delta.Sqr() + nch7delta.Sqr() + hwdelta.Sqr();
-  systerr.Sqrt();
+    TVectorD standtvd= getAnalysisObjectFromFile( f, obs, stand )->getTVectorD( "vn" );
+    TVectorD standerrtvd= getAnalysisObjectFromFile( f, obs, stand )->getTVectorD( "en" );
+    TVectorD tctvd= getAnalysisObjectFromFile( f, obs, tc )->getTVectorD( "vn" );
+    TVectorD costt07tvd= getAnalysisObjectFromFile( f, obs, costt07 )->getTVectorD( "vn" );
+    TVectorD nch7tvd= getAnalysisObjectFromFile( f, obs, nch7 )->getTVectorD( "vn" );
+    TVectorD hwtvd= getAnalysisObjectFromFile( f, obs, hw )->getTVectorD( "vn" );
 
-  for( Int_t i= 0; i < systerr.GetNoElements(); i++ ) {
-    cout << i << " " << standtvd[i] << " +/- " << standerrtvd[i]
-	 << " +/- " << systerr[i] << endl;
+    TVectorD tcdelta= tctvd - standtvd;
+    TVectorD costt07delta= costt07tvd - standtvd;
+    TVectorD nch7delta= nch7tvd - standtvd;
+    TVectorD hwdelta= hwtvd - standtvd;
+
+    TVectorD systerr= tcdelta.Sqr() + costt07delta.Sqr() + nch7delta.Sqr() + hwdelta.Sqr();
+    systerr.Sqrt();
+
+    for( Int_t i= 0; i < systerr.GetNoElements(); i++ ) {
+      cout << i << " " << standtvd[i] << " +/- " << standerrtvd[i]
+	   << " +/- " << systerr[i] << endl;
+    }
+
   }
+
+  catch( const std::exception& e ) {
+    cout << "Cought exception: " << e.what() << endl;
+  }
+
+  // Try matrix object which throuws error
+  try {
+    Analysis matrix( "py", "mt", "stand", "nonrad", "hadron" );
+    AnalysisObject* ao= getAnalysisObjectFromFile( f, obs, matrix );
+  }
+  catch( const std::exception& e ) {
+    cout << "Cought exception: " << e.what() << endl;
+  }
+
+  return;
   
 }
 

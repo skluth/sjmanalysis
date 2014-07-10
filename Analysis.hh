@@ -6,9 +6,10 @@ using std::string;
 
 class Analysis {
 public:
-  Analysis( const string& source, const string& reco, const string& cuts, 
-	    const string& mccuts="none", const string& reco2="none",
-	    const string& unfoldsource="none", const string& unfoldmethod="none" );
+  Analysis( const string&, const string&, const string&, 
+	    const string& mcc="none", const string& r2="none",
+	    const string& bkgsts="none",
+	    const string& unfsrc="none", const string& unfm="none" );
   Analysis();
   ~Analysis();
   string getSource() const;
@@ -16,18 +17,28 @@ public:
   string getCuts() const;
   string getMccuts() const;
   string getReco2() const;
+  string getBkgStatus() const;
   string getUnfoldSource() const;
   string getUnfoldMethod() const;
   string getTag() const;
   void print() const;
+  void setSource( const string& );
+  void setReco( const string& );
+  void setCuts( const string& );
+  void setMccuts( const string& );
+  void setReco2( const string& );
+  void setBkgStatus( const string& );
+  void setUnfoldSource( const string& );
+  void setUnfoldMethod( const string& );
 private:
-  string a_source;
-  string a_reco;
-  string a_cuts;
-  string a_mccuts;
-  string a_reco2;
-  string a_unfoldsource;
-  string a_unfoldmethod;
+  string source;
+  string reco;
+  string cuts;
+  string mccuts;
+  string reco2;
+  string bkgstatus;
+  string unfoldsource;
+  string unfoldmethod;
 };
 
 #endif

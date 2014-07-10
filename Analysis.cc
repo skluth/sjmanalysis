@@ -5,46 +5,64 @@
 using std::cout;
 using std::endl;
 
-Analysis::Analysis( const string& source, const string& reco, const string& cuts, 
-		    const string& mccuts,  const string& reco2,
-		    const string& unfoldsource, const string& unfoldmethod ) :
-  a_source(source), a_reco(reco), a_cuts(cuts), a_mccuts(mccuts), a_reco2(reco2),
-  a_unfoldsource(unfoldsource), a_unfoldmethod(unfoldmethod) {}
+Analysis::Analysis( const string& src, const string& r, const string& c, 
+		    const string& mcc,  const string& r2,
+		    const string& bkgsts,
+		    const string& unfsrc, const string& unfm ) :
+  source(src), reco(r), cuts(c), mccuts(mcc), reco2(r2),
+  bkgstatus(bkgsts),
+  unfoldsource(unfsrc), unfoldmethod(unfm) {}
 
 Analysis::Analysis() {}
+
 Analysis::~Analysis() {}
 
-string Analysis::getSource() const { return a_source; }
-string Analysis::getReco() const { return a_reco; }
-string Analysis::getCuts() const { return a_cuts; }
-string Analysis::getMccuts() const { return a_mccuts; }
-string Analysis::getReco2() const { return a_reco2; }
-string Analysis::getUnfoldSource() const { return a_unfoldsource; }
-string Analysis::getUnfoldMethod() const { return a_unfoldmethod; }
+string Analysis::getSource() const { return source; }
+string Analysis::getReco() const { return reco; }
+string Analysis::getCuts() const { return cuts; }
+string Analysis::getMccuts() const { return mccuts; }
+string Analysis::getReco2() const { return reco2; }
+string Analysis::getBkgStatus() const { return bkgstatus; }
+string Analysis::getUnfoldSource() const { return unfoldsource; }
+string Analysis::getUnfoldMethod() const { return unfoldmethod; }
+
+void Analysis::setSource( const string& src ) { source=src; }
+void Analysis::setReco( const string& r ) { reco=r; }
+void Analysis::setCuts( const string& c ) { cuts=c; }
+void Analysis::setMccuts( const string& mcc ) { mccuts=mcc; }
+void Analysis::setReco2( const string& r2 ) { reco2=r2; }
+void Analysis::setBkgStatus( const string& bkgsts ) { bkgstatus=bkgsts; }
+void Analysis::setUnfoldSource( const string& unfsrc ) { unfoldsource=unfsrc; }
+void Analysis::setUnfoldMethod( const string& unfm ) { unfoldmethod=unfm; }
 
 string Analysis::getTag() const { 
-  string result= a_source + " " + a_reco + " " + a_cuts;
-  if( a_mccuts != "none" ) {
+  string result= source + " " + reco + " " + cuts;
+  if( mccuts != "none" ) {
     result+= " ";
-    result+= a_mccuts;
+    result+= mccuts;
   }
-  if( a_reco2 != "none" ) {
+  if( reco2 != "none" ) {
     result+= " ";
-    result+= a_reco2;
+    result+= reco2;
   }
-  if( a_unfoldsource != "none" ) {
+  if( bkgstatus != "none" ) {
     result+= " ";
-    result+= a_unfoldsource;
+    result+= bkgstatus;
   }
-  if( a_unfoldmethod != "none" ) {
+  if( unfoldsource != "none" ) {
     result+= " ";
-    result+= a_unfoldmethod;
+    result+= unfoldsource;
+  }
+  if( unfoldmethod != "none" ) {
+    result+= " ";
+    result+= unfoldmethod;
   }
   return result;
 }
 
 void Analysis::print() const {
-  cout << a_source << " " << a_reco << " " << a_cuts << " " << a_mccuts << " " 
-       << a_reco2 << " " << a_unfoldsource << " " << a_unfoldmethod << endl;
+  cout << source << " " << reco << " " << cuts << " " << mccuts << " " 
+       << reco2 << " " << bkgstatus << " "
+       << unfoldsource << " " << unfoldmethod << endl;
 }
 

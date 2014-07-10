@@ -62,11 +62,11 @@ void processUnfolding( const vector<Analysis>& measuredAnalyses, string unfoldso
   cout << "Hadron level: " << hadronlevel.getTag() << endl;
   for( size_t ianal= 0; ianal < measuredAnalyses.size(); ianal++ ) {
     Analysis measured= measuredAnalyses[ianal];
-    cout << measured.getTag() << endl;
-    Analysis measuredMC( unfoldsource, measured.getReco(), measured.getCuts() );
+    Analysis measuredMC( measured );
+    measuredMC.setSource( unfoldsource );
+    cout << measured.getTag() << ", " << measuredMC.getTag() << endl;
     Unfolder unfolder( measured, measuredMC, hadronlevel );
     for( size_t iobs= 0; iobs < vobs.size(); iobs++ ) {
-      // cout << "processUnfolding: observable " << vobs[iobs]->getName() << endl;
       unfolder.unfold( vobs[iobs] );
     }
   }

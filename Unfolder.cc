@@ -28,7 +28,7 @@ void Unfolder::unfold( FilledObservable* obs ) const {
 		       measuredMCAnalysis.getTag() );
   }
 
-  // Get data points:
+  // Get real and simulated data:
   DataStructure* hadronlevel= obs->getDataStructure( hadronlevelAnalysis );
   DataStructure* measured= obs->getDataStructure( measuredAnalysis );
   DataStructure* measuredMC= obs->getDataStructure( measuredMCAnalysis  );
@@ -54,13 +54,13 @@ void Unfolder::unfold( FilledObservable* obs ) const {
   correctedData->setValues( correctedValues );
   correctedData->setErrors( correctedErrors );
   correctedData->setNEvents( neventsCorrected );
-  Analysis correctedDataAnalysis( measuredAnalysis.getSource(),
-				  measuredAnalysis.getReco(),
-				  measuredAnalysis.getCuts(),
-				  measuredAnalysis.getMccuts(),
-				  hadronlevelAnalysis.getSource(),
-				  "bbb" );
+  Analysis correctedDataAnalysis( measuredAnalysis );
+  correctedDataAnalysis.setUnfoldSource( hadronlevelAnalysis.getSource() );
+  correctedDataAnalysis.setUnfoldMethod( "bbb" );
   obs->setDataStructure( correctedData, correctedDataAnalysis );
+
+  // The End:
   return;
+
 }
 

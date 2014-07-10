@@ -6,6 +6,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+using std::cout;
+using std::endl;
 #include <stdexcept>
 
 // extern "C" {
@@ -25,9 +27,10 @@ NtupleReader::~NtupleReader() {
   CloseFile();
 }
 
-void NtupleReader::OpenFileAndLoadNtuple( const char* filename, const char* ntid ) {
-  std::cout << "NtupleReader::OpenFileAndLoadNtuple: opening file: " 
-	    << filename << std::endl;
+void NtupleReader::OpenFileAndLoadNtuple( const char* filename, 
+					  const char* ntid ) {
+  cout << "NtupleReader::OpenFileAndLoadNtuple: opening file: " 
+       << filename << endl;
   nt_file= new TFile( filename );
   if( not nt_file->IsOpen() ) {
     TString txt= "NtupleReader::OpenFileAndLoadNtuple: file not open: ";
@@ -43,15 +46,22 @@ void NtupleReader::OpenFileAndLoadNtuple( const char* filename, const char* ntid
   std::string sfilename( filename );
   if( sfilename.find( "mc" ) != std::string::npos ) nt_isMC= true;
   Init();
+  nt_nevents= 0;
   return;
 }
 
 void NtupleReader::CloseFile() {
   if( nt_file ) {
+    cout << "NtupleReader::CloseFile: closing file: " 
+	 << nt_file->GetName() << ", " << nt_nevents << " events" << endl;
     nt_file->Close();
     delete nt_file;
     nt_file= 0;
   }
+  else {
+    throw std::logic_error( "NtupleReader::CloseFile: NULL file pointer" );
+  }
+  return;
 }
 
 Int_t NtupleReader::GetNumberEntries() {
@@ -64,6 +74,7 @@ bool NtupleReader::GetEvent( Int_t ievnt ) {
   if( nt_tree and nt_tree->GetEvent( ievnt ) > 0 ) {
     result= true;
     nt_vtlvcache= false;
+    nt_nevents++;
   }
   return result;
 }

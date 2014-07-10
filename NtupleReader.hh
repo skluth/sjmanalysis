@@ -63,6 +63,7 @@ private:
   TTree* nt_tree;
   bool nt_isMC;
   bool nt_vtlvcache;
+  Int_t nt_nevents;
 
   static const Int_t nt_maxtrk= 501;
   static const Int_t nt_maxp= 50;

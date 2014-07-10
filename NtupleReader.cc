@@ -4,10 +4,11 @@
 #include "TFile.h"
 #include "TMath.h"
 #include <iostream>
-#include <sstream>
-#include <string>
 using std::cout;
 using std::endl;
+#include <sstream>
+#include <string>
+using std::string;
 #include <stdexcept>
 
 // extern "C" {
@@ -33,17 +34,19 @@ void NtupleReader::OpenFileAndLoadNtuple( const char* filename,
        << filename << endl;
   nt_file= new TFile( filename );
   if( not nt_file->IsOpen() ) {
-    TString txt= "NtupleReader::OpenFileAndLoadNtuple: file not open: ";
-    txt.Append( filename );
-    throw std::logic_error( txt.Data() );
+    string txt= "NtupleReader::OpenFileAndLoadNtuple: file not open: ";
+    txt+= filename;
+    throw std::logic_error( txt );
   }
   nt_tree= (TTree*) nt_file->Get( ntid );
   if( nt_tree == 0 ) {
-    TString txt= "NtupleReader::OpenFileAndLoadNtuple: tree not found: ";
-    txt.Append( ntid );
-    throw std::logic_error( txt.Data() );
+    string txt= "NtupleReader::OpenFileAndLoadNtuple: tree not found: ";
+    txt+= ntid;
+    throw std::logic_error( txt );
   }
-  std::string sfilename( filename );
+  cout << "NtupleReader::OpenFileAndLoadNtuple: " 
+       << GetNumberEntries() << " events on file" << endl;
+  string sfilename( filename );
   if( sfilename.find( "mc" ) != std::string::npos ) nt_isMC= true;
   Init();
   nt_nevents= 0;

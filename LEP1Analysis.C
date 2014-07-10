@@ -55,7 +55,8 @@ void processAnalyses( const vector<Analysis>& analyses,
   return;
 }
 
-void processUnfolding( const vector<Analysis>& measuredAnalyses, string unfoldsource,
+void processUnfolding( const vector<Analysis>& measuredAnalyses, 
+		       string unfoldsource,
 		       const vector<FilledObservable*>& vobs ) {
   cout << "processUnfolding: bin-by-bin unfolding for analyses:" << endl;
   Analysis hadronlevel( unfoldsource, "hadron", "none", "nonrad" );

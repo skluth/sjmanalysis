@@ -11,7 +11,7 @@ class DataStructure {
 public:
 
   DataStructure() : Ntotal(0) {}
-  ~DataStructure() {}
+  virtual ~DataStructure() {}
 
   virtual const vector<Double_t>& getPoints() const { return points; }
   virtual const vector<Double_t>& getValues() const { return values; }

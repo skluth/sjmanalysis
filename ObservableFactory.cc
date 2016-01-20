@@ -130,9 +130,9 @@ vector<Observable*> ObservableFactory::createObservables( const vector<string>& 
     else if( name.find( "antiktR" ) != string::npos ) 
       vobs.push_back( new ObsFastJetR( name, "eeantikt", 0.06, Rvalues, analyses ) );
     else if( name.find( "sisconeemin" ) != string::npos ) 
-      vobs.push_back( new ObsFastJetEmin( name, "siscone", 0.7, eminFraction, analyses ) );
+      vobs.push_back( new ObsFastJetEmin( name, "eesiscone", 0.7, eminFraction, analyses ) );
     else if( name.find( "sisconeR" ) != string::npos ) 
-      vobs.push_back( new ObsFastJetR( name, "siscone", 0.06, Rvalues, analyses ) );
+      vobs.push_back( new ObsFastJetR( name, "eesiscone", 0.06, Rvalues, analyses ) );
     else {
       string txt= "ObservableFactory::createObservables: wrong class name: " + name;
       throw std::logic_error( txt );

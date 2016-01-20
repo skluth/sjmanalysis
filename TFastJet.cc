@@ -5,6 +5,9 @@
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/JetDefinition.hh"
 #include "fastjet/SISConePlugin.hh"
+
+#include "fastjet/SISConeSphericalPlugin.hh"
+
 #include "fastjet/JadePlugin.hh"
 
 #include "TParticle.h"
@@ -53,6 +56,7 @@ TFastJet::TFastJet( const vector<TLorentzVector>& vtl,
     jamap["antikt"]= fastjet::antikt_algorithm;
     jamap["genkt"]= fastjet::genkt_algorithm;
     jamap["siscone"]= fastjet::plugin_algorithm;
+    jamap["eesiscone"]= fastjet::plugin_algorithm;
     jamap["eekt"]= fastjet::ee_kt_algorithm;
     jamap["jade"]= fastjet::plugin_algorithm;
     jamap["eeantikt"]= fastjet::ee_genkt_algorithm;
@@ -67,9 +71,13 @@ TFastJet::TFastJet( const vector<TLorentzVector>& vtl,
   fastjet::JetAlgorithm ja= jamap[jetalgString];
   fastjet::JetDefinition jetdef;
   fastjet::JetDefinition::Recombiner* recombiner= 0;
+  //  if( ja == fastjet::plugin_algorithm ) {
   if( ja == 99 ) {
     if( jetalgString == "siscone" ) {
       plugin= new fastjet::SISConePlugin( R, 0.75 );
+    }
+    else if( jetalgString == "eesiscone" ) {
+      plugin= new fastjet::SISConeSphericalPlugin( R, 0.75 );
     }
     else if( jetalgString == "jade" ) {
       plugin= new fastjet::JadePlugin();

@@ -13,7 +13,7 @@ public:
 
   DifferentialDataStructure( const vector<Double_t>& p );
   DifferentialDataStructure() {}
-  ~DifferentialDataStructure() {}
+  virtual ~DifferentialDataStructure() {}
 
   void fill( Double_t value, Double_t weight=1.0 );
   void normalise();

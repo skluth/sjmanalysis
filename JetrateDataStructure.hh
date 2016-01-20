@@ -13,7 +13,7 @@ public:
 
   JetrateDataStructure( const vector<Double_t>&, Int_t );
   JetrateDataStructure() {}
-  ~JetrateDataStructure() {}
+  virtual ~JetrateDataStructure() {}
 
   void fill( const vector<Double_t>& NJets );
   void normalise();

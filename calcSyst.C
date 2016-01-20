@@ -14,12 +14,14 @@ using std::endl;
 
 class AnalysisObject {
 public:
+  virtual ~AnalysisObject() {}
   virtual TVectorD getTVectorD( TString opt="v" ) = 0;
 };
 
 class TH1DAnalysisObject: public AnalysisObject {
 public:
   TH1DAnalysisObject( TH1D* h ) : hist(h) {}
+  virtual ~TH1DAnalysisObject() {}
   TVectorD getTVectorD( TString opt="v" ) {
     TH1D* tmphist= hist;
     if( opt.Contains( "n" ) ) tmphist= normalise();
@@ -35,6 +37,9 @@ public:
       else if( opt.Contains( "e" ) ) {
 	tvd[i]= tmphist->GetBinError( i+1 );
 	integral+= TMath::Power( tvd[i]*binw, 2 );
+      }
+      else if( opt.Contains( "p" ) ) {
+	tvd[i]= tmphist->GetBinCenter( i+1 );
       }
     }
     if( opt.Contains( "v" ) ) tvd[nbin]= integral;
@@ -62,12 +67,14 @@ private:
 class TGEAnalysisObject: public AnalysisObject {
 public:
   TGEAnalysisObject( TGraphErrors* t ) : tge(t) {}
+  virtual ~TGEAnalysisObject() {}
   TVectorD getTVectorD( TString opt="v" ) {
     TGraphErrors* tmptge= tge;
     if( opt.Contains( "n" ) ) tmptge= normalise();
     TVectorD tvd( tmptge->GetN() );
     if( opt.Contains( "v" ) ) tvd.SetElements( tmptge->GetY() );
     else if( opt.Contains( "e" ) ) tvd.SetElements( tmptge->GetEY() );
+    else if( opt.Contains( "p" ) ) tvd.SetElements( tmptge->GetX() );
     if( opt.Contains( "n" ) ) delete tmptge;
     return tvd;
   }
@@ -142,6 +149,8 @@ void printResults( TString obs="thrust" ) {
 
   try {
 
+    TVectorD points= getAnalysisObjectFromFile( f, obs, stand )->getTVectorD( "pn" );
+
     TVectorD standtvd= getAnalysisObjectFromFile( f, obs, stand )->getTVectorD( "vn" );
     TVectorD standerrtvd= getAnalysisObjectFromFile( f, obs, stand )->getTVectorD( "en" );
     TVectorD tctvd= getAnalysisObjectFromFile( f, obs, tc )->getTVectorD( "vn" );
@@ -158,24 +167,25 @@ void printResults( TString obs="thrust" ) {
     systerr.Sqrt();
 
     for( Int_t i= 0; i < systerr.GetNoElements(); i++ ) {
-      cout << i << " " << standtvd[i] << " +/- " << standerrtvd[i]
+      cout << i << " " << points[i] << " " << standtvd[i] << " +/- " << standerrtvd[i]
 	   << " +/- " << systerr[i] << endl;
     }
 
   }
 
-  catch( const std::exception& e ) {
+  //catch( const std::exception& e ) {
+  catch( const std::logic_error& e ) {
     cout << "Cought exception: " << e.what() << endl;
   }
 
   // Try matrix object which throws error
-  try {
-    Analysis matrix( "py", "mt", "stand", "nonrad", "hadron" );
-    AnalysisObject* ao= getAnalysisObjectFromFile( f, obs, matrix );
-  }
-  catch( const std::exception& e ) {
-    cout << "Cought exception: " << e.what() << endl;
-  }
+  // try {
+  //   Analysis matrix( "py", "mt", "stand", "nonrad", "hadron" );
+  //   AnalysisObject* ao= getAnalysisObjectFromFile( f, obs, matrix );
+  // }
+  // catch( const std::exception& e ) {
+  //   cout << "Cought exception: " << e.what() << endl;
+  // }
 
   return;
   

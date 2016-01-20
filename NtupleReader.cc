@@ -10,6 +10,7 @@ using std::endl;
 #include <string>
 using std::string;
 #include <stdexcept>
+using std::logic_error;
 
 // extern "C" {
 //   void pxlth4_( Int_t*, Int_t*, Float_t*, Float_t*, Float_t*, Int_t* );
@@ -47,7 +48,7 @@ void NtupleReader::OpenFileAndLoadNtuple( const char* filename,
   cout << "NtupleReader::OpenFileAndLoadNtuple: " 
        << GetNumberEntries() << " events on file" << endl;
   string sfilename( filename );
-  if( sfilename.find( "mc" ) != std::string::npos ) nt_isMC= true;
+  if( sfilename.find( "mc" ) != string::npos ) nt_isMC= true;
   Init();
   nt_nevents= 0;
   return;

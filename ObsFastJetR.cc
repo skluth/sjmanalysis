@@ -22,9 +22,9 @@ void ObsFastJetR::fill( NtupleReader* ntr, const Analysis& variation ) {
   size_t n= points.size();
   vector<Double_t> NJets( n );
   for( size_t i= 0; i < n; i++ ) {
-    TFastJet tfjakt( vtlv, Algorithm.c_str(), points[i] );
-    Double_t Evis= tfjakt.Evis();
-    vector<TLorentzVector> incljets= tfjakt.inclusive_jets( EminFraction*Evis );
+    TFastJet tfj( vtlv, Algorithm.c_str(), points[i] );
+    Double_t Evis= tfj.Evis();
+    vector<TLorentzVector> incljets= tfj.inclusive_jets( EminFraction*Evis );
     NJets[i]= incljets.size();
   }
   getAndFillJetrateDataStructures( NJets, variation.getTag() );

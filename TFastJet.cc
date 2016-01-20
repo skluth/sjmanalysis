@@ -71,8 +71,7 @@ TFastJet::TFastJet( const vector<TLorentzVector>& vtl,
   fastjet::JetAlgorithm ja= jamap[jetalgString];
   fastjet::JetDefinition jetdef;
   fastjet::JetDefinition::Recombiner* recombiner= 0;
-  //  if( ja == fastjet::plugin_algorithm ) {
-  if( ja == 99 ) {
+  if( ja == fastjet::plugin_algorithm ) {
     if( jetalgString == "siscone" ) {
       plugin= new fastjet::SISConePlugin( R, 0.75 );
     }

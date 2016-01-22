@@ -4,6 +4,10 @@
 #include <iostream>
 using std::cout;
 using std::endl;
+#include <sstream>
+using std::ostringstream;
+#include <stdexcept>
+using std::logic_error;
 
 JetrateDataStructure::JetrateDataStructure( const vector<Double_t>& p, 
 					    Int_t njet ) :
@@ -24,6 +28,12 @@ DataStructure* JetrateDataStructure::clone() {
 }
 
 void JetrateDataStructure::fill( const vector<Double_t>& NJets ) {
+  if( NJets.size() != values.size() ) {
+    ostringstream txt;
+    txt << "Input vector wrong size " << NJets.size() 
+	<< ", expected " << values.size();
+    throw logic_error( txt.str() );
+  }
   Ntotal++;
   for( size_t i= 0; i < NJets.size(); i++ ) {
     if( NJets[i] == Jetrate ) {

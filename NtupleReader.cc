@@ -26,7 +26,8 @@ NtupleReader::NtupleReader( const char* filename, const char* ntid ) :
 }
 
 NtupleReader::~NtupleReader() {
-  CloseFile();
+  try { CloseFile(); }
+  catch( std::logic_error e ) {}
 }
 
 void NtupleReader::OpenFileAndLoadNtuple( const char* filename, 

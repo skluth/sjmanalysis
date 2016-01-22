@@ -1,30 +1,45 @@
 
 #include "MatrixDataStructure.hh"
+
 #include <iostream>
 using std::cout;
 using std::endl;
+#include <sstream>
+using std::ostringstream;
 
-MatrixDataStructure::MatrixDataStructure( vector<Double_t> bins ) : 
+#include <stdexcept>
+using std::logic_error;
+
+// Ctor:
+MatrixDataStructure::MatrixDataStructure( const vector<Double_t>& bins ) : 
   binedges(bins), Ntotal(0) {
   ndim= binedges.size()+1;
   array= new Double_t[ndim*ndim];
+  for( size_t i= 0; i < ndim; i++ ) {
+    for( size_t j= 0; j < ndim; j++ ) {
+      array[j*ndim+i]= 0.0;
+    }
+  }
 }
 
 // Underflows go in value[0], overflow goes in values[n] with n # of binedges:
 void MatrixDataStructure::fill( Double_t xvalue, Double_t yvalue ) {
   Ntotal++;
-  vector<double>::iterator xiter= lower_bound( binedges.begin(), binedges.end(), xvalue );
-  vector<double>::iterator yiter= lower_bound( binedges.begin(), binedges.end(), yvalue );
+  vector<double>::iterator xiter= lower_bound( binedges.begin(), binedges.end(), 
+					       xvalue );
+  vector<double>::iterator yiter= lower_bound( binedges.begin(), binedges.end(), 
+					       yvalue );
   size_t xindex= xiter-binedges.begin();
   size_t yindex= yiter-binedges.begin();
   array[yindex*ndim+xindex]++;
 }
 
 Double_t MatrixDataStructure::getElement( size_t irow, size_t icol ) const {
-  if( irow >= ndim ) cout << "irow > ndim " << irow << " " << ndim << endl;
-  if( irow < 0 ) cout << "irow < 0 " << irow << endl;
-  if( icol >= ndim ) cout << "icol > ndim " << icol << " " << ndim << endl;
-  if( icol < 0 ) cout << "icol < 0 " << icol << endl;
+  if( irow >= ndim or irow < 0 or icol >= ndim or icol < 0 ) {
+    ostringstream txt;
+    txt << "Bad irow, icol or ndim: " << irow << " " << icol << " " << ndim;
+    throw logic_error( txt.str() );
+  }
   return array[icol*ndim+irow];
 }
 

@@ -22,28 +22,31 @@ ObsPartonShower::ObsPartonShower( const vector<Double_t>& a14bins,
 				  const vector<Analysis>& variations,
 				  Double_t y34c, Double_t y34y23c ) :
   ObsDifferential( "partonshower", a14bins ), 
-  c202binedges(c202bins), asbinedges(asbins), mrbinedges(mrbins),
+  //  Observable( "partonshower" ),
+  a14binedges(a14bins), c202binedges(c202bins), asbinedges(asbins), mrbinedges(mrbins),
   y34cut(y34c), y34y23cut(y34y23c) {
   addAnalyses( variations );
-  cout << "ObsPartonShower::ObsPartonShower: create " << getName() 
-       << " with A14, C202, AS, MR with cuts y34cut=" << y34cut 
-       << " and y34y23cut=" << y34y23cut << endl;
-  printVectorD( "A14 binedges:", a14bins );
-  printVectorD( "C202 binedges:", c202bins );
-  printVectorD( "AS binedges:", asbins );
-  printVectorD( "MR binedges:", mrbins );
+  // cout << "ObsPartonShower::ObsPartonShower: create " << getName() 
+  //      << " with A14, C202, AS, MR with cuts y34cut=" << y34cut 
+  //      << " and y34y23cut=" << y34y23cut << endl;
+  // printVectorD( "A14 binedges:", a14bins );
+  // printVectorD( "C202 binedges:", c202bins );
+  // printVectorD( "AS binedges:", asbins );
+  // printVectorD( "MR binedges:", mrbins );
 }
 
 void ObsPartonShower::addAnalyses( const vector<Analysis>& variations ) {
   // A14:
-  ObsDifferential::addAnalyses( variations );
-  // C202, AS, MR:
+  //ObsDifferential::addAnalyses( variations );
+  // A14, C202, AS, MR:
   for( size_t ivar= 0; ivar < variations.size(); ivar++ ) {      
     string tag= variations[ivar].getTag();
+    a14data[tag]= new DifferentialDataStructure( a14binedges );
     c202data[tag]= new DifferentialDataStructure( c202binedges );
     asdata[tag]= new DifferentialDataStructure( asbinedges );
     mrdata[tag]= new DifferentialDataStructure( mrbinedges );
     if( variations[ivar].getReco2() != "none" ) {
+      a14matrices[tag]= new MatrixDataStructure( a14binedges );
       c202matrices[tag]= new MatrixDataStructure( c202binedges );
       asmatrices[tag]= new MatrixDataStructure( asbinedges );
       mrmatrices[tag]= new MatrixDataStructure( mrbinedges );
@@ -56,14 +59,14 @@ void ObsPartonShower::fill( NtupleReader* ntr, const Analysis& variation ) {
   string reco= variation.getReco();
   string tag= variation.getTag();
   vector<Double_t> values= getValues( ntr, reco );
-  getAndFillDifferentialDataStructure( values[0], tag, datastructures );
+  getAndFillDifferentialDataStructure( values[0], tag, a14data );
   getAndFillDifferentialDataStructure( values[1], tag, c202data );
   getAndFillDifferentialDataStructure( values[2], tag, asdata );
   getAndFillDifferentialDataStructure( values[3], tag, mrdata );
   string reco2= variation.getReco2();
   if( reco2 != "none" and ntr->isMC() ) {
     vector<Double_t> MCvalues= getValues( ntr, reco2 );    
-    matrices[tag]->fill( MCvalues[0], values[0] );
+    a14matrices[tag]->fill( MCvalues[0], values[0] );
     c202matrices[tag]->fill( MCvalues[1], values[1] );
     asmatrices[tag]->fill( MCvalues[2], values[2] );
     mrmatrices[tag]->fill( MCvalues[3], values[3] );
@@ -150,10 +153,10 @@ Double_t ObsPartonShower::EnergyCorrelator( const vector<TLorentzVector>& jets,
 }
 
 vector<FilledObservable*> ObsPartonShower::getFilledObservables() const {
-  cout << "ObsPartonShower::getFilledObservables: " 
-       << "create FilledObservables a14, c202, as, mr" << endl;  
+  // cout << "ObsPartonShower::getFilledObservables: " 
+  //      << "create FilledObservables a14, c202, as, mr" << endl;  
   vector<FilledObservable*> vfobs;
-  vfobs.push_back( new FilledObservable( "a14", datastructures, matrices ) );
+  vfobs.push_back( new FilledObservable( "a14", a14data, a14matrices ) );
   vfobs.push_back( new FilledObservable( "c202", c202data, c202matrices ) );
   vfobs.push_back( new FilledObservable( "as", asdata, asmatrices ) );
   vfobs.push_back( new FilledObservable( "mr", mrdata, mrmatrices ) );

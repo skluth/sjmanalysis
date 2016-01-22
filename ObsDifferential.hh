@@ -5,6 +5,7 @@
 #include "Observable.hh"
 #include "Analysis.hh"
 
+#include <iostream>
 #include <vector>
 #include <string>
 #include <map>
@@ -24,10 +25,10 @@ public:
 		   const vector<Double_t>& bins );
   virtual ~ObsDifferential() {}
   virtual void fill( NtupleReader* ntr, const Analysis& variation ) = 0;
-  virtual void addAnalyses( const vector<Analysis>& variations );
 
 protected:
   
+  virtual void addAnalyses( const vector<Analysis>& variations );
   DifferentialDataStructure* getDifferentialDataStructure( DataStructure* ) const;
   void getAndFillDifferentialDataStructure( Double_t, const string&,
 					    const map<string,DataStructure*>&,

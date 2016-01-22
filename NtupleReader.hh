@@ -17,7 +17,7 @@ public:
 
   NtupleReader();
   NtupleReader( const char* filename, const char* ntid="h10");
-  ~NtupleReader();
+  virtual ~NtupleReader();
 
   void OpenFileAndLoadNtuple( const char* filename, const char* ntid="h10" );
   void CloseFile();
@@ -40,9 +40,9 @@ public:
   bool isMC() { return nt_isMC; }
 
   Float_t costt() { return nt_Tvectc[2]; }
-  Double_t getYmergeD( const TString& reco, Int_t njet );
-  Double_t getYmergeE( const TString& reco, Int_t njet );
-  Double_t getThrust( const TString& reco );
+  virtual Double_t getYmergeD( const TString& reco, Int_t njet );
+  virtual Double_t getYmergeE( const TString& reco, Int_t njet );
+  virtual Double_t getThrust( const TString& reco );
 
 private:
 

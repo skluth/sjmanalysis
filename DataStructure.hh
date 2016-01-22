@@ -33,29 +33,29 @@ protected:
 
 };
 
-template <typename T>
-vector<T> divideVectors( const vector<T>& lhs, const vector<T>& rhs ) { 
-  size_t n= lhs.size();
-  vector<T> result( n );
-  for( size_t i= 0; i < n; i++ ) {
-    if( rhs[i] != 0.0 ) result[i]= lhs[i]/rhs[i];
-    else result[i]= 0.0;
-  }
-  return result;
-}
-template <typename T>
-vector<T> multiplyVectors( const vector<T>& lhs, const vector<T>& rhs ) {
-  size_t n= lhs.size();
-  vector<T> result( n );
-  for( size_t i= 0; i < n; i++ ) result[i]= lhs[i]*rhs[i];
-  return result;
-}
-template <typename T>
-vector<T> subtractVectors( const vector<T>& lhs, const vector<T>& rhs ) {
-  size_t n= lhs.size();
-  vector<T> result( n );
-  for( size_t i= 0; i < n; i++ ) result[i]= lhs[i]-rhs[i];
-  return result;
-}
+// template <typename T>
+// vector<T> divideVectors( const vector<T>& lhs, const vector<T>& rhs ) { 
+//   size_t n= lhs.size();
+//   vector<T> result( n );
+//   for( size_t i= 0; i < n; i++ ) {
+//     if( rhs[i] != 0.0 ) result[i]= lhs[i]/rhs[i];
+//     else result[i]= 0.0;
+//   }
+//   return result;
+// }
+// template <typename T>
+// vector<T> multiplyVectors( const vector<T>& lhs, const vector<T>& rhs ) {
+//   size_t n= lhs.size();
+//   vector<T> result( n );
+//   for( size_t i= 0; i < n; i++ ) result[i]= lhs[i]*rhs[i];
+//   return result;
+// }
+// template <typename T>
+// vector<T> subtractVectors( const vector<T>& lhs, const vector<T>& rhs ) {
+//   size_t n= lhs.size();
+//   vector<T> result( n );
+//   for( size_t i= 0; i < n; i++ ) result[i]= lhs[i]-rhs[i];
+//   return result;
+// }
 
 #endif

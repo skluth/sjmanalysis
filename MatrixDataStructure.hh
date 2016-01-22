@@ -9,7 +9,7 @@ class MatrixDataStructure {
 
 public:
 
-  MatrixDataStructure( vector<Double_t> bins );
+  MatrixDataStructure( const vector<Double_t>& bins );
   ~MatrixDataStructure() {}
 
   void fill( Double_t, Double_t );

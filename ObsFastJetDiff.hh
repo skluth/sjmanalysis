@@ -24,13 +24,14 @@ public:
 		  const vector<Double_t>& bins, 
 		  const vector<Analysis>& variations );
   ~ObsFastJetDiff();
-  virtual void addAnalyses( const vector<Analysis>& variations );
   virtual void fill( NtupleReader* ntr, const Analysis& variation );
   virtual vector<FilledObservable*> getFilledObservables() const;
   virtual bool containsAnalysis( const Analysis& );  
 
 private:
   
+  virtual void addAnalyses( const vector<Analysis>& variations );
+
   string Algorithm;
   map<string,DataStructure*> ymerge23;
   map<string,DataStructure*> ymerge34;

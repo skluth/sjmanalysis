@@ -2,9 +2,15 @@
 # Makefile for sjmanalysis package
 
 CXX      = g++
+LD       = $(CXX)
 RC       = rootcint
 OPT      = -g
-CXXFLAGS = -Wall -fPIC $(OPT)
+CXXFLAGS = -Wall -fPIC $(OPT) -std=c++11
+
+GTESTPATH = /home/skluth/Downloads/googletest/googletest
+GMOCKPATH = /home/skluth/Downloads/googletest/googlemock
+GINCS = -I $(GMOCKPATH)/include -I $(GTESTPATH)/include
+GLIBS = -L $(GMOCKPATH) -l gmock -L $(GTESTPATH) -lgtest -lpthread
 
 FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.0.6/install/bin/fastjet-config
 FASTJETINC = $(shell $(FASTJETCONFIG) --cxxflags )
@@ -12,6 +18,7 @@ FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --plugins )
 
 ROOTINC = $(shell root-config --noauxcflags --cflags )
 ROOTLIBS = $(shell root-config --libs )
+ROOTLIBDIR = $(shell root-config --libdir )
 
 CPPFLAGS = $(ROOTINC) $(FASTJETINC)
 
@@ -44,11 +51,18 @@ libAnalysisDict.so: AnalysisDict.o Analysis.o
 $(DICT): $(SRCS:.cc=.hh) $(DICT:Dict.cc=LinkDef.h)
 	$(RC) -f $@ -c $^
 
-$(DICTLIB): $(DICT:.cc=.o) $(SRCS:.cc=.o)
+$(DICTLIB): $(DICT:.cc=.o) $(LIB)
 	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) -o $@ $^
 
 $(LIB): $(SRCS:.cc=.o)
 	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) -o $@ $^
+
+testsjmanalysis.o: testsjmanalysis.cc
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GINCS) -c -o $@ $^
+
+testsjmanalysis: testsjmanalysis.o $(LIB)
+	$(LD) -o $@ $^ $(GLIBS) $(ROOTLIBS)
+	LD_LIBRARY_PATH=$(PWD):$(ROOTLIBDIR) ./$@
 
 clean:
 	rm -f $(DICTLIB) $(DICT:.cc=.*) $(SRCS:.cc=.o) $(LIB) $(DEPS) AnalysisDict.*

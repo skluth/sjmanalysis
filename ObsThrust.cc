@@ -10,12 +10,15 @@ using std::cout;
 using std::endl;
 
 ObsThrust::ObsThrust( const vector<Double_t>& bins, 
-		      const vector<Analysis>& variations ) :
+		      const vector<Analysis>& variations,
+		      const bool lprint ) :
   ObsDifferential( "thrust", bins ) {
   addAnalyses( variations );
-  cout << "ObsThrust::ObsThrust: create " << getName() 
-       << " with 1-T and (1-T)^2 weighted distributions" << endl;
-  printVectorD( "Binedges:", bins );
+  if( lprint ) {
+    cout << "ObsThrust::ObsThrust: create " << getName() 
+	 << " with 1-T and (1-T)^2 weighted distributions" << endl;
+    printVectorD( "Binedges:", bins );
+  }
 }
 
 void ObsThrust::addAnalyses( const vector<Analysis>& variations ) {
@@ -44,8 +47,8 @@ void ObsThrust::fill( NtupleReader* ntr, const Analysis& variation ) {
 }
 
 vector<FilledObservable*> ObsThrust::getFilledObservables() const {
-  cout << "ObsThrust::getFilledObservables: " 
-       << "create FilledObservables " << name << " and " << name+"W1" << endl;  
+  // cout << "ObsThrust::getFilledObservables: " 
+  //      << "create FilledObservables " << name << " and " << name+"W1" << endl;  
   vector<FilledObservable*> vfobs;
   vfobs.push_back( new FilledObservable( name, datastructures, matrices ) );
   vfobs.push_back( new FilledObservable( name+"W1", weighted1 ) );

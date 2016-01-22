@@ -14,6 +14,7 @@ Observable::~Observable() {
 }
 
 void Observable::deleteDataStructures( map<string,DataStructure*>& dss ) {
+  if( dss.empty() ) return;
   for( map<string,DataStructure*>::iterator iter= dss.begin();
        iter != dss.end(); iter++ ) {
     DataStructure* ds= iter->second;

@@ -2,11 +2,13 @@
 #include "MatrixDataStructure.hh"
 #include "JetrateDataStructure.hh"
 #include "DifferentialDataStructure.hh"
-#include "ObsThrust.hh"
 #include "ObsPartonShower.hh"
 #include "Analysis.hh"
 #include "NtupleReader.hh"
 #include "FilledObservable.hh"
+#include "ThrustCalculator.hh"
+#include "YnmdCalculator.hh"
+#include "YnmjCalculator.hh"
 
 #include "TMath.h"
 
@@ -162,42 +164,57 @@ namespace sjmtests {
     EXPECT_FLOAT_EQ( 1.0, values[values.size()-1] );
   }
 
-  // Differential observables with thrust
+  // Differential observables:
 
   class MockNtupleReader: public NtupleReader {
   public:
     MOCK_METHOD1( getThrust, Double_t( const TString& ) );
+    MOCK_METHOD2( getYmergeD, Double_t( const TString&, Int_t ) );
+    MOCK_METHOD2( getYmergeE, Double_t( const TString&, Int_t ) );
   };
 
-  class ObsThrustTest : public ::testing::Test {
+  class ObsDiffTest : public ::testing::Test {
   public:
-    ObsThrustTest() : 
-      binedges{ 0.0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.07, 
+    ObsDiffTest() : 
+      thbinedges{ 0.0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.07, 
 	0.09, 0.12, 0.15, 0.22, 0.3, 0.5 },
+      ynmbinedges{ 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5 },
       analysis1( "data", "mt", "stand" ), 
       analysis2( "data", "mt", "costt07" ),
       analyses{ analysis1, analysis2 },
-      obst( binedges, analyses, false ) {}
-    virtual ~ObsThrustTest() {}
-    vector<double> binedges;
+      obst( "thrust", thbinedges, analyses, &tcalc ),
+      y23dcalc( 2 ),
+      obsy23d( "durhamymerge23", ynmbinedges, analyses, &y23dcalc ),
+      y23jcalc( 2 ),
+      obsy23j( "jadeymerge23", ynmbinedges, analyses, &y23jcalc ) {}
+    virtual ~ObsDiffTest() {}
+    vector<double> thbinedges;
+    vector<double> ynmbinedges;
     Analysis analysis1;
     Analysis analysis2;
     vector<Analysis> analyses;
-    ObsThrust obst;
+    ThrustCalculator tcalc;
+    ObsDifferential obst;
+    YnmdCalculator y23dcalc;
+    ObsDifferential obsy23d;
+    YnmjCalculator y23jcalc;
+    ObsDifferential obsy23j;
     MockNtupleReader mntr;
   };
 
   // containsAnalysis
-  TEST_F( ObsThrustTest, testcontainsAnalysis ) {
+  TEST_F( ObsDiffTest, testcontainsAnalysis ) {
     EXPECT_TRUE( obst.containsAnalysis( analysis1 ) );
     EXPECT_TRUE( obst.containsAnalysis( analysis2 ) );
     Analysis analysis3( "bla", "blo", "blu" );
     EXPECT_FALSE( obst.containsAnalysis( analysis3 ) );
   }
   // getName
-  TEST_F( ObsThrustTest, testgetName ) {
-    string name= "thrust";
-    EXPECT_EQ( name, obst.getName() );
+  TEST_F( ObsDiffTest, testgetName ) {
+    //    string name= "thrust";
+    EXPECT_EQ( "thrust", obst.getName() );
+    EXPECT_EQ( "durhamymerge23", obsy23d.getName() );
+    EXPECT_EQ( "jadeymerge23", obsy23j.getName() );
   }
 
   class nameeq {
@@ -224,7 +241,7 @@ namespace sjmtests {
   }
 
   // fill
-  TEST_F( ObsThrustTest, testfill ) {
+  TEST_F( ObsDiffTest, testfill ) {
     EXPECT_CALL( mntr, getThrust(_) ).WillOnce(Return(0.25));
     obst.fill( &mntr, analysis1 );
     vector<Double_t> tvalues= getObsValues( "thrust", analysis1, obst );
@@ -233,6 +250,17 @@ namespace sjmtests {
     EXPECT_EQ( 0.25, tw1values[11] );
     vector<Double_t> tw2values= getObsValues( "thrustW2", analysis1, obst );
     EXPECT_EQ( 0.0625, tw2values[11] );
+
+    EXPECT_CALL( mntr, getYmergeD(_,_) ).WillOnce(Return(0.11));
+    obsy23d.fill( &mntr, analysis1 );
+    vector<Double_t> y23dvalues= getObsValues( "durhamymerge23", analysis1, obsy23d );
+    EXPECT_EQ( 1.0, y23dvalues[2] );
+
+    EXPECT_CALL( mntr, getYmergeE(_,_) ).WillOnce(Return(0.11));
+    obsy23j.fill( &mntr, analysis1 );
+    vector<Double_t> y23jvalues= getObsValues( "jadeymerge23", analysis1, obsy23j );
+    EXPECT_EQ( 1.0, y23jvalues[2] );
+
   } 
 
   // Partonshower obs

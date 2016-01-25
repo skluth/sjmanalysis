@@ -4,48 +4,55 @@
 #include "DataStructure.hh"
 #include "DifferentialDataStructure.hh"
 #include "MatrixDataStructure.hh"
+#include "FilledObservable.hh"
+#include "DifferentialCalculator.hh"
 
 #include <iostream>
 using std::cout;
 using std::endl;
 
 ObsDifferential::ObsDifferential( const string& name,
-				  const vector<Double_t>& bins ) :
-  Observable(name), binedges(bins) {}
-
-// Call this method in derived class ctors:
-void ObsDifferential::addAnalyses( const vector<Analysis>& variations ) {
-  //cout << "ObsDifferential::addAnalyses: adding analyses for " << getName() << endl;
+				  const vector<Double_t>& bins,
+				  const vector<Analysis>& variations,
+				  const DifferentialCalculator* calc ) :
+  Observable(name), calculator(calc) {
   for( size_t ivar= 0; ivar < variations.size(); ivar++ ) {      
     string tag= variations[ivar].getTag();
-    datastructures[tag]= new DifferentialDataStructure( binedges );
+    data[tag]= new DifferentialDataStructure( bins );
+    weighted1[tag]= new DifferentialDataStructure( bins );
+    weighted2[tag]= new DifferentialDataStructure( bins );
     if( variations[ivar].getReco2() != "none" ) {
-      matrices[tag]= new MatrixDataStructure( binedges );
+      matrices[tag]= new MatrixDataStructure( bins );
     }
   }
   return;
 }
 
-void 
-ObsDifferential::getAndFillDifferentialDataStructure( Double_t value, 
-						      const string& tag,
-						      const map<string,DataStructure*>& dss,
-						      Double_t weight ) {
-  DataStructure* ds= getDataStructure( tag, dss );
-  if( ds ) {
-    DifferentialDataStructure* dds= getDifferentialDataStructure( ds );
-    if( dds ) dds->fill( value, weight );
-  }
-  return;
+bool ObsDifferential::containsAnalysis( const Analysis& analysis ) {
+  return data.find( analysis.getTag() ) != data.end();
 }
 
-DifferentialDataStructure* 
-ObsDifferential::getDifferentialDataStructure( DataStructure* ds ) const {
-  DifferentialDataStructure* dds= dynamic_cast<DifferentialDataStructure*>( ds );
-  if( not dds ) {
-    cout << "ObsDifferential::getDifferentialDataStructure: dynamic_cast to DifferentialDataStructure failed for observable " 
-	 << name << endl;
+void ObsDifferential::fill( NtupleReader* ntr, const Analysis& variation ) {
+  string tag= variation.getTag();  
+  Double_t value= calculator->getValue( ntr, variation.getReco() );
+  data[tag]->fill( value );
+  if( value >= 0.0 ) {
+    weighted1[tag]->fill( value, value );
+    weighted2[tag]->fill( value, TMath::Power( value, 2 ) );
   }
-  return dds;
+  if( variation.getReco2() != "none" and ntr->isMC() ) {
+    Double_t MCvalue= calculator->getValue( ntr, variation.getReco2() );
+    matrices[tag]->fill( MCvalue, value );
+  }
+}
+
+vector<FilledObservable*> ObsDifferential::getFilledObservables() const {
+  // cout << "ObsDifferential::getFilledObservables: " 
+  //      << "create FilledObservables " << name << " and " << name+"W1" << endl;  
+  vector<FilledObservable*> vfobs;
+  vfobs.push_back( new FilledObservable( name, data, matrices ) );
+  vfobs.push_back( new FilledObservable( name+"W1", weighted1 ) );
+  vfobs.push_back( new FilledObservable( name+"W2", weighted2 ) );
+  return vfobs;
 }
 

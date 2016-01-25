@@ -16,12 +16,12 @@ class NtupleReader;
 class FilledObservable;
 class DataStructure;
 
-class ObsFastJetDiff : public ObsDifferential {
+class ObsFastJetDiff : public Observable {
 
 public:
 
   ObsFastJetDiff( const string& name, const string& algo,
-		  const vector<Double_t>& bins, 
+		  const vector<Double_t>& ynmbins, 
 		  const vector<Analysis>& variations );
   ~ObsFastJetDiff();
   virtual void fill( NtupleReader* ntr, const Analysis& variation );
@@ -29,14 +29,12 @@ public:
   virtual bool containsAnalysis( const Analysis& );  
 
 private:
-  
-  virtual void addAnalyses( const vector<Analysis>& variations );
 
   string Algorithm;
-  map<string,DataStructure*> ymerge23;
-  map<string,DataStructure*> ymerge34;
-  map<string,DataStructure*> ymerge45;
-  map<string,DataStructure*> ymerge56;
+  map<string,DifferentialDataStructure*> ymerge23;
+  map<string,DifferentialDataStructure*> ymerge34;
+  map<string,DifferentialDataStructure*> ymerge45;
+  map<string,DifferentialDataStructure*> ymerge56;
 
 };
 

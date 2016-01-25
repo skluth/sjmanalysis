@@ -9,7 +9,7 @@ using std::string;
 using std::map;
 
 class DataStructure;
-//class MatrixDataStructure;
+class DifferentialDataStructure;
 #include "MatrixDataStructure.hh"
 
 
@@ -19,7 +19,14 @@ public:
 
   FilledObservable( const string&, 
 		    const map<string,DataStructure*>&,
-		    const map<string,MatrixDataStructure*>& mds= map<string,MatrixDataStructure*>() );
+		    const map<string,MatrixDataStructure*>& mds= 
+		    map<string,MatrixDataStructure*>() );
+
+  FilledObservable( const string&, 
+  		    const map<string,DifferentialDataStructure*>&,
+  		    const map<string,MatrixDataStructure*>& mds= 
+  		    map<string,MatrixDataStructure*>() );
+
   ~FilledObservable() {}
   void finalise();
   void print() const;

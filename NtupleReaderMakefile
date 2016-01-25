@@ -26,10 +26,11 @@ SRCS = NtupleReader.cc TFastJet.cc Analysis.cc \
 JetrateDataStructure.cc DifferentialDataStructure.cc MatrixDataStructure.cc \
 Observable.cc ObsDifferential.cc ObsJetrate.cc \
 ObsFastJetR.cc ObsFastJetEmin.cc ObsFastJetYcut.cc \
-ObsFastJetDiff.cc ObsDurhamYmerge23.cc ObsJadeYmerge23.cc \
-ObsThrust.cc ObsPartonShower.cc ObservableFactory.cc \
-FilledObservable.cc \
-Unfolder.cc OutputWriter.cc 
+ObsFastJetDiff.cc \
+ObsPartonShower.cc ObservableFactory.cc \
+FilledObservable.cc Unfolder.cc OutputWriter.cc \
+ThrustCalculator.cc YnmdCalculator.cc YnmjCalculator.cc 
+# ObsThrust.cc ObsDurhamYmerge23.cc ObsJadeYmerge23.cc 
 
 DICT = NtupleReaderDict.cc
 DICTLIB = libNtupleReaderDict.so
@@ -65,6 +66,6 @@ testsjmanalysis: testsjmanalysis.o $(LIB)
 	LD_LIBRARY_PATH=$(PWD):$(ROOTLIBDIR) ./$@
 
 clean:
-	rm -f $(DICTLIB) $(DICT:.cc=.*) $(SRCS:.cc=.o) $(LIB) $(DEPS) AnalysisDict.*
+	rm -f $(DICTLIB) $(DICT:.cc=.*) $(SRCS:.cc=.o) $(LIB) $(DEPS) AnalysisDict.* testsjmanalysis testsjmanalysis.o
 
 INTERMEDIATE: $(DICTS) AnalysisDict.*

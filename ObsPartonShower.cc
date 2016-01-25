@@ -21,8 +21,8 @@ ObsPartonShower::ObsPartonShower( const vector<Double_t>& a14bins,
 				  const vector<Double_t>& mrbins,
 				  const vector<Analysis>& variations,
 				  Double_t y34c, Double_t y34y23c ) :
-  ObsDifferential( "partonshower", a14bins ), 
-  //  Observable( "partonshower" ),
+  // ObsDifferential( "partonshower", a14bins, variations ), 
+  Observable( "partonshower" ),
   a14binedges(a14bins), c202binedges(c202bins), asbinedges(asbins), mrbinedges(mrbins),
   y34cut(y34c), y34y23cut(y34y23c) {
   addAnalyses( variations );
@@ -59,10 +59,14 @@ void ObsPartonShower::fill( NtupleReader* ntr, const Analysis& variation ) {
   string reco= variation.getReco();
   string tag= variation.getTag();
   vector<Double_t> values= getValues( ntr, reco );
-  getAndFillDifferentialDataStructure( values[0], tag, a14data );
-  getAndFillDifferentialDataStructure( values[1], tag, c202data );
-  getAndFillDifferentialDataStructure( values[2], tag, asdata );
-  getAndFillDifferentialDataStructure( values[3], tag, mrdata );
+  // getAndFillDifferentialDataStructure( values[0], tag, a14data );
+  // getAndFillDifferentialDataStructure( values[1], tag, c202data );
+  // getAndFillDifferentialDataStructure( values[2], tag, asdata );
+  // getAndFillDifferentialDataStructure( values[3], tag, mrdata );
+  a14data[tag]->fill( values[0] );
+  c202data[tag]->fill( values[1] );
+  asdata[tag]->fill( values[2] );
+  mrdata[tag]->fill( values[3] );
   string reco2= variation.getReco2();
   if( reco2 != "none" and ntr->isMC() ) {
     vector<Double_t> MCvalues= getValues( ntr, reco2 );    
@@ -163,3 +167,6 @@ vector<FilledObservable*> ObsPartonShower::getFilledObservables() const {
   return vfobs;
 }
 
+bool ObsPartonShower::containsAnalysis( const Analysis& analysis ) {
+  return a14data.find( analysis.getTag() ) != a14data.end();
+}

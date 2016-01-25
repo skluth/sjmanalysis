@@ -14,8 +14,7 @@ class TLorentzVector;
 class DifferentialDataStructure;
 class FilledObservable;
 
-class ObsPartonShower : public ObsDifferential {
-//class ObsPartonShower : public Observable {
+class ObsPartonShower : public Observable {
 
 public:
 
@@ -31,7 +30,9 @@ public:
 
 private:
 
+  virtual bool containsAnalysis( const Analysis& );
   virtual void addAnalyses( const vector<Analysis>& );
+
   vector<Double_t> getValues( NtupleReader*, const string& );
   Double_t calcAngle( const TLorentzVector&, const TLorentzVector& );
   Double_t EnergyCorrelator( const vector<TLorentzVector>&, 
@@ -43,10 +44,10 @@ private:
   vector<Double_t> mrbinedges;
   Double_t y34cut;
   Double_t y34y23cut;
-  map<string,DataStructure*> a14data;
-  map<string,DataStructure*> c202data;
-  map<string,DataStructure*> asdata;
-  map<string,DataStructure*> mrdata;
+  map<string,DifferentialDataStructure*> a14data;
+  map<string,DifferentialDataStructure*> c202data;
+  map<string,DifferentialDataStructure*> asdata;
+  map<string,DifferentialDataStructure*> mrdata;
   map<string,MatrixDataStructure*> a14matrices;
   map<string,MatrixDataStructure*> c202matrices;
   map<string,MatrixDataStructure*> asmatrices;

@@ -1,6 +1,7 @@
 
 #include "FilledObservable.hh"
 #include "DataStructure.hh"
+#include "DifferentialDataStructure.hh"
 #include "MatrixDataStructure.hh"
 #include <iostream>
 using std::cout;
@@ -10,6 +11,16 @@ FilledObservable::FilledObservable( const string& obsname,
 				    const map<string,DataStructure*>& dss,
 				    const map<string,MatrixDataStructure*>& mds ) : 
   name(obsname), datastructures(dss), matrices(mds) {}
+
+FilledObservable::FilledObservable( const string& obsname,
+				    const map<string,DifferentialDataStructure*>& ddss,
+				    const map<string,MatrixDataStructure*>& mds ) : 
+  name(obsname), matrices(mds) {
+  for( map<string,DifferentialDataStructure*>::const_iterator iter= ddss.begin();
+       iter != ddss.end(); iter++ ) {
+    datastructures[iter->first]= iter->second;
+  }
+}
 
 void FilledObservable::finalise() {
   for( map<string,DataStructure*>::iterator iter= datastructures.begin();

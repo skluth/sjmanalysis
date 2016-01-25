@@ -1,10 +1,15 @@
 
 #include "ObservableFactory.hh"
 #include "Observable.hh"
-#include "ObsThrust.hh"
+
+#include "ObsDifferential.hh"
+#include "ThrustCalculator.hh"
+#include "YnmdCalculator.hh"
+#include "YnmjCalculator.hh"
+
 #include "ObsPartonShower.hh"
-#include "ObsDurhamYmerge23.hh"
-#include "ObsJadeYmerge23.hh"
+//#include "ObsDurhamYmerge23.hh"
+//#include "ObsJadeYmerge23.hh"
 #include "ObsFastJetR.hh"
 #include "ObsFastJetEmin.hh"
 #include "ObsFastJetDiff.hh"
@@ -106,7 +111,9 @@ vector<Observable*> ObservableFactory::createObservables( const vector<string>& 
   for( size_t iobs= 0; iobs < obsnames.size(); iobs++ ) {
     string name= obsnames[iobs];
     if( name.find( "thrust" ) != string::npos )
-      vobs.push_back( new ObsThrust( thrustbins, analyses ) );
+      //vobs.push_back( new ObsThrust( thrustbins, analyses ) );
+      vobs.push_back( new ObsDifferential( "thrust", thrustbins, analyses, 
+					   new ThrustCalculator() ) );
     else if( name.find( "partonshower" ) != string::npos )
       vobs.push_back( new ObsPartonShower( a14bins, 
 					   c202bins,
@@ -114,9 +121,11 @@ vector<Observable*> ObservableFactory::createObservables( const vector<string>& 
 					   mrbins,
 					   analyses ) );
     else if( name.find( "durhamymerge23" ) != string::npos ) 
-      vobs.push_back( new ObsDurhamYmerge23( yNMbins, analyses ) );
+      vobs.push_back( new ObsDifferential( "durhamymerge23", yNMbins, analyses,
+					   new YnmdCalculator( 2 ) ) );
     else if( name.find( "jadeymerge23" ) != string::npos ) 
-      vobs.push_back( new ObsJadeYmerge23( yNMbins, analyses ) );
+      vobs.push_back( new ObsDifferential( "jadeymerge23", yNMbins, analyses,
+					   new YnmjCalculator( 2 ) ) );
     else if( name.find( "durhamymergefj" ) != string::npos ) 
       vobs.push_back( new ObsFastJetDiff( name, "eekt", yNMbins, analyses ) );
     else if( name.find( "jadeymergefj" ) != string::npos )

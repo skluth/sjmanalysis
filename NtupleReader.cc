@@ -19,8 +19,8 @@ using std::logic_error;
 NtupleReader::NtupleReader() : nt_file(0), nt_tree(0), nt_isMC(false), 
 			       nt_vtlvcache(false) {}
 
-NtupleReader::NtupleReader( const char* filename, const char* ntid ) :
-  nt_file(0), nt_tree(0), nt_isMC(false), nt_vtlvcache(false) {
+NtupleReader::NtupleReader( const char* filename, const char* ntid, const bool lpr ) :
+  nt_file(0), nt_tree(0), nt_isMC(false), nt_vtlvcache(false), lprint(lpr) {
   OpenFileAndLoadNtuple( filename, ntid );
   return;
 }
@@ -32,8 +32,10 @@ NtupleReader::~NtupleReader() {
 
 void NtupleReader::OpenFileAndLoadNtuple( const char* filename, 
 					  const char* ntid ) {
-  cout << "NtupleReader::OpenFileAndLoadNtuple: opening file: " 
-       << filename << endl;
+  if( lprint ) {
+    cout << "NtupleReader::OpenFileAndLoadNtuple: opening file: " 
+	 << filename << endl;
+  }
   nt_file= new TFile( filename );
   if( not nt_file->IsOpen() ) {
     string txt= "NtupleReader::OpenFileAndLoadNtuple: file not open: ";
@@ -46,8 +48,10 @@ void NtupleReader::OpenFileAndLoadNtuple( const char* filename,
     txt+= ntid;
     throw std::logic_error( txt );
   }
-  cout << "NtupleReader::OpenFileAndLoadNtuple: " 
-       << GetNumberEntries() << " events on file" << endl;
+  if( lprint ) {
+    cout << "NtupleReader::OpenFileAndLoadNtuple: " 
+	 << GetNumberEntries() << " events on file" << endl;
+  }
   string sfilename( filename );
   if( sfilename.find( "mc" ) != string::npos ) nt_isMC= true;
   Init();
@@ -57,8 +61,10 @@ void NtupleReader::OpenFileAndLoadNtuple( const char* filename,
 
 void NtupleReader::CloseFile() {
   if( nt_file ) {
-    cout << "NtupleReader::CloseFile: closing file: " 
-	 << nt_file->GetName() << ", " << nt_nevents << " events" << endl;
+    if( lprint ) {
+      cout << "NtupleReader::CloseFile: closing file: " 
+	   << nt_file->GetName() << ", " << nt_nevents << " events" << endl;
+    }
     nt_file->Close();
     delete nt_file;
     nt_file= 0;

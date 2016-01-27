@@ -2,22 +2,32 @@
 #include "FilledObservable.hh"
 #include "DataStructure.hh"
 #include "DifferentialDataStructure.hh"
+#include "JetrateDataStructure.hh"
 #include "MatrixDataStructure.hh"
 #include <iostream>
 using std::cout;
 using std::endl;
 
-FilledObservable::FilledObservable( const string& obsname,
-				    const map<string,DataStructure*>& dss,
-				    const map<string,MatrixDataStructure*>& mds ) : 
-  name(obsname), datastructures(dss), matrices(mds) {}
+// FilledObservable::FilledObservable( const string& obsname,
+// 				    const map<string,DataStructure*>& dss,
+// 				    const map<string,MatrixDataStructure*>& mds ) : 
+//   name(obsname), datastructures(dss), matrices(mds) {}
 
 FilledObservable::FilledObservable( const string& obsname,
 				    const map<string,DifferentialDataStructure*>& ddss,
-				    const map<string,MatrixDataStructure*>& mds ) : 
-  name(obsname), matrices(mds) {
+				    const map<string,MatrixDataStructure*>& mdss ) : 
+  name(obsname), matrices(mdss) {
   for( map<string,DifferentialDataStructure*>::const_iterator iter= ddss.begin();
        iter != ddss.end(); iter++ ) {
+    datastructures[iter->first]= iter->second;
+  }
+}
+
+FilledObservable::FilledObservable( const string& obsname,
+				    const map<string,JetrateDataStructure*>& jrdss ) :
+  name(obsname) {
+  for( map<string,JetrateDataStructure*>::const_iterator iter= jrdss.begin();
+       iter != jrdss.end(); iter++ ) {
     datastructures[iter->first]= iter->second;
   }
 }

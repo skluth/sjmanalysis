@@ -16,7 +16,7 @@ class NtupleReader {
 public:
 
   NtupleReader();
-  NtupleReader( const char* filename, const char* ntid="h10");
+  NtupleReader( const char* filename, const char* ntid="h10", const bool lpr=true );
   virtual ~NtupleReader();
 
   void OpenFileAndLoadNtuple( const char* filename, const char* ntid="h10" );
@@ -64,6 +64,7 @@ private:
   bool nt_isMC;
   bool nt_vtlvcache;
   Int_t nt_nevents;
+  bool lprint;
 
   static const Int_t nt_maxtrk= 501;
   static const Int_t nt_maxp= 50;

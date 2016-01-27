@@ -10,6 +10,7 @@ using std::map;
 
 class DataStructure;
 class DifferentialDataStructure;
+class JetrateDataStructure;
 #include "MatrixDataStructure.hh"
 
 
@@ -17,15 +18,18 @@ class FilledObservable {
 
 public:
 
-  FilledObservable( const string&, 
-		    const map<string,DataStructure*>&,
-		    const map<string,MatrixDataStructure*>& mds= 
-		    map<string,MatrixDataStructure*>() );
+  // FilledObservable( const string&, 
+  // 		    const map<string,DataStructure*>&,
+  // 		    const map<string,MatrixDataStructure*>& mds= 
+  // 		    map<string,MatrixDataStructure*>() );
 
   FilledObservable( const string&, 
   		    const map<string,DifferentialDataStructure*>&,
   		    const map<string,MatrixDataStructure*>& mds= 
   		    map<string,MatrixDataStructure*>() );
+
+  FilledObservable( const string&, 
+  		    const map<string,JetrateDataStructure*>& );
 
   ~FilledObservable() {}
   void finalise();

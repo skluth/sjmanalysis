@@ -8,12 +8,13 @@
 #include "YnmjCalculator.hh"
 
 #include "ObsPartonShower.hh"
-//#include "ObsDurhamYmerge23.hh"
-//#include "ObsJadeYmerge23.hh"
-#include "ObsFastJetR.hh"
-#include "ObsFastJetEmin.hh"
 #include "ObsFastJetDiff.hh"
-#include "ObsFastJetYcut.hh"
+
+#include "ObsJetrate.hh"
+#include "FastJetYcutCalculator.hh"
+#include "FastJetEminCalculator.hh"
+#include "FastJetRCalculator.hh"
+
 #include <iostream>
 #include <algorithm>
 using std::cout;
@@ -105,13 +106,13 @@ ObservableFactory::ObservableFactory() {
 }
 
 // Handle all known observable names:
-vector<Observable*> ObservableFactory::createObservables( const vector<string>& obsnames,
-							  const vector<Analysis>& analyses ) {
+vector<Observable*>
+ObservableFactory::createObservables( const vector<string>& obsnames,
+				      const vector<Analysis>& analyses ) {
   vector<Observable*> vobs;
   for( size_t iobs= 0; iobs < obsnames.size(); iobs++ ) {
     string name= obsnames[iobs];
     if( name.find( "thrust" ) != string::npos )
-      //vobs.push_back( new ObsThrust( thrustbins, analyses ) );
       vobs.push_back( new ObsDifferential( "thrust", thrustbins, analyses, 
 					   new ThrustCalculator() ) );
     else if( name.find( "partonshower" ) != string::npos )
@@ -131,17 +132,23 @@ vector<Observable*> ObservableFactory::createObservables( const vector<string>& 
     else if( name.find( "jadeymergefj" ) != string::npos )
       vobs.push_back( new ObsFastJetDiff( name, "jade", yNMbins, analyses ) );
     else if( name.find( "durhamycutfj" ) != string::npos ) 
-      vobs.push_back( new ObsFastJetYcut( name, "eekt", yNMbins, analyses ) );
+      vobs.push_back( new ObsJetrate( name, yNMbins, analyses,
+				      new FastJetYcutCalculator( "eekt" ) ) );
     else if( name.find( "jadeycutfj" ) != string::npos )
-      vobs.push_back( new ObsFastJetYcut( name, "jade", yNMbins, analyses ) );
+      vobs.push_back( new ObsJetrate( name, yNMbins, analyses,
+				      new FastJetYcutCalculator( "jade" ) ) );
     else if( name.find( "antiktemin" ) != string::npos ) 
-      vobs.push_back( new ObsFastJetEmin( name, "eeantikt", 0.7, eminFraction, analyses ) );
+      vobs.push_back( new ObsJetrate( name, eminFraction, analyses,
+				      new FastJetEminCalculator( "eeantikt", 0.7 ) ) );
     else if( name.find( "antiktR" ) != string::npos ) 
-      vobs.push_back( new ObsFastJetR( name, "eeantikt", 0.06, Rvalues, analyses ) );
+      vobs.push_back( new ObsJetrate( name, Rvalues, analyses,
+				      new FastJetRCalculator( "eeantikt", 0.06 ) ) );
     else if( name.find( "sisconeemin" ) != string::npos ) 
-      vobs.push_back( new ObsFastJetEmin( name, "eesiscone", 0.7, eminFraction, analyses ) );
+      vobs.push_back( new ObsJetrate( name, eminFraction, analyses,
+				      new FastJetEminCalculator( "eesiscone", 0.7 ) ) );
     else if( name.find( "sisconeR" ) != string::npos ) 
-      vobs.push_back( new ObsFastJetR( name, "eesiscone", 0.06, Rvalues, analyses ) );
+      vobs.push_back( new ObsJetrate( name, Rvalues, analyses,
+				      new FastJetRCalculator( "eesiscone", 0.06 ) ) );
     else {
       string txt= "ObservableFactory::createObservables: wrong class name: " + name;
       throw std::logic_error( txt );

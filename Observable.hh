@@ -27,6 +27,8 @@ public:
   virtual vector<FilledObservable*> getFilledObservables() const = 0;
   string getName() const { return name; }
   virtual bool containsAnalysis( const Analysis& ) = 0;
+  virtual void addAnalyses( const vector<Analysis>& ) = 0;
+
 
   void printVectorD( const string&, const vector<Double_t>& );
 
@@ -39,8 +41,6 @@ protected:
 					const map<string,DataStructure*>& );
 
   string name;
-  //  map<string,DataStructure*> datastructures;
-  //  map<string,MatrixDataStructure*> matrices;
 
 };
 

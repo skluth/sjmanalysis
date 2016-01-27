@@ -9,6 +9,11 @@
 #include "ThrustCalculator.hh"
 #include "YnmdCalculator.hh"
 #include "YnmjCalculator.hh"
+#include "ObsFastJetDiff.hh"
+#include "ObsJetrate.hh"
+#include "FastJetYcutCalculator.hh"
+#include "FastJetEminCalculator.hh"
+#include "FastJetRCalculator.hh"
 
 #include "TMath.h"
 
@@ -182,11 +187,11 @@ namespace sjmtests {
       analysis1( "data", "mt", "stand" ), 
       analysis2( "data", "mt", "costt07" ),
       analyses{ analysis1, analysis2 },
-      obst( "thrust", thbinedges, analyses, &tcalc ),
+      obst( "thrust", thbinedges, analyses, &tcalc, false ),
       y23dcalc( 2 ),
-      obsy23d( "durhamymerge23", ynmbinedges, analyses, &y23dcalc ),
+      obsy23d( "durhamymerge23", ynmbinedges, analyses, &y23dcalc, false ),
       y23jcalc( 2 ),
-      obsy23j( "jadeymerge23", ynmbinedges, analyses, &y23jcalc ) {}
+      obsy23j( "jadeymerge23", ynmbinedges, analyses, &y23jcalc, false ) {}
     virtual ~ObsDiffTest() {}
     vector<double> thbinedges;
     vector<double> ynmbinedges;
@@ -255,42 +260,13 @@ namespace sjmtests {
     obsy23d.fill( &mntr, analysis1 );
     vector<Double_t> y23dvalues= getObsValues( "durhamymerge23", analysis1, obsy23d );
     EXPECT_EQ( 1.0, y23dvalues[2] );
-
     EXPECT_CALL( mntr, getYmergeE(_,_) ).WillOnce(Return(0.11));
     obsy23j.fill( &mntr, analysis1 );
     vector<Double_t> y23jvalues= getObsValues( "jadeymerge23", analysis1, obsy23j );
     EXPECT_EQ( 1.0, y23jvalues[2] );
+  }
 
-  } 
-
-  // Partonshower obs
-  class ObsPartonShowerTest : public ::testing::Test {
-  public:
-    ObsPartonShowerTest() : 
-      binedgesA14{ 0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
-	0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1 },
-      binedgesC202{ 0.355, 0.402, 0.424, 0.446, 0.468, 0.495 },
-      binedgesAS{ -0.05, 0.04, 0.1, 0.16, 0.22, 0.28, 0.34, 0.43 },
-      binedgesMR{ 0.0, 0.06, 0.15, 0.38, 0.69, 1.0 },
-      analysis1( "data", "mt", "stand" ), 
-      analysis2( "data", "mt", "costt07" ),
-      analyses{ analysis1, analysis2 },
-      obsps( binedgesA14, binedgesC202, binedgesAS, binedgesMR,
-	     analyses ) {
-	ntr= new NtupleReader( "mc5025_1_200.root" );
-      }
-    virtual ~ObsPartonShowerTest() { delete ntr; }
-    vector<double> binedgesA14;
-    vector<double> binedgesC202;
-    vector<double> binedgesAS;
-    vector<double> binedgesMR;
-    Analysis analysis1;
-    Analysis analysis2;
-    vector<Analysis> analyses;
-    ObsPartonShower obsps;
-    NtupleReader* ntr;
-  };
-
+  // Helper to fill observables from ntuple:
   void fillFromNtuple( NtupleReader* ntr, const Analysis analysis, 
 		       Observable & obs, size_t nevnt=100 ) {
     for( size_t ievnt= 0; ievnt < nevnt; ievnt++ ) {
@@ -305,6 +281,61 @@ namespace sjmtests {
       }
     }
   }
+
+  // ObsFastJetDiff tests
+  class ObsFastJetDiffTest : public ::testing::Test {
+  public:
+    ObsFastJetDiffTest() : 
+      ynmbinedges{ 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5 },
+      analysis1( "data", "mt", "stand" ), 
+      analysis2( "data", "mt", "costt07" ),
+      analyses{ analysis1, analysis2 },
+      obsfjdd( "durhamymergefj", "eekt", ynmbinedges, analyses, false ) {
+	ntr= new NtupleReader( "mc5025_1_200.root", "h10", false );
+      }
+    virtual ~ObsFastJetDiffTest() { delete ntr; }
+    vector<Double_t> ynmbinedges;
+    Analysis analysis1;
+    Analysis analysis2;
+    vector<Analysis> analyses;
+    ObsFastJetDiff obsfjdd;
+    NtupleReader* ntr;
+  };
+
+  TEST_F( ObsFastJetDiffTest, testfill ) {
+    fillFromNtuple( ntr, analysis1, obsfjdd );
+    vector<Double_t> y23dfjvalues= getObsValues( "durhamymergefj23", analysis1, obsfjdd );
+    vector<Double_t> y23dfjexp{ 0, 0, 4, 11, 17, 21, 30, 10, 0, 0, 0, 0 };
+    EXPECT_EQ( y23dfjexp, y23dfjvalues );
+  } 
+
+  // Partonshower obs:
+  class ObsPartonShowerTest : public ::testing::Test {
+  public:
+    ObsPartonShowerTest() : 
+      binedgesA14{ 0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
+	0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1 },
+      binedgesC202{ 0.355, 0.402, 0.424, 0.446, 0.468, 0.495 },
+      binedgesAS{ -0.05, 0.04, 0.1, 0.16, 0.22, 0.28, 0.34, 0.43 },
+      binedgesMR{ 0.0, 0.06, 0.15, 0.38, 0.69, 1.0 },
+      analysis1( "data", "mt", "stand" ), 
+      analysis2( "data", "mt", "costt07" ),
+      analyses{ analysis1, analysis2 },
+      obsps( binedgesA14, binedgesC202, binedgesAS, binedgesMR,
+	     analyses ) {
+	ntr= new NtupleReader( "mc5025_1_200.root", "h10", false );
+      }
+    virtual ~ObsPartonShowerTest() { delete ntr; }
+    vector<double> binedgesA14;
+    vector<double> binedgesC202;
+    vector<double> binedgesAS;
+    vector<double> binedgesMR;
+    Analysis analysis1;
+    Analysis analysis2;
+    vector<Analysis> analyses;
+    ObsPartonShower obsps;
+    NtupleReader* ntr;
+  };
 
   // fill
   TEST_F( ObsPartonShowerTest, testfill ) {
@@ -322,6 +353,56 @@ namespace sjmtests {
     vector<Double_t> mrvalues= getObsValues( "mr", analysis1, obsps );
     vector<Double_t> mrexp{ 88, 0, 0, 1, 1, 3, 0 };
     EXPECT_EQ( mrexp, mrvalues );
+  }
+
+  // Jetrate tests
+  class ObsJetrTest : public ::testing::Test {
+  public:
+    ObsJetrTest() :
+      Ycutpoints{ 0.0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5 },
+      Eminfpoints{ 0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18 },
+      Rpoints{ 0.2, 0.4, 0.6, 0.7, 0.8, 1.0, 1.2, 1.4 },
+      analysis1( "data", "mt", "stand" ), 
+      analysis2( "data", "mt", "costt07" ),
+      analyses{ analysis1, analysis2 },
+      fjycc( "eekt" ),
+      fjeminc( "eeantikt", 0.7 ),
+      fjrc( "eeantikt", 0.06 ),
+      obsfjycut( "durhamycutfj", Ycutpoints, analyses, &fjycc, false ),
+      obsfjemin( "antiktemin", Eminfpoints, analyses, &fjeminc, false ),
+      obsfjr( "antiktR", Rpoints, analyses, &fjrc, false ) {
+	ntr= new NtupleReader( "mc5025_1_200.root", "h10", false );
+      }
+    virtual ~ObsJetrTest() { delete ntr; }
+    vector<double> Ycutpoints;
+    vector<double> Eminfpoints;
+    vector<double> Rpoints;
+    Analysis analysis1;
+    Analysis analysis2;
+    vector<Analysis> analyses;
+    FastJetYcutCalculator fjycc;
+    FastJetEminCalculator fjeminc;
+    FastJetRCalculator fjrc;
+    ObsJetrate obsfjycut;
+    ObsJetrate obsfjemin;
+    ObsJetrate obsfjr;
+    NtupleReader* ntr;
+  };
+
+  // fill
+  TEST_F( ObsJetrTest, testfill ) {
+    fillFromNtuple( ntr, analysis1, obsfjycut );
+    vector<Double_t> njetsdycut= getObsValues( "durhamycutfjR2", analysis1, obsfjycut );
+    vector<Double_t> njetsdycutexp{ 0, 93, 89, 78, 61, 40, 10, 0, 0, 0, 0 };
+    EXPECT_EQ( njetsdycutexp, njetsdycut );
+    fillFromNtuple( ntr, analysis1, obsfjemin );
+    vector<Double_t> njetsaktemin= getObsValues( "antikteminR2", analysis1, obsfjemin );
+    vector<Double_t> njetsakteminexp{ 46, 57, 67, 73, 78, 79, 81, 80, 80 };
+    EXPECT_EQ( njetsakteminexp, njetsaktemin );
+    fillFromNtuple( ntr, analysis1, obsfjr );
+    vector<Double_t> njetsaktr= getObsValues( "antiktRR2", analysis1, obsfjr );
+    vector<Double_t> njetsaktrexp{ 49, 65, 65, 67, 71, 77, 82, 87 };
+    EXPECT_EQ( njetsaktrexp, njetsaktr );
   }
 
 

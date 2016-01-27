@@ -14,19 +14,42 @@ using std::endl;
 ObsDifferential::ObsDifferential( const string& name,
 				  const vector<Double_t>& bins,
 				  const vector<Analysis>& variations,
-				  const DifferentialCalculator* calc ) :
-  Observable(name), calculator(calc) {
-  for( size_t ivar= 0; ivar < variations.size(); ivar++ ) {      
-    string tag= variations[ivar].getTag();
-    data[tag]= new DifferentialDataStructure( bins );
-    weighted1[tag]= new DifferentialDataStructure( bins );
-    weighted2[tag]= new DifferentialDataStructure( bins );
-    if( variations[ivar].getReco2() != "none" ) {
-      matrices[tag]= new MatrixDataStructure( bins );
-    }
+				  const DifferentialCalculator* calc,
+				  const bool lprint ) :
+  Observable(name), binedges(bins), calculator(calc) {
+  addAnalyses( variations );
+  // for( size_t ivar= 0; ivar < variations.size(); ivar++ ) {      
+  //   string tag= variations[ivar].getTag();
+  //   data[tag]= new DifferentialDataStructure( bins );
+  //   weighted1[tag]= new DifferentialDataStructure( bins );
+  //   weighted2[tag]= new DifferentialDataStructure( bins );
+  //   if( variations[ivar].getReco2() != "none" ) {
+  //     matrices[tag]= new MatrixDataStructure( bins );
+  //   }
+  // }
+  if( lprint ) {
+    cout << "ObsDifferential::ObsDifferential: ds/dy, ds/dy*y, ds/dy*y**2 for " 
+	 << name << endl;
+    printVectorD( "Binedges:", bins );
+
   }
   return;
 }
+
+ObsDifferential::~ObsDifferential() {}
+
+void ObsDifferential::addAnalyses( const vector<Analysis>& variations ) {
+  for( size_t ivar= 0; ivar < variations.size(); ivar++ ) {      
+    string tag= variations[ivar].getTag();
+    data[tag]= new DifferentialDataStructure( binedges );
+    weighted1[tag]= new DifferentialDataStructure( binedges );
+    weighted2[tag]= new DifferentialDataStructure( binedges );
+    if( variations[ivar].getReco2() != "none" ) {
+      matrices[tag]= new MatrixDataStructure( binedges );
+    }
+  }
+}
+
 
 bool ObsDifferential::containsAnalysis( const Analysis& analysis ) {
   return data.find( analysis.getTag() ) != data.end();

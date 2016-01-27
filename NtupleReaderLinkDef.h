@@ -16,14 +16,10 @@
 #pragma link C++ class Observable;
 #pragma link C++ class FilledObservable;
 #pragma link C++ class ObservableFactory;
-#pragma link C++ class ObsFastJetR;
-#pragma link C++ class ObsFastJetEmin;
 #pragma link C++ class ObsFastJetDiff;
-#pragma link C++ class ObsFastJetYcut;
-#pragma link C++ class ObsThrust;
 #pragma link C++ class ObsPartonShower;
-#pragma link C++ class ObsDurhamYmerge23;
-#pragma link C++ class ObsJadeYmerge23;
+#pragma link C++ class ObsDifferential;
+#pragma link C++ class ObsJetrate;
 #pragma link C++ class TFastJet;
 #pragma link C++ class Unfolder;
 #pragma link C++ class OutputWriter;

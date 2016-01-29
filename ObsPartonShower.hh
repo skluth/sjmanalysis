@@ -30,8 +30,7 @@ public:
 
 private:
 
-  virtual bool containsAnalysis( const Analysis& );
-  virtual void addAnalyses( const vector<Analysis>& );
+  virtual void addAnalysis( const Analysis& );
 
   vector<Double_t> getValues( NtupleReader*, const string& );
   Double_t calcAngle( const TLorentzVector&, const TLorentzVector& );

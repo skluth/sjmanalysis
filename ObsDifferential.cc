@@ -16,17 +16,8 @@ ObsDifferential::ObsDifferential( const string& name,
 				  const vector<Analysis>& variations,
 				  const DifferentialCalculator* calc,
 				  const bool lprint ) :
-  Observable(name), binedges(bins), calculator(calc) {
+  Observable( name ), binedges( bins ), calculator( calc ) {
   addAnalyses( variations );
-  // for( size_t ivar= 0; ivar < variations.size(); ivar++ ) {      
-  //   string tag= variations[ivar].getTag();
-  //   data[tag]= new DifferentialDataStructure( bins );
-  //   weighted1[tag]= new DifferentialDataStructure( bins );
-  //   weighted2[tag]= new DifferentialDataStructure( bins );
-  //   if( variations[ivar].getReco2() != "none" ) {
-  //     matrices[tag]= new MatrixDataStructure( bins );
-  //   }
-  // }
   if( lprint ) {
     cout << "ObsDifferential::ObsDifferential: ds/dy, ds/dy*y, ds/dy*y**2 for " 
 	 << name << endl;
@@ -38,34 +29,33 @@ ObsDifferential::ObsDifferential( const string& name,
 
 ObsDifferential::~ObsDifferential() {}
 
-void ObsDifferential::addAnalyses( const vector<Analysis>& variations ) {
-  for( size_t ivar= 0; ivar < variations.size(); ivar++ ) {      
-    string tag= variations[ivar].getTag();
-    data[tag]= new DifferentialDataStructure( binedges );
-    weighted1[tag]= new DifferentialDataStructure( binedges );
-    weighted2[tag]= new DifferentialDataStructure( binedges );
-    if( variations[ivar].getReco2() != "none" ) {
-      matrices[tag]= new MatrixDataStructure( binedges );
-    }
+// void ObsDifferential::addAnalyses( const vector<Analysis>& variations ) {
+void ObsDifferential::addAnalysis( const Analysis& analysis ) {
+  //  for( size_t ivar= 0; ivar < variations.size(); ivar++ ) {
+  //    string tag= variations[ivar].getTag();
+  string tag= analysis.getTag();
+  data[tag]= new DifferentialDataStructure( binedges );
+  weighted1[tag]= new DifferentialDataStructure( binedges );
+  weighted2[tag]= new DifferentialDataStructure( binedges );
+  //    if( variations[ivar].getReco2() != "none" ) {
+  if( analysis.getReco2() != "none" ) {
+    matrices[tag]= new MatrixDataStructure( binedges );
   }
-}
-
-
-bool ObsDifferential::containsAnalysis( const Analysis& analysis ) {
-  return data.find( analysis.getTag() ) != data.end();
+  //  }
 }
 
 void ObsDifferential::fill( NtupleReader* ntr, const Analysis& variation ) {
   string tag= variation.getTag();  
   Double_t value= calculator->getValue( ntr, variation.getReco() );
-  data[tag]->fill( value );
+  //data[tag]->fill( value );
+  data.at(tag)->fill( value );
   if( value >= 0.0 ) {
-    weighted1[tag]->fill( value, value );
-    weighted2[tag]->fill( value, TMath::Power( value, 2 ) );
+    weighted1.at(tag)->fill( value, value );
+    weighted2.at(tag)->fill( value, TMath::Power( value, 2 ) );
   }
   if( variation.getReco2() != "none" and ntr->isMC() ) {
     Double_t MCvalue= calculator->getValue( ntr, variation.getReco2() );
-    matrices[tag]->fill( MCvalue, value );
+    matrices.at(tag)->fill( MCvalue, value );
   }
 }
 

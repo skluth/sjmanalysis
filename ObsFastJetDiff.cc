@@ -17,13 +17,6 @@ ObsFastJetDiff::ObsFastJetDiff( const string& name, const string& algo,
 				const bool lprint ) :
   Observable( name ), Algorithm( algo ), binedges(ynmbins) {
   addAnalyses( variations );
-  // for( size_t i= 0; i < variations.size(); i++ ) {      
-  //   string tag= variations[i].getTag();
-  //   ymerge23[tag]= new DifferentialDataStructure( ynmbins );
-  //   ymerge34[tag]= new DifferentialDataStructure( ynmbins );
-  //   ymerge45[tag]= new DifferentialDataStructure( ynmbins );
-  //   ymerge56[tag]= new DifferentialDataStructure( ynmbins );
-  // }
   if( lprint ) {
     cout << "ObsFastJetDiff::ObsFastJetDiff: create " << getName() 
 	 << " with algorithm " << algo << " for y23, y34, y45, y56" << endl;
@@ -31,31 +24,28 @@ ObsFastJetDiff::ObsFastJetDiff( const string& name, const string& algo,
   }
 }
 
-ObsFastJetDiff::~ObsFastJetDiff() {
-  // deleteDataStructures( ymerge23 );
-  // deleteDataStructures( ymerge34 );
-  // deleteDataStructures( ymerge45 );
-  // deleteDataStructures( ymerge56 );
-}
+ObsFastJetDiff::~ObsFastJetDiff() {}
 
-void ObsFastJetDiff::addAnalyses( const vector<Analysis>& variations ) {
-  for( size_t i= 0; i < variations.size(); i++ ) {      
-    string tag= variations[i].getTag();
-    ymerge23[tag]= new DifferentialDataStructure( binedges );
-    ymerge34[tag]= new DifferentialDataStructure( binedges );
-    ymerge45[tag]= new DifferentialDataStructure( binedges );
-    ymerge56[tag]= new DifferentialDataStructure( binedges );
-  }
+//void ObsFastJetDiff::addAnalyses( const vector<Analysis>& variations ) {
+void ObsFastJetDiff::addAnalysis( const Analysis& analysis ) {
+  //  for( size_t i= 0; i < variations.size(); i++ ) {      
+  // string tag= variations[i].getTag();
+  string tag= analysis.getTag();
+  ymerge23[tag]= new DifferentialDataStructure( binedges );
+  ymerge34[tag]= new DifferentialDataStructure( binedges );
+  ymerge45[tag]= new DifferentialDataStructure( binedges );
+  ymerge56[tag]= new DifferentialDataStructure( binedges );
+  //  }
 }
 
 void ObsFastJetDiff::fill( NtupleReader* ntr, const Analysis& variation ) {
   const vector<TLorentzVector>& vtlv= ntr->GetLorentzVectors( variation.getReco() );
   TFastJet tfj( vtlv, Algorithm.c_str() );
   string tag= variation.getTag();
-  ymerge23[tag]->fill( -TMath::Log10( tfj.ymerge( 2 ) ) );
-  ymerge34[tag]->fill( -TMath::Log10( tfj.ymerge( 3 ) ) );
-  ymerge45[tag]->fill( -TMath::Log10( tfj.ymerge( 4 ) ) );
-  ymerge56[tag]->fill( -TMath::Log10( tfj.ymerge( 5 ) ) );
+  ymerge23.at(tag)->fill( -TMath::Log10( tfj.ymerge( 2 ) ) );
+  ymerge34.at(tag)->fill( -TMath::Log10( tfj.ymerge( 3 ) ) );
+  ymerge45.at(tag)->fill( -TMath::Log10( tfj.ymerge( 4 ) ) );
+  ymerge56.at(tag)->fill( -TMath::Log10( tfj.ymerge( 5 ) ) );
   return;
 }
 
@@ -74,6 +64,4 @@ vector<FilledObservable*> ObsFastJetDiff::getFilledObservables() const {
   return vfobs;
 }
 
-bool ObsFastJetDiff::containsAnalysis( const Analysis& analysis ) {
-  return ymerge23.find( analysis.getTag() ) != ymerge23.end();
-}
+

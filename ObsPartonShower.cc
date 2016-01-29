@@ -21,7 +21,6 @@ ObsPartonShower::ObsPartonShower( const vector<Double_t>& a14bins,
 				  const vector<Double_t>& mrbins,
 				  const vector<Analysis>& variations,
 				  Double_t y34c, Double_t y34y23c ) :
-  // ObsDifferential( "partonshower", a14bins, variations ), 
   Observable( "partonshower" ),
   a14binedges(a14bins), c202binedges(c202bins), asbinedges(asbins), mrbinedges(mrbins),
   y34cut(y34c), y34y23cut(y34y23c) {
@@ -35,23 +34,24 @@ ObsPartonShower::ObsPartonShower( const vector<Double_t>& a14bins,
   // printVectorD( "MR binedges:", mrbins );
 }
 
-void ObsPartonShower::addAnalyses( const vector<Analysis>& variations ) {
-  // A14:
-  //ObsDifferential::addAnalyses( variations );
+//void ObsPartonShower::addAnalyses( const vector<Analysis>& variations ) {
+void ObsPartonShower::addAnalysis( const Analysis& analysis ) {
   // A14, C202, AS, MR:
-  for( size_t ivar= 0; ivar < variations.size(); ivar++ ) {      
-    string tag= variations[ivar].getTag();
-    a14data[tag]= new DifferentialDataStructure( a14binedges );
-    c202data[tag]= new DifferentialDataStructure( c202binedges );
-    asdata[tag]= new DifferentialDataStructure( asbinedges );
-    mrdata[tag]= new DifferentialDataStructure( mrbinedges );
-    if( variations[ivar].getReco2() != "none" ) {
-      a14matrices[tag]= new MatrixDataStructure( a14binedges );
-      c202matrices[tag]= new MatrixDataStructure( c202binedges );
-      asmatrices[tag]= new MatrixDataStructure( asbinedges );
-      mrmatrices[tag]= new MatrixDataStructure( mrbinedges );
-    }
+  // for( size_t ivar= 0; ivar < variations.size(); ivar++ ) {
+  //  string tag= variations[ivar].getTag();
+  string tag= analysis.getTag();
+  a14data[tag]= new DifferentialDataStructure( a14binedges );
+  c202data[tag]= new DifferentialDataStructure( c202binedges );
+  asdata[tag]= new DifferentialDataStructure( asbinedges );
+  mrdata[tag]= new DifferentialDataStructure( mrbinedges );
+  //    if( variations[ivar].getReco2() != "none" ) {
+  if( analysis.getReco2() != "none" ) {
+    a14matrices[tag]= new MatrixDataStructure( a14binedges );
+    c202matrices[tag]= new MatrixDataStructure( c202binedges );
+    asmatrices[tag]= new MatrixDataStructure( asbinedges );
+    mrmatrices[tag]= new MatrixDataStructure( mrbinedges );
   }
+    //  }
   return;
 }
 
@@ -59,21 +59,17 @@ void ObsPartonShower::fill( NtupleReader* ntr, const Analysis& variation ) {
   string reco= variation.getReco();
   string tag= variation.getTag();
   vector<Double_t> values= getValues( ntr, reco );
-  // getAndFillDifferentialDataStructure( values[0], tag, a14data );
-  // getAndFillDifferentialDataStructure( values[1], tag, c202data );
-  // getAndFillDifferentialDataStructure( values[2], tag, asdata );
-  // getAndFillDifferentialDataStructure( values[3], tag, mrdata );
-  a14data[tag]->fill( values[0] );
-  c202data[tag]->fill( values[1] );
-  asdata[tag]->fill( values[2] );
-  mrdata[tag]->fill( values[3] );
+  a14data.at(tag)->fill( values[0] );
+  c202data.at(tag)->fill( values[1] );
+  asdata.at(tag)->fill( values[2] );
+  mrdata.at(tag)->fill( values[3] );
   string reco2= variation.getReco2();
   if( reco2 != "none" and ntr->isMC() ) {
     vector<Double_t> MCvalues= getValues( ntr, reco2 );    
-    a14matrices[tag]->fill( MCvalues[0], values[0] );
-    c202matrices[tag]->fill( MCvalues[1], values[1] );
-    asmatrices[tag]->fill( MCvalues[2], values[2] );
-    mrmatrices[tag]->fill( MCvalues[3], values[3] );
+    a14matrices.at(tag)->fill( MCvalues[0], values[0] );
+    c202matrices.at(tag)->fill( MCvalues[1], values[1] );
+    asmatrices.at(tag)->fill( MCvalues[2], values[2] );
+    mrmatrices.at(tag)->fill( MCvalues[3], values[3] );
   }
   return;
 }
@@ -167,6 +163,4 @@ vector<FilledObservable*> ObsPartonShower::getFilledObservables() const {
   return vfobs;
 }
 
-bool ObsPartonShower::containsAnalysis( const Analysis& analysis ) {
-  return a14data.find( analysis.getTag() ) != a14data.end();
-}
+

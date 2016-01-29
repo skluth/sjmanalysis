@@ -27,10 +27,10 @@ public:
   ~ObsFastJetDiff();
   virtual void fill( NtupleReader* ntr, const Analysis& variation );
   virtual vector<FilledObservable*> getFilledObservables() const;
-  virtual bool containsAnalysis( const Analysis& );  
-  virtual void addAnalyses( const vector<Analysis>& );
 
 private:
+
+  virtual void addAnalysis( const Analysis& );
 
   string Algorithm;
   vector<Double_t> binedges;

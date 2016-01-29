@@ -23,24 +23,20 @@ public:
   Observable() {}
   virtual ~Observable();
   virtual void fill( NtupleReader*, const Analysis& ) = 0;
-  //virtual void print() const;
+  virtual void fillAllAnalyses( NtupleReader* );
   virtual vector<FilledObservable*> getFilledObservables() const = 0;
   string getName() const { return name; }
-  virtual bool containsAnalysis( const Analysis& ) = 0;
-  virtual void addAnalyses( const vector<Analysis>& ) = 0;
-
+  virtual bool containsAnalysis( const Analysis& );
+  virtual void addAnalyses( const vector<Analysis>& );
 
   void printVectorD( const string&, const vector<Double_t>& );
 
 protected:
 
-  DataStructure* getDataStructure( const string&, 
-				   const map<string,DataStructure*>& ) const;
-  void deleteDataStructures( map<string,DataStructure*>& );
-  bool containsAnalysisInDataStructure( const Analysis&,
-					const map<string,DataStructure*>& );
+  virtual void addAnalysis( const Analysis& ) = 0;
 
   string name;
+  vector<Analysis> analyses;
 
 };
 

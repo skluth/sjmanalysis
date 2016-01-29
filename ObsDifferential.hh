@@ -29,12 +29,11 @@ public:
 		   const bool lprint=true );
   virtual ~ObsDifferential();
   virtual vector<FilledObservable*> getFilledObservables() const;
-  virtual bool containsAnalysis( const Analysis& );
   virtual void fill( NtupleReader* ntr, const Analysis& variation );
-  virtual void addAnalyses( const vector<Analysis>& );
 
-  //protected:
 private:  
+
+  virtual void addAnalysis( const Analysis& );
 
   vector<Double_t> binedges;
   map<string,DifferentialDataStructure*> data;

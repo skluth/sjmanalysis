@@ -31,11 +31,10 @@ public:
   virtual void fill( NtupleReader* ntr, const Analysis& variation );
   virtual vector<FilledObservable*> getFilledObservables() const;
   virtual void print() const;
-  virtual bool containsAnalysis( const Analysis& );
-  virtual void addAnalyses( const vector<Analysis>& );
 
 private:
 
+  virtual void addAnalysis( const Analysis& );
   void printDatastructures( const map<string,JetrateDataStructure*>& ) const;
 
   vector<Double_t> points;

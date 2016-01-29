@@ -46,7 +46,17 @@ void processAnalyses( const vector<Analysis>& analyses,
 	  ( mccuts == "none" or MCnonrad ) ) {
 	for( size_t iobs= 0; iobs < vobs.size(); iobs++ ) {
 	  Observable* obs= vobs[iobs];
-	  if( obs->containsAnalysis( analysis ) ) obs->fill( ntr, analysis );
+	  // Not all observables have all analysis variants
+	  // due to filling of transfer matrices:
+	  if( obs->containsAnalysis( analysis ) ) {
+	    try {
+	      obs->fill( ntr, analysis );
+	    }
+	    catch( const std::out_of_range& oor ) {
+	      cout << oor.what() << " " << obs->getName() << " " 
+		   << analysis.getTag() << endl;
+	    }
+	  }
 	}
       }
     }

@@ -14,6 +14,9 @@
 #include "FastJetYcutCalculator.hh"
 #include "FastJetEminCalculator.hh"
 #include "FastJetRCalculator.hh"
+#include "FastJetPxConeEminCalculator.hh"
+#include "FastJetPxConeRCalculator.hh"
+
 
 #include "TMath.h"
 
@@ -362,49 +365,127 @@ namespace sjmtests {
       Ycutpoints{ 0.0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5 },
       Eminfpoints{ 0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18 },
       Rpoints{ 0.2, 0.4, 0.6, 0.7, 0.8, 1.0, 1.2, 1.4 },
+      EminPxpoints{ 2, 6, 10, 14, 18, 22, 25.5 },
+      RPxpoints{ 0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5 },
       analysis1( "data", "mt", "stand" ), 
       analysis2( "data", "mt", "costt07" ),
       analyses{ analysis1, analysis2 },
       fjycc( "eekt" ),
       fjeminc( "eeantikt", 0.7 ),
       fjrc( "eeantikt", 0.06 ),
+
+      fjpxceminc( 0.7 ),
+      fjpxcrc( 7.0 ),
+
       obsfjycut( "durhamycutfj", Ycutpoints, analyses, &fjycc, false ),
       obsfjemin( "antiktemin", Eminfpoints, analyses, &fjeminc, false ),
-      obsfjr( "antiktR", Rpoints, analyses, &fjrc, false ) {
+      obsfjr( "antiktR", Rpoints, analyses, &fjrc, false ),
+	
+      obsfjpxemin( "pxconeemin", EminPxpoints, analyses, &fjpxceminc, false ),
+      obsfjpxr( "pxconer", RPxpoints, analyses, &fjpxcrc, false )
+
+      {
 	ntr= new NtupleReader( "mc5025_1_200.root", "h10", false );
       }
     virtual ~ObsJetrTest() { delete ntr; }
     vector<double> Ycutpoints;
     vector<double> Eminfpoints;
     vector<double> Rpoints;
+    vector<double> EminPxpoints;
+    vector<double> RPxpoints;
     Analysis analysis1;
     Analysis analysis2;
     vector<Analysis> analyses;
     FastJetYcutCalculator fjycc;
     FastJetEminCalculator fjeminc;
     FastJetRCalculator fjrc;
+
+    FastJetPxConeEminCalculator fjpxceminc;
+    FastJetPxConeRCalculator fjpxcrc;
+
     ObsJetrate obsfjycut;
     ObsJetrate obsfjemin;
     ObsJetrate obsfjr;
+
+    ObsJetrate obsfjpxemin;
+    ObsJetrate obsfjpxr;
+
     NtupleReader* ntr;
   };
 
   // fill
-  TEST_F( ObsJetrTest, testfill ) {
+  TEST_F( ObsJetrTest, testfillycut ) {
     fillFromNtuple( ntr, analysis1, obsfjycut );
     vector<Double_t> njetsdycut= getObsValues( "durhamycutfjR2", analysis1, obsfjycut );
     vector<Double_t> njetsdycutexp{ 0, 93, 89, 78, 61, 40, 10, 0, 0, 0, 0 };
     EXPECT_EQ( njetsdycutexp, njetsdycut );
-    fillFromNtuple( ntr, analysis1, obsfjemin );
-    vector<Double_t> njetsaktemin= getObsValues( "antikteminR2", analysis1, obsfjemin );
-    vector<Double_t> njetsakteminexp{ 46, 57, 67, 73, 78, 79, 81, 80, 80 };
-    EXPECT_EQ( njetsakteminexp, njetsaktemin );
-    fillFromNtuple( ntr, analysis1, obsfjr );
-    vector<Double_t> njetsaktr= getObsValues( "antiktRR2", analysis1, obsfjr );
-    vector<Double_t> njetsaktrexp{ 49, 65, 65, 67, 71, 77, 82, 87 };
-    EXPECT_EQ( njetsaktrexp, njetsaktr );
   }
-
+  TEST_F( ObsJetrTest, testfillEmin ) {
+    fillFromNtuple( ntr, analysis1, obsfjemin );
+    vector<Double_t> njetsaktemin2= getObsValues( "antikteminR2", analysis1, obsfjemin );
+    vector<Double_t> njetsaktemin2exp{ 35, 54, 62, 66, 71, 73, 76, 77, 81 };
+    EXPECT_EQ( njetsaktemin2exp, njetsaktemin2 );
+    vector<Double_t> njetsaktemin3= getObsValues( "antikteminR3", analysis1, obsfjemin );
+    vector<Double_t> njetsaktemin3exp{ 38, 31, 27, 25, 22, 20, 17, 16, 12 };
+    EXPECT_EQ( njetsaktemin3exp, njetsaktemin3 );
+    vector<Double_t> njetsaktemin4= getObsValues( "antikteminR4", analysis1, obsfjemin );
+    vector<Double_t> njetsaktemin4exp{ 13, 7, 4, 2, 0, 0, 0, 0, 0 };
+    EXPECT_EQ( njetsaktemin4exp, njetsaktemin4 );
+    vector<Double_t> njetsaktemin5= getObsValues( "antikteminR5", analysis1, obsfjemin );
+    vector<Double_t> njetsaktemin5exp{ 6, 1, 0, 0, 0, 0, 0, 0, 0 };
+    EXPECT_EQ( njetsaktemin5exp, njetsaktemin5 );
+    vector<Double_t> njetsaktemin6= getObsValues( "antikteminR6", analysis1, obsfjemin );
+    vector<Double_t> njetsaktemin6exp{ 1, 0, 0, 0, 0, 0, 0, 0, 0 };
+    EXPECT_EQ( njetsaktemin6exp, njetsaktemin6 );
+  }
+  TEST_F( ObsJetrTest, testfillR ) {
+    fillFromNtuple( ntr, analysis1, obsfjr );
+    vector<Double_t> njetsaktr2= getObsValues( "antiktRR2", analysis1, obsfjr );
+    vector<Double_t> njetsaktr2exp{ 39, 60, 60, 62, 67, 74, 82, 87 };
+    EXPECT_EQ( njetsaktr2exp, njetsaktr2 );
+    vector<Double_t> njetsaktr3= getObsValues( "antiktRR3", analysis1, obsfjr );
+    vector<Double_t> njetsaktr3exp{ 33, 22, 30, 27, 25, 19, 11, 6 };
+    EXPECT_EQ( njetsaktr3exp, njetsaktr3 );
+    vector<Double_t> njetsaktr4= getObsValues( "antiktRR4", analysis1, obsfjr );
+    vector<Double_t> njetsaktr4exp{ 18, 10, 3, 4, 1, 0, 0, 0 };
+    EXPECT_EQ( njetsaktr4exp, njetsaktr4 );
+    vector<Double_t> njetsaktr5= getObsValues( "antiktRR5", analysis1, obsfjr );
+    vector<Double_t> njetsaktr5exp{ 0, 1, 0, 0, 0, 0, 0, 0 };
+    EXPECT_EQ( njetsaktr5exp, njetsaktr5 );
+    vector<Double_t> njetsaktr6= getObsValues( "antiktRR6", analysis1, obsfjr );
+    vector<Double_t> njetsaktr6exp{ 3, 0, 0, 0, 0, 0, 0, 0 };
+    EXPECT_EQ( njetsaktr6exp, njetsaktr6 );
+  }
+  TEST_F( ObsJetrTest, testfillPxEmin ) {
+    fillFromNtuple( ntr, analysis1, obsfjpxemin );
+    vector<Double_t> njetspxconeemin2= getObsValues( "pxconeeminR2", analysis1, 
+						     obsfjpxemin );
+    vector<Double_t> njetspxconeemin2exp{ 52, 70, 77, 83, 89, 86, 82 };
+    EXPECT_EQ( njetspxconeemin2exp, njetspxconeemin2 );
+    vector<Double_t> njetspxconeemin3= getObsValues( "pxconeeminR3", analysis1, 
+						     obsfjpxemin );
+    vector<Double_t> njetspxconeemin3exp{ 32, 20, 16, 10, 4, 0, 0 };
+    EXPECT_EQ( njetspxconeemin3exp, njetspxconeemin3 );
+    vector<Double_t> njetspxconeemin4= getObsValues( "pxconeeminR4", analysis1, 
+						     obsfjpxemin );
+    vector<Double_t> njetspxconeemin4exp{ 9, 3, 0, 0, 0, 0, 0 };
+    EXPECT_EQ( njetspxconeemin4exp, njetspxconeemin4 );
+  }
+  TEST_F( ObsJetrTest, testfillPxR ) {
+    fillFromNtuple( ntr, analysis1, obsfjpxr );
+    vector<Double_t> njetspxconer2= getObsValues( "pxconerR2", analysis1, 
+						  obsfjpxr );
+    vector<Double_t> njetspxconer2exp{ 63, 66, 74, 76, 84, 88, 93 };
+    EXPECT_EQ( njetspxconer2exp, njetspxconer2 );
+    vector<Double_t> njetspxconer3= getObsValues( "pxconerR3", analysis1, 
+						  obsfjpxr );
+    vector<Double_t> njetspxconer3exp{ 26, 24, 17, 17, 9, 5, 0 };
+    EXPECT_EQ( njetspxconer3exp, njetspxconer3 );
+    vector<Double_t> njetspxconer4= getObsValues( "pxconerR4", analysis1, 
+						  obsfjpxr );
+    vector<Double_t> njetspxconer4exp{ 3, 3, 2, 0, 0, 0, 0 };
+    EXPECT_EQ( njetspxconer4exp, njetspxconer4 );
+  }
 
 } // namespace
 

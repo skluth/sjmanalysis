@@ -5,6 +5,7 @@
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/JetDefinition.hh"
 #include "fastjet/SISConePlugin.hh"
+#include "fastjet/PxConePlugin.hh"
 
 #include "fastjet/SISConeSphericalPlugin.hh"
 
@@ -45,9 +46,10 @@ using std::logic_error;
 TFastJet::TFastJet( const vector<TLorentzVector>& vtl, 
 		    const char* jetalg, 
 		    const double& R, 
-		    const vector<int>* vindx ) : clusseq(0),
-						 plugin(0),
-						 pjets(0) {
+		    const vector<int>* vindx,
+		    const double Emin ) : clusseq(0),
+					  plugin(0),
+					  pjets(0) {
   // Hide map from rootcint
   static map<string,fastjet::JetAlgorithm> jamap;
   if( jamap.size() == 0 ) {
@@ -60,6 +62,7 @@ TFastJet::TFastJet( const vector<TLorentzVector>& vtl,
     jamap["eekt"]= fastjet::ee_kt_algorithm;
     jamap["jade"]= fastjet::plugin_algorithm;
     jamap["eeantikt"]= fastjet::ee_genkt_algorithm;
+    jamap["pxcone"]= fastjet::plugin_algorithm;
   }
   // Check input:
   string jetalgString( jetalg );
@@ -81,6 +84,9 @@ TFastJet::TFastJet( const vector<TLorentzVector>& vtl,
     else if( jetalgString == "jade" ) {
       plugin= new fastjet::JadePlugin();
       recombiner= new EEE0Recombiner();
+    }
+    else if( jetalgString == "pxcone" ) {
+      plugin= new fastjet::PxConePlugin( R, Emin, 0.75, true, 1 );
     }
     else {
       string txt= "TFastJet::TFastJet: wrong plugin: " + jetalgString;
@@ -121,11 +127,18 @@ TFastJet::~TFastJet() {
   if( pjets ) delete pjets;
 }
 
-// All jets with p_t > p_t,min (or E < Emin for e+e-):
+// All jets with p_t > p_t,min (or E > Emin for e+e-):
 const vector<TLorentzVector>& TFastJet::inclusive_jets( const double& ptmin ) {
   vector<fastjet::PseudoJet> incljets= clusseq->inclusive_jets( ptmin );
   *pjets= sorted_by_pt( incljets );
   return copyPseudoJetsToLorentzVectors();
+}
+
+// All jets with E > Emin for e+e-:
+const vector<TLorentzVector>& TFastJet::inclusive_eejets( const double& Emin ) {
+  vector<fastjet::PseudoJet> incljets= clusseq->inclusive_jets( 0.0 );
+  *pjets= sorted_by_E( incljets );
+  return copyPseudoJetsToLorentzVectors( Emin );
 }
 
 // Fixed number of jets (e+e-):
@@ -136,14 +149,20 @@ const vector<TLorentzVector>& TFastJet::exclusive_jets( const int njets ) {
 }
 
 // Internal helper:
-const vector<TLorentzVector>& TFastJet::copyPseudoJetsToLorentzVectors() {
+const vector<TLorentzVector>& 
+TFastJet::copyPseudoJetsToLorentzVectors( const double Emin ) {
   static vector<TLorentzVector> jetstlv;
   jetstlv.clear();
   jetstlv.reserve( pjets->size() );
   for( UInt_t i= 0; i < pjets->size(); i++ ) {
     fastjet::PseudoJet pj= (*pjets)[i];
-    TLorentzVector tlv( pj.px(), pj.py(), pj.pz(), pj.E() );
-    jetstlv.push_back( tlv );
+    if( pj.E() > Emin ) {
+      TLorentzVector tlv( pj.px(), pj.py(), pj.pz(), pj.E() );
+      jetstlv.push_back( tlv );
+    }
+    else {
+      break;
+    }
   }
   return jetstlv;
 }

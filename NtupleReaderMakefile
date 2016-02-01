@@ -12,7 +12,8 @@ GMOCKPATH = /home/skluth/Downloads/googletest/googlemock
 GINCS = -I $(GMOCKPATH)/include -I $(GTESTPATH)/include
 GLIBS = -L $(GMOCKPATH) -l gmock -L $(GTESTPATH) -lgtest -lpthread
 
-FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.0.6/install/bin/fastjet-config
+#FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.0.6/install/bin/fastjet-config
+FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.1.3/install/bin/fastjet-config
 FASTJETINC = $(shell $(FASTJETCONFIG) --cxxflags )
 FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --plugins )
 
@@ -28,7 +29,8 @@ Observable.cc ObsDifferential.cc ObsJetrate.cc ObsFastJetDiff.cc \
 ObsPartonShower.cc ObservableFactory.cc \
 FilledObservable.cc Unfolder.cc OutputWriter.cc \
 ThrustCalculator.cc YnmdCalculator.cc YnmjCalculator.cc \
-FastJetYcutCalculator.cc FastJetEminCalculator.cc FastJetRCalculator.cc
+FastJetYcutCalculator.cc FastJetEminCalculator.cc FastJetRCalculator.cc \
+FastJetPxConeRCalculator.cc FastJetPxConeEminCalculator.cc
 
 DICT = NtupleReaderDict.cc
 DICTLIB = libNtupleReaderDict.so

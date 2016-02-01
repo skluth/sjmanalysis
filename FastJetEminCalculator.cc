@@ -18,7 +18,8 @@ FastJetEminCalculator::getValues( NtupleReader* ntr,
   TFastJet tfj( vtlv, algorithm.c_str(), Rvalue );
   Double_t Evis= tfj.Evis();
   for( size_t i= 0; i < n; i++ ) {
-    vector<TLorentzVector> incljets= tfj.inclusive_jets( Eminfpoints[i]*Evis );
+    // vector<TLorentzVector> incljets= tfj.inclusive_jets( Eminfpoints[i]*Evis );
+    vector<TLorentzVector> incljets= tfj.inclusive_eejets( Eminfpoints[i]*Evis );
     NJets[i]= incljets.size();
   }
   return NJets;

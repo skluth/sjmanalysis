@@ -18,7 +18,8 @@ FastJetRCalculator::getValues( NtupleReader* ntr,
   for( size_t i= 0; i < n; i++ ) {
     TFastJet tfj( vtlv, algorithm.c_str(), Rpoints[i] );
     Double_t Evis= tfj.Evis();
-    vector<TLorentzVector> incljets= tfj.inclusive_jets( EminFraction*Evis );
+    // vector<TLorentzVector> incljets= tfj.inclusive_jets( EminFraction*Evis );
+    vector<TLorentzVector> incljets= tfj.inclusive_eejets( EminFraction*Evis );
     NJets[i]= incljets.size();
   }
   return NJets;

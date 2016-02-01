@@ -136,6 +136,8 @@ void LEP1Analysis( Int_t maxevt=1000,
   obsnames.push_back( "antiktR" );
   obsnames.push_back( "sisconeemin" );
   obsnames.push_back( "sisconeR" );
+  obsnames.push_back( "pxconeemin" );
+  obsnames.push_back( "pxconeR" );
   ObservableFactory obsfac;
   vector<Observable*> vobs;
   try {

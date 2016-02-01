@@ -31,6 +31,10 @@ private:
   vector<Double_t> eminFraction;
   vector<Double_t> Rvalues;
 
+  vector<Double_t> PxEminValues;
+  vector<Double_t> PxRValues;
+
+
 };
 
 #endif

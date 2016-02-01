@@ -14,6 +14,8 @@
 #include "FastJetYcutCalculator.hh"
 #include "FastJetEminCalculator.hh"
 #include "FastJetRCalculator.hh"
+#include "FastJetPxConeEminCalculator.hh"
+#include "FastJetPxConeRCalculator.hh"
 
 #include <iostream>
 #include <algorithm>
@@ -24,8 +26,10 @@ using std::stringstream;
 #include <cctype>
 #include <stdexcept>
 
-ObservableFactory::ObservableFactory() {
-
+ObservableFactory::ObservableFactory() : 
+  PxEminValues{ 2, 6, 10, 14, 18, 22, 25.5 },
+  PxRValues{ 0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5 } {
+    
   // Thrust
   thrustbins.resize( 13 );
   thrustbins[0]= 0.00;
@@ -80,7 +84,7 @@ ObservableFactory::ObservableFactory() {
     yNMbins[i]= 0.5*i;
   }
 
-  // excl. jets Emin/Evis points:
+  // Emin/Evis points:
   eminFraction.resize( 9 );
   eminFraction[0]= 0.02;
   eminFraction[1]= 0.04;
@@ -92,7 +96,7 @@ ObservableFactory::ObservableFactory() {
   eminFraction[7]= 0.16;
   eminFraction[8]= 0.18;
 
-  // excl. jets R points:
+  // R points:
   Rvalues.resize( 8 );
   Rvalues[0]= 0.2;
   Rvalues[1]= 0.4;
@@ -102,6 +106,7 @@ ObservableFactory::ObservableFactory() {
   Rvalues[5]= 1.0;
   Rvalues[6]= 1.2;
   Rvalues[7]= 1.4;
+
 
 }
 
@@ -149,6 +154,12 @@ ObservableFactory::createObservables( const vector<string>& obsnames,
     else if( name.find( "sisconeR" ) != string::npos ) 
       vobs.push_back( new ObsJetrate( name, Rvalues, analyses,
 				      new FastJetRCalculator( "eesiscone", 0.06 ) ) );
+    else if( name.find( "pxconeemin" ) != string::npos ) 
+      vobs.push_back( new ObsJetrate( name, PxEminValues, analyses,
+				      new FastJetPxConeEminCalculator( 0.7 ) ) );
+    else if( name.find( "pxconeR" ) != string::npos ) 
+      vobs.push_back( new ObsJetrate( name, PxRValues, analyses,
+				      new FastJetPxConeRCalculator( 7.0 ) ) );
     else {
       string txt= "ObservableFactory::createObservables: wrong class name: " + name;
       throw std::logic_error( txt );

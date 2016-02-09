@@ -34,6 +34,8 @@ private:
   vector<Double_t> PxEminValues;
   vector<Double_t> PxRValues;
 
+  vector<Double_t> Donkersycutd;
+  vector<Double_t> Donkersycutj;
 
 };
 

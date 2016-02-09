@@ -132,6 +132,8 @@ void LEP1Analysis( Int_t maxevt=1000,
   obsnames.push_back( "jadeymergefj" );
   obsnames.push_back( "durhamycutfj" );
   obsnames.push_back( "jadeycutfj" );
+  obsnames.push_back( "durhamycut" );
+  obsnames.push_back( "jadeycut" );
   obsnames.push_back( "antiktemin" );
   obsnames.push_back( "antiktR" );
   obsnames.push_back( "sisconeemin" );

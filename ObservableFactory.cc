@@ -11,6 +11,7 @@
 #include "ObsFastJetDiff.hh"
 
 #include "ObsJetrate.hh"
+#include "YcutCalculator.hh"
 #include "FastJetYcutCalculator.hh"
 #include "FastJetEminCalculator.hh"
 #include "FastJetRCalculator.hh"
@@ -28,7 +29,14 @@ using std::stringstream;
 
 ObservableFactory::ObservableFactory() : 
   PxEminValues{ 2, 6, 10, 14, 18, 22, 25.5 },
-  PxRValues{ 0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5 } {
+  PxRValues{ 0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5 }, 
+  Donkersycutd{ 4.93, 4.81, 4.68, 4.56, 4.43, 4.31, 4.18, 4.06, 
+      3.93, 3.81, 3.68, 3.56, 3.43, 3.31, 3.18, 3.06,
+      2.93, 2.81, 2.68, 2.56, 2.43, 2.31, 2.18, 2.06,
+      1.93, 3.81, 1.68, 1.56, 1.43, 1.31, 1.18, 1.06,
+      0.93, 3.81, 0.68, 0.56 },
+  Donkersycutj{ 2.30, 2.06, 1.90, 1.70, 1.52, 1.40, 1.30, 1.22, 
+      1.15, 1.10, 1.02, 0.94, 0.87, 0.80 } {
     
   // Thrust
   thrustbins.resize( 13 );
@@ -136,12 +144,21 @@ ObservableFactory::createObservables( const vector<string>& obsnames,
       vobs.push_back( new ObsFastJetDiff( name, "eekt", yNMbins, analyses ) );
     else if( name.find( "jadeymergefj" ) != string::npos )
       vobs.push_back( new ObsFastJetDiff( name, "jade", yNMbins, analyses ) );
+
     else if( name.find( "durhamycutfj" ) != string::npos ) 
-      vobs.push_back( new ObsJetrate( name, yNMbins, analyses,
+      vobs.push_back( new ObsJetrate( name, Donkersycutd, analyses,
 				      new FastJetYcutCalculator( "eekt" ) ) );
     else if( name.find( "jadeycutfj" ) != string::npos )
-      vobs.push_back( new ObsJetrate( name, yNMbins, analyses,
+      vobs.push_back( new ObsJetrate( name, Donkersycutj, analyses,
 				      new FastJetYcutCalculator( "jade" ) ) );
+
+    else if( name.find( "durhamycut" ) != string::npos ) 
+      vobs.push_back( new ObsJetrate( name, Donkersycutd, analyses,
+				      new YcutCalculator( "durham" ) ) );
+    else if( name.find( "jadeycut" ) != string::npos )
+      vobs.push_back( new ObsJetrate( name, Donkersycutj, analyses,
+				      new YcutCalculator( "jade" ) ) );
+
     else if( name.find( "antiktemin" ) != string::npos ) 
       vobs.push_back( new ObsJetrate( name, eminFraction, analyses,
 				      new FastJetEminCalculator( "eeantikt", 0.7 ) ) );

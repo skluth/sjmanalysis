@@ -12,7 +12,7 @@ using std::vector;
 class FastJetPxConeRCalculator: public JetrateCalculator {
   Double_t EminValue;
 public:
-  FastJetPxConeRCalculator( Double_t Emin );
+  FastJetPxConeRCalculator( const Double_t Emin );
   ~FastJetPxConeRCalculator() {}
   vector<Double_t> getValues( NtupleReader*, 
 			      const vector<Double_t>&,

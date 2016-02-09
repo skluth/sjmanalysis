@@ -4,7 +4,7 @@
 #include "TFastJet.hh"
 #include "TLorentzVector.h"
 
-FastJetPxConeEminCalculator::FastJetPxConeEminCalculator( Double_t R ) :
+FastJetPxConeEminCalculator::FastJetPxConeEminCalculator( const Double_t R ) :
   RValue(R) {}
 
 vector<Double_t> 

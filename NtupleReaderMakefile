@@ -7,8 +7,8 @@ RC       = rootcint
 OPT      = -g
 CXXFLAGS = -Wall -fPIC $(OPT) -std=c++11
 
-GTESTPATH = /home/skluth/Downloads/googletest/googletest
-GMOCKPATH = /home/skluth/Downloads/googletest/googlemock
+GTESTPATH = $(HOME)/Downloads/googletest/googletest-master/googletest
+GMOCKPATH = $(HOME)/Downloads/googletest/googletest-master/googlemock
 GINCS = -I $(GMOCKPATH)/include -I $(GTESTPATH)/include
 GLIBS = -L $(GMOCKPATH) -l gmock -L $(GTESTPATH) -lgtest -lpthread
 
@@ -30,7 +30,8 @@ ObsPartonShower.cc ObservableFactory.cc \
 FilledObservable.cc Unfolder.cc OutputWriter.cc \
 ThrustCalculator.cc YnmdCalculator.cc YnmjCalculator.cc \
 FastJetYcutCalculator.cc FastJetEminCalculator.cc FastJetRCalculator.cc \
-FastJetPxConeRCalculator.cc FastJetPxConeEminCalculator.cc
+FastJetPxConeRCalculator.cc FastJetPxConeEminCalculator.cc \
+YcutCalculator.cc
 
 DICT = NtupleReaderDict.cc
 DICTLIB = libNtupleReaderDict.so

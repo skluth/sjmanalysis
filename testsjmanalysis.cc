@@ -19,6 +19,9 @@
 #include "FastJetPxConeRCalculator.hh"
 
 
+#include "SjmConfigParser.hh"
+
+
 #include "TMath.h"
 
 #include <iostream>
@@ -54,6 +57,7 @@ namespace sjmtests {
   // getElement:
   TEST_F( MatrixDataStructureTest, testgetElement ) {
     size_t ndim= mds.getBinedges().size();
+    EXPECT_EQ( ndim, bins.size() );
     for( size_t i= 0; i < ndim; i++ ) {
       for( size_t j= 0; j < ndim; j++ ) {
 	EXPECT_EQ( mds.getElement( i, j ), 0.0 );
@@ -61,7 +65,7 @@ namespace sjmtests {
     }
   }
 
-  // getElement exceptions
+  // getElement exceptions:
   TEST_F( MatrixDataStructureTest, testgetElementExceptions ) {
     EXPECT_THROW( mds.getElement( -1, 1 ), std::logic_error );
     EXPECT_THROW( mds.getElement( 1, -1 ), std::logic_error );
@@ -94,17 +98,17 @@ namespace sjmtests {
     JetrateDataStructure jrds;
   };
 
-  // getPoints, getValues, getErrors
+  // getPoints, getValues, getErrors:
   TEST_F( JetrateDataStructureTest, testgetters ) {
     vector<Double_t> mypoints= jrds.getPoints();
-    EXPECT_EQ( points, mypoints );
+    EXPECT_EQ( mypoints, points );
     vector<Double_t> values= jrds.getValues();
     EXPECT_FLOAT_EQ( values[2], 2.0 );
     vector<Double_t> errors= jrds.getErrors();
     EXPECT_FLOAT_EQ( errors[2], TMath::Sqrt( 2.0 ) );
   }
 
-  // normalise
+  // normalise:
   TEST_F( JetrateDataStructureTest, testnormalise ) {
     jrds.normalise();
     vector<Double_t> values= jrds.getValues();
@@ -113,7 +117,7 @@ namespace sjmtests {
     EXPECT_FLOAT_EQ( errors[2], TMath::Sqrt( 2.0/3.0*(1.0-2.0/3.0)/3.0 ) );    
   }
 
-  // fill exceptions
+  // fill exceptions:
   TEST_F( JetrateDataStructureTest, testfillExceptions ) {
     vector<Double_t> njetstooshort{ 1., 1., 1., 1., 1. };
     EXPECT_THROW( jrds.fill( njetstooshort ), std::logic_error );
@@ -211,21 +215,21 @@ namespace sjmtests {
     MockNtupleReader mntr;
   };
 
-  // containsAnalysis
+  // containsAnalysis:
   TEST_F( ObsDiffTest, testcontainsAnalysis ) {
     EXPECT_TRUE( obst.containsAnalysis( analysis1 ) );
     EXPECT_TRUE( obst.containsAnalysis( analysis2 ) );
     Analysis analysis3( "bla", "blo", "blu" );
     EXPECT_FALSE( obst.containsAnalysis( analysis3 ) );
   }
-  // getName
+  // getName:
   TEST_F( ObsDiffTest, testgetName ) {
-    //    string name= "thrust";
     EXPECT_EQ( "thrust", obst.getName() );
     EXPECT_EQ( "durhamymerge23", obsy23d.getName() );
     EXPECT_EQ( "jadeymerge23", obsy23j.getName() );
   }
 
+  // Function object for std::find_if below:
   class nameeq {
     string name;
   public:
@@ -235,6 +239,7 @@ namespace sjmtests {
     }
   };
 
+  // Helper to get observable values via FilledObservable class:
   vector<Double_t> getObsValues( const string & name, 
 				 const Analysis & anal,
 				 const Observable & obs ) {
@@ -249,7 +254,7 @@ namespace sjmtests {
     return (*it)->getDataStructure( anal )->getValues();
   }
 
-  // fill
+  // fill tests via mock NtupleReader:
   TEST_F( ObsDiffTest, testfill ) {
     EXPECT_CALL( mntr, getThrust(_) ).WillOnce(Return(0.25));
     obst.fill( &mntr, analysis1 );
@@ -269,7 +274,7 @@ namespace sjmtests {
     EXPECT_EQ( 1.0, y23jvalues[2] );
   }
 
-  // Helper to fill observables from ntuple:
+  // Helper to fill observables from real ntuple:
   void fillFromNtuple( NtupleReader* ntr, const Analysis analysis, 
 		       Observable & obs, size_t nevnt=100 ) {
     for( size_t ievnt= 0; ievnt < nevnt; ievnt++ ) {
@@ -285,7 +290,7 @@ namespace sjmtests {
     }
   }
 
-  // ObsFastJetDiff tests
+  // ObsFastJetDiff tests:
   class ObsFastJetDiffTest : public ::testing::Test {
   public:
     ObsFastJetDiffTest() : 
@@ -305,9 +310,11 @@ namespace sjmtests {
     NtupleReader* ntr;
   };
 
+  // fill test:
   TEST_F( ObsFastJetDiffTest, testfill ) {
     fillFromNtuple( ntr, analysis1, obsfjdd );
-    vector<Double_t> y23dfjvalues= getObsValues( "durhamymergefj23", analysis1, obsfjdd );
+    vector<Double_t> y23dfjvalues= getObsValues( "durhamymergefj23", analysis1, 
+						 obsfjdd );
     vector<Double_t> y23dfjexp{ 0, 0, 4, 10, 17, 21, 27, 10, 0, 0, 0, 0 };
     EXPECT_EQ( y23dfjexp, y23dfjvalues );
   } 
@@ -475,7 +482,7 @@ namespace sjmtests {
     vector<Double_t> n6jetsexp{ 0, 0, 0, 0, 0, 2, 19, 12, 4, 1, 1 };
     EXPECT_EQ( n6jetsexp, n6jets );
   }
-  // expectations not identical to above for njet > 2
+  // expectations for FastJet Jade not identical to above for njet > 2
   TEST_F( ObsJetrTest, testfillfjycutj ) {
     fillFromNtuple( ntr, analysis1, obsfjycutj );
     vector<Double_t> n2jets= getObsValues( "jadeycutfjR2", analysis1, obsfjycutj );
@@ -559,10 +566,59 @@ namespace sjmtests {
     EXPECT_EQ( n4jetsexp, n4jets );
   }
 
+  // SjmConfigParser tests:
+  class SjmConfigParserTest : public ::testing::Test {
+  public:
+    int argc;
+    const char* argv[2];
+    SjmConfigParser sjmcp;
+    SjmConfigParserTest() : argc(2), argv{ "program", "poconfig.cfg" }, 
+      sjmcp( argc, argv ) {} 
+  };
+
+  TEST_F( SjmConfigParserTest, testgetConfigFilename ) {
+    string cfgname= sjmcp.getConfigFileName();
+    EXPECT_EQ( "poconfig.cfg", cfgname );
+  }
+  TEST_F( SjmConfigParserTest, testgetEnergy ) {
+    float energy= sjmcp.getEnergy();
+    EXPECT_FLOAT_EQ( energy, 91.2 );
+  }
+  TEST_F( SjmConfigParserTest, testgetDataLumi ) {
+    float datalumi= sjmcp.getDataLumi();
+    EXPECT_EQ( datalumi, 1.0 );
+  }
+  TEST_F( SjmConfigParserTest, testgetDataFiles ) {
+    vector<string> files= sjmcp.getDataFiles();
+    EXPECT_EQ( files[0], "/path/to/data/da91_96_200.root" );
+    EXPECT_EQ( files[1], "/path/to/data/da91_97_200.root" );
+  }
+  TEST_F( SjmConfigParserTest, testgetSignalMCXsec ) {
+    float xsec= sjmcp.getSignalMCXsec();
+    EXPECT_EQ( xsec, 2.0 );
+  }
+  TEST_F( SjmConfigParserTest, testgetSignalMCFiles ) {
+    vector<string> files= sjmcp.getSignalMCFiles();
+    EXPECT_EQ( files[0], "/path/to/data/mc5025_1_200.root" );
+  }
+  TEST_F( SjmConfigParserTest, testgetAltSignalMCXsec ) {
+    float xsec= sjmcp.getAltSignalMCXsec();
+    EXPECT_EQ( xsec, 3.0 );
+  }
+  TEST_F( SjmConfigParserTest, testgetAltSignalMCFiles ) {
+    vector<string> files= sjmcp.getAltSignalMCFiles();
+    EXPECT_EQ( files[0], "/path/to/data/mc12406_1_200.root" );
+  }
+  TEST_F( SjmConfigParserTest, testgetObservables ) {
+    vector<string> obs= sjmcp.getObservables();
+    EXPECT_EQ( obs[0], "thrust" );
+  }
+
+
 } // namespace
 
 // main must be provided:
-int main( int argc, char **argv ) {
+int main( int argc, char** argv ) {
   ::testing::InitGoogleMock( &argc, argv );
   return RUN_ALL_TESTS();
 }

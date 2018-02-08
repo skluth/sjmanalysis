@@ -11,7 +11,7 @@ FastJetYcutCalculator::FastJetYcutCalculator( const string& algo ) :
 vector<Double_t> 
 FastJetYcutCalculator::getValues( NtupleReader* ntr, 
 				  const vector<Double_t>& Ycutpoints,
-				  const string& reco) const {
+				  const string& reco ) const {
   const vector<TLorentzVector>& vtlv= ntr->GetLorentzVectors( reco );
   size_t n= Ycutpoints.size();
   vector<Double_t> NJets( n );

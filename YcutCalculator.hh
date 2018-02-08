@@ -1,5 +1,5 @@
-#ifndef FASTJETPXCONEEMINCALCULATOR_HH
-#define FASTJETPXCONEEMINCALCULATOR_HH
+#ifndef YCUTCALCULATOR_HH
+#define YCUTCALCULATOR_HH
 
 #include "JetrateCalculator.hh"
 
@@ -9,11 +9,11 @@ class NtupleReader;
 using std::string;
 using std::vector;
 
-class FastJetPxConeEminCalculator: public JetrateCalculator {
-  Double_t RValue;
+class YcutCalculator: public JetrateCalculator {
+  string algorithm;
 public:
-  FastJetPxConeEminCalculator( const Double_t R );
-  ~FastJetPxConeEminCalculator() {}
+  YcutCalculator( const string& );
+  ~YcutCalculator() {}
   vector<Double_t> getValues( NtupleReader*, 
 			      const vector<Double_t>&,
 			      const string& ) const;

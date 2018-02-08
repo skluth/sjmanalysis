@@ -36,7 +36,7 @@ void NtupleReader::OpenFileAndLoadNtuple( const char* filename,
     cout << "NtupleReader::OpenFileAndLoadNtuple: opening file: " 
 	 << filename << endl;
   }
-  nt_file= new TFile( filename );
+  nt_file= TFile::Open( filename );
   if( not nt_file->IsOpen() ) {
     string txt= "NtupleReader::OpenFileAndLoadNtuple: file not open: ";
     txt+= filename;
@@ -103,19 +103,21 @@ bool NtupleReader::LEP1Selection() {
   bool result= true;
   if( !LEP1Preselection() ) result= false;
   if( nt_Ntkd02 < 5 ) result= false;
-  if( costt() > 0.9 ) result= false;
+  if( abscostt() > 0.9 ) result= false;
   return result;
 }
 
 std::map<std::string,bool> NtupleReader::LEP1Selections() {
   std::map<std::string,bool> selections;
-  selections["standard"]= false;
+  selections["stand"]= false;
   selections["costt07"]= false;
   selections["nch7"]= false;
   bool preselection= LEP1Selection();
-  if( preselection and nt_Ntkd02 >= 5 and costt() < 0.9 ) selections["stand"]= true;
-  if( preselection and nt_Ntkd02 >= 7 and costt() < 0.9 ) selections["nch7"]= true;
-  if( preselection and nt_Ntkd02 >= 5 and costt() < 0.7 ) selections["costt07"]= true;
+  if( preselection ) {
+    if( nt_Ntkd02 >= 5 and abscostt() < 0.9 ) selections["stand"]= true;
+    if( nt_Ntkd02 >= 7 and abscostt() < 0.9 ) selections["nch7"]= true;
+    if( nt_Ntkd02 >= 5 and abscostt() < 0.7 ) selections["costt07"]= true;
+  }
   return selections;
 }
 
@@ -145,7 +147,7 @@ Double_t NtupleReader::getRecoYmergeValue( const TString& reco, Int_t njet,
   else if( reco == "hadron" and inRange( njet, maxh ) ) result= Yh[njet-1];
   else if( reco == "parton" and inRange( njet, maxp ) ) result= Yp[njet-1];
   else {
-    std::cout << "NtupleReader::getRecoYmergeValue: no value found " << reco << "  " 
+    std::cout << "NtupleReader::getRecoYmergeValue: no value found " << reco << " "
 	      << njet << " " << maxmt << std::endl;
   }
   return result;

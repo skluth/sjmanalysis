@@ -39,7 +39,7 @@ public:
   bool MCNonRad();
   bool isMC() { return nt_isMC; }
 
-  Float_t costt() { return nt_Tvectc[2]; }
+  Float_t abscostt() { return fabs(nt_Tvectc[2]); }
   virtual Double_t getYmergeD( const TString& reco, Int_t njet );
   virtual Double_t getYmergeE( const TString& reco, Int_t njet );
   virtual Double_t getThrust( const TString& reco );

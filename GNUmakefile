@@ -12,9 +12,7 @@ GMOCKPATH = $(HOME)/Downloads/googletest/googletest-master/googlemock
 GINCS = -I $(GMOCKPATH)/include -I $(GTESTPATH)/include
 GLIBS = -L $(GMOCKPATH) -l gmock -L $(GTESTPATH) -lgtest -lpthread
 
-#FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.0.6/install/bin/fastjet-config
-#FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.1.3/install/bin/fastjet-config
-FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.3.0/install/bin/fastjet-config
+FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.1.3/install/bin/fastjet-config
 FASTJETINC = $(shell $(FASTJETCONFIG) --cxxflags )
 FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --plugins )
 
@@ -32,42 +30,27 @@ FilledObservable.cc Unfolder.cc OutputWriter.cc \
 ThrustCalculator.cc YnmdCalculator.cc YnmjCalculator.cc \
 FastJetYcutCalculator.cc FastJetEminCalculator.cc FastJetRCalculator.cc \
 FastJetPxConeRCalculator.cc FastJetPxConeEminCalculator.cc \
-YcutCalculator.cc
+YcutCalculator.cc AnalysisProcessor.cc SjmConfigParser.cc
 
-DICT = NtupleReaderDict.cc
-DICTLIB = libNtupleReaderDict.so
-LIB= libNtupleReader.so
+LIB = libNtupleReader.so
 DEPS = $(SRCS:.cc=.d)
 
-all: $(DICTLIB)
+all: testsjmanalysis runjob
 
 $(DEPS): %.d: %.cc
 	$(CXX) $(CPPFLAGS) -MM $< -MF $@
 -include $(DEPS)
 
-AnalysisDict.cc: Analysis.hh AnalysisLinkDef.h
-	$(RC) -f $@ -c $^
-
-libAnalysisDict.so: AnalysisDict.o Analysis.o
-	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) -o $@ $^
-
-$(DICT): $(SRCS:.cc=.hh) $(DICT:Dict.cc=LinkDef.h)
-	$(RC) -f $@ -c $^
-
-$(DICTLIB): $(DICT:.cc=.o) $(LIB)
-	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) -o $@ $^
-
 $(LIB): $(SRCS:.cc=.o)
 	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) -o $@ $^
 
-testsjmanalysis.o: testsjmanalysis.cc
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GINCS) -c -o $@ $^
-
-testsjmanalysis: testsjmanalysis.o $(LIB)
-	$(LD) -o $@ $^ $(GLIBS) $(ROOTLIBS)
+testsjmanalysis: testsjmanalysis.cc $(LIB)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GINCS) -o $@ $^ $(GLIBS) $(ROOTLIBS) -lboost_program_options
 	LD_LIBRARY_PATH=$(PWD):$(ROOTLIBDIR) ./$@
 
-clean:
-	rm -f $(DICTLIB) $(DICT:.cc=.*) $(SRCS:.cc=.o) $(LIB) $(DEPS) AnalysisDict.* testsjmanalysis testsjmanalysis.o
+runjob: runjob.cc $(LIB)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) -lboost_program_options
 
-INTERMEDIATE: $(DICTS) AnalysisDict.*
+clean:
+	rm -f $(SRCS:.cc=.o) $(LIB) $(DEPS) testsjmanalysis testsjmanalysis.o runjob
+

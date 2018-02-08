@@ -1,5 +1,7 @@
 
-#if !defined(__CINT__) || defined(__MAKECINT__)
+#include "AnalysisProcessor.hh"
+
+#include "SjmConfigParser.hh"
 #include "Analysis.hh"
 #include "Observable.hh"
 #include "FilledObservable.hh"
@@ -7,29 +9,37 @@
 #include "Unfolder.hh"
 #include "OutputWriter.hh"
 #include "NtupleReader.hh"
+using std::vector;
+using std::string;
 #include <sstream>
 using std::ostringstream;
 #include <iostream>
 using std::cout;
 using std::endl;
-#include <vector>
-using std::vector;
-#include <string>
-using std::string;
 #include <stdexcept>
 using std::logic_error;
-#endif
 
-void processAnalyses( const vector<Analysis>& analyses,
-		      const vector<Observable*>& vobs,
-		      const string& filename,
-		      Int_t maxevt ) {
+
+AnalysisProcessor::AnalysisProcessor( const SjmConfigParser& sjmcp ) {
+  datafilenames= sjmcp.getDataFiles();
+  pyfilenames= sjmcp.getSignalMCFiles();
+  hwfilenames= sjmcp.getAltSignalMCFiles();
+  maxevt= sjmcp.getMaxEvent();
+  obsnames= sjmcp.getObservables();
+}  
+
+
+void AnalysisProcessor::processAnalyses( const vector<Analysis>& analyses,
+					 const vector<Observable*>& vobs,
+					 const string& filename ) {
   cout << "processAnalyses: file " << filename << ", analyses:" << endl;
   for( size_t i= 0; i < analyses.size(); i++ ) {
     cout << analyses[i].getTag() << endl;
   }
   NtupleReader* ntr= new NtupleReader( filename.c_str() );
   Int_t nevnt= ntr->GetNumberEntries();
+  if( nevnt > maxevt ) cout << "processAnalyses: process " 
+			    << maxevt << " events" << endl;
   for( Int_t ievnt= 0; ievnt < TMath::Min( nevnt, maxevt ); ievnt++ ) {
     if( ntr->GetEvent( ievnt ) == 0 ) {
       ostringstream txt;
@@ -65,9 +75,9 @@ void processAnalyses( const vector<Analysis>& analyses,
   return;
 }
 
-void processUnfolding( const vector<Analysis>& measuredAnalyses, 
-		       string unfoldsource,
-		       const vector<FilledObservable*>& vobs ) {
+void AnalysisProcessor::processUnfolding( const vector<Analysis>& measuredAnalyses, 
+					  const string& unfoldsource,
+					  const vector<FilledObservable*>& vobs ) {
   cout << "processUnfolding: bin-by-bin unfolding for analyses:" << endl;
   Analysis hadronlevel( unfoldsource, "hadron", "none", "nonrad" );
   cout << "Hadron level: " << hadronlevel.getTag() << endl;
@@ -84,7 +94,8 @@ void processUnfolding( const vector<Analysis>& measuredAnalyses,
   return;
 }
 
-vector<FilledObservable*> getFilled( const vector<Observable*>& vobs ) {
+vector<FilledObservable*> 
+AnalysisProcessor::getFilled( const vector<Observable*>& vobs ) {
   vector<FilledObservable*> vfobs;
   for( size_t iobs= 0; iobs < vobs.size(); iobs++ ) {
     vector<FilledObservable*> vfobspart= vobs[iobs]->getFilledObservables();
@@ -93,15 +104,7 @@ vector<FilledObservable*> getFilled( const vector<Observable*>& vobs ) {
   return vfobs;
 }
 
-void LEP1Analysis( Int_t maxevt=1000, 
-		   const char* datafilename="da91_96_200.root",
-		   const char* pyfilename="mc5025_1_200.root", 
-		   const char* hwfilename="mc12406_1_200.root" ) {
-
-  // Load libs in root before loading this macro
-  // gROOT->LoadMacro("libNtupleReaderDict.so");
-  // gROOT->ProcessLine(".include /home/skluth/qcd/fastjet/fastjet-3.0.6/install/include")
-  // to allow ACLIC
+void AnalysisProcessor::LEP1Analysis() {
 
   // Define analysis variations:
   vector<Analysis> measuredAnalyses;
@@ -123,30 +126,13 @@ void LEP1Analysis( Int_t maxevt=1000,
   allAnalyses.insert( allAnalyses.end(), hwAnalyses.begin(), hwAnalyses.end() );
 
   // Define observables:
-  vector<string> obsnames;
-  obsnames.push_back( "thrust" );
-  obsnames.push_back( "partonshower" );
-  obsnames.push_back( "durhamymerge23" );
-  obsnames.push_back( "jadeymerge23" );
-  obsnames.push_back( "durhamymergefj" );
-  obsnames.push_back( "jadeymergefj" );
-  obsnames.push_back( "durhamycutfj" );
-  obsnames.push_back( "jadeycutfj" );
-  obsnames.push_back( "durhamycut" );
-  obsnames.push_back( "jadeycut" );
-  obsnames.push_back( "antiktemin" );
-  obsnames.push_back( "antiktR" );
-  obsnames.push_back( "sisconeemin" );
-  obsnames.push_back( "sisconeR" );
-  obsnames.push_back( "pxconeemin" );
-  obsnames.push_back( "pxconeR" );
   ObservableFactory obsfac;
   vector<Observable*> vobs;
   try {
     vobs= obsfac.createObservables( obsnames, allAnalyses );
   }
   catch( const std::exception& e ) {
-    cout << "Cought exception: " << e.what() << endl;
+    cout << "AnalysisProcessor::LEP1Analysis: cought exception: " << e.what() << endl;
     return;
   }
 
@@ -172,9 +158,15 @@ void LEP1Analysis( Int_t maxevt=1000,
 
   // Fill from data and mc (PYTHIA and HERWIG) ntuples:
   try {
-    processAnalyses( measuredAnalyses, vobs, datafilename, maxevt );
-    processAnalyses( pyAnalyses, vobs, pyfilename, maxevt );
-    processAnalyses( hwAnalyses, vobs, hwfilename, maxevt );
+    for( const string& datafilename : datafilenames ) {
+      processAnalyses( measuredAnalyses, vobs, datafilename );
+    }
+    for( const string& pyfilename : pyfilenames ) {
+      processAnalyses( pyAnalyses, vobs, pyfilename );
+    }
+    for( const string& hwfilename : hwfilenames ) {
+      processAnalyses( hwAnalyses, vobs, hwfilename );
+    }
   }
   catch( const std::exception& e ) {
     cout << "Cought exception: " << e.what() << endl;

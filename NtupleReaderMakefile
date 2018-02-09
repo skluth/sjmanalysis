@@ -13,7 +13,8 @@ GINCS = -I $(GMOCKPATH)/include -I $(GTESTPATH)/include
 GLIBS = -L $(GMOCKPATH) -l gmock -L $(GTESTPATH) -lgtest -lpthread
 
 #FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.0.6/install/bin/fastjet-config
-FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.1.3/install/bin/fastjet-config
+#FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.1.3/install/bin/fastjet-config
+FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.3.0/install/bin/fastjet-config
 FASTJETINC = $(shell $(FASTJETCONFIG) --cxxflags )
 FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --plugins )
 

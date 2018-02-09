@@ -31,7 +31,8 @@ FilledObservable.cc Unfolder.cc OutputWriter.cc \
 ThrustCalculator.cc YnmdCalculator.cc YnmjCalculator.cc \
 FastJetYcutCalculator.cc FastJetEminCalculator.cc FastJetRCalculator.cc \
 FastJetPxConeRCalculator.cc FastJetPxConeEminCalculator.cc \
-YcutCalculator.cc
+YcutCalculator.cc SjmConfigParser.cc
+
 
 DICT = NtupleReaderDict.cc
 DICTLIB = libNtupleReaderDict.so

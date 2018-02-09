@@ -20,38 +20,37 @@ ObsPartonShower::ObsPartonShower( const vector<Double_t>& a14bins,
 				  const vector<Double_t>& asbins,
 				  const vector<Double_t>& mrbins,
 				  const vector<Analysis>& variations,
-				  Double_t y34c, Double_t y34y23c ) :
+				  Double_t y34c, Double_t y34y23c,
+				  bool lprint ) :
   Observable( "partonshower" ),
   a14binedges(a14bins), c202binedges(c202bins), asbinedges(asbins), mrbinedges(mrbins),
   y34cut(y34c), y34y23cut(y34y23c) {
   addAnalyses( variations );
-  // cout << "ObsPartonShower::ObsPartonShower: create " << getName() 
-  //      << " with A14, C202, AS, MR with cuts y34cut=" << y34cut 
-  //      << " and y34y23cut=" << y34y23cut << endl;
-  // printVectorD( "A14 binedges:", a14bins );
-  // printVectorD( "C202 binedges:", c202bins );
-  // printVectorD( "AS binedges:", asbins );
-  // printVectorD( "MR binedges:", mrbins );
+  if( lprint ) {
+    cout << "ObsPartonShower::ObsPartonShower: create " << getName() 
+	 << " with A14, C202, AS, MR with cuts y34cut=" << y34cut 
+	 << " and y34y23cut=" << y34y23cut << endl;
+    printVectorD( "A14 binedges:", a14bins );
+    printVectorD( "C202 binedges:", c202bins );
+    printVectorD( "AS binedges:", asbins );
+    printVectorD( "MR binedges:", mrbins );
+  }
 }
 
 //void ObsPartonShower::addAnalyses( const vector<Analysis>& variations ) {
 void ObsPartonShower::addAnalysis( const Analysis& analysis ) {
   // A14, C202, AS, MR:
-  // for( size_t ivar= 0; ivar < variations.size(); ivar++ ) {
-  //  string tag= variations[ivar].getTag();
   string tag= analysis.getTag();
   a14data[tag]= new DifferentialDataStructure( a14binedges );
   c202data[tag]= new DifferentialDataStructure( c202binedges );
   asdata[tag]= new DifferentialDataStructure( asbinedges );
   mrdata[tag]= new DifferentialDataStructure( mrbinedges );
-  //    if( variations[ivar].getReco2() != "none" ) {
   if( analysis.getReco2() != "none" ) {
     a14matrices[tag]= new MatrixDataStructure( a14binedges );
     c202matrices[tag]= new MatrixDataStructure( c202binedges );
     asmatrices[tag]= new MatrixDataStructure( asbinedges );
     mrmatrices[tag]= new MatrixDataStructure( mrbinedges );
   }
-    //  }
   return;
 }
 

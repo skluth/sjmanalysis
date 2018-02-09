@@ -4,6 +4,8 @@
 #include <iostream>
 using std::cout;
 using std::endl;
+#include <boost/algorithm/string.hpp>
+#include <exception>
 
 Analysis::Analysis( const string& src, const string& r, const string& c, 
 		    const string& mcc,  const string& r2,
@@ -12,6 +14,25 @@ Analysis::Analysis( const string& src, const string& r, const string& c,
   source(src), reco(r), cuts(c), mccuts(mcc), reco2(r2),
   bkgstatus(bkgsts),
   unfoldsource(unfsrc), unfoldmethod(unfm) {}
+
+Analysis::Analysis( const string& options ) : 
+  source(), reco(), cuts(), mccuts( "none" ), reco2( "none" ),
+  bkgstatus( "none" ),
+  unfoldsource( "none" ), unfoldmethod( "none" ) {
+  std::vector<std::string> tokens;
+  boost::split( tokens, options, boost::is_any_of( " " ), boost::token_compress_on );
+  size_t ntoken= tokens.size();
+  if( ntoken < 3 ) throw std::runtime_error( "Analysis::Analysis: options wrong" );
+  source= tokens[0];
+  reco= tokens[1];
+  cuts= tokens[2];
+  if( ntoken > 3 ) mccuts= tokens[3];
+  if( ntoken > 4 ) reco2= tokens[4];
+  if( ntoken > 5 ) bkgstatus= tokens[5];
+  if( ntoken > 6 ) unfoldsource= tokens[6];
+  if( ntoken > 7 ) unfoldmethod= tokens[7];
+}
+
 
 Analysis::Analysis() {}
 

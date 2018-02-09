@@ -2,9 +2,14 @@
 #include "YcutCalculator.hh"
 #include "NtupleReader.hh"
 #include "TMath.h"
+#include <iostream>
 
 YcutCalculator::YcutCalculator( const string& algo ) : 
   algorithm(algo) {}
+
+void YcutCalculator::print() const {
+  std::cout << "YcutCalculator algorithm: " << algorithm << std::endl;
+}
 
 vector<Double_t> 
 YcutCalculator::getValues( NtupleReader* ntr, 

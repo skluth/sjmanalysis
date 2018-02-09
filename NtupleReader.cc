@@ -90,37 +90,6 @@ bool NtupleReader::GetEvent( Int_t ievnt ) {
   return result;
 }
 
-bool NtupleReader::LEP1Preselection() {
-  bool result= true;
-  Int_t icjst= nt_Icjst;
-  Int_t iebst= nt_Iebst;
-  Int_t itkmh= nt_Itkmh;
-  if( icjst != 3 or iebst != 3 or itkmh != 1 ) result= false;
-  return result;
-}
-
-bool NtupleReader::LEP1Selection() {
-  bool result= true;
-  if( !LEP1Preselection() ) result= false;
-  if( nt_Ntkd02 < 5 ) result= false;
-  if( abscostt() > 0.9 ) result= false;
-  return result;
-}
-
-std::map<std::string,bool> NtupleReader::LEP1Selections() {
-  std::map<std::string,bool> selections;
-  selections["stand"]= false;
-  selections["costt07"]= false;
-  selections["nch7"]= false;
-  bool preselection= LEP1Selection();
-  if( preselection ) {
-    if( nt_Ntkd02 >= 5 and abscostt() < 0.9 ) selections["stand"]= true;
-    if( nt_Ntkd02 >= 7 and abscostt() < 0.9 ) selections["nch7"]= true;
-    if( nt_Ntkd02 >= 5 and abscostt() < 0.7 ) selections["costt07"]= true;
-  }
-  return selections;
-}
-
 bool NtupleReader::MCNonRad() {
   bool result= false;
   Int_t inonr= nt_Inonr;
@@ -167,8 +136,8 @@ Double_t NtupleReader::getRecoValue( const TString& reco,
   else if( reco == "clusters" ) value= cluster;
   else if( reco == "hadron" ) value= hadron;
   else if( reco == "parton" ) value= parton;
-  else std::cout << "NtupleReader::getRecoValue: reco method " << reco << " not recognised" 
-		 << std::endl;
+  else std::cout << "NtupleReader::getRecoValue: reco method " 
+		 << reco << " not recognised" << std::endl;
   return value;
 }
 
@@ -202,12 +171,13 @@ void NtupleReader::SetBranchAddressChecked( const char* branchname, void* addres
 
 void NtupleReader::Init() {
 
-  // LEP1 preselection:
+  // Preselection:
   nt_tree->SetBranchAddress( "Icjst", &nt_Icjst );
   nt_tree->SetBranchAddress( "Iebst", &nt_Iebst );
-  nt_tree->SetBranchAddress( "Itkmh", &nt_Itkmh );
+  // ITKM and L2MH in subclasses
+  //  nt_tree->SetBranchAddress( "Itkmh", &nt_Itkmh );
 
-  // LEP1 selection:
+  // General selection:
   nt_tree->SetBranchAddress( "Ntkd02", &nt_Ntkd02 );
   nt_tree->SetBranchAddress( "Tvectc", &nt_Tvectc );
 

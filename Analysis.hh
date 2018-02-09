@@ -10,6 +10,7 @@ public:
 	    const string& mcc="none", const string& r2="none",
 	    const string& bkgsts="none",
 	    const string& unfsrc="none", const string& unfm="none" );
+  Analysis( const string& );
   Analysis();
   ~Analysis();
   string getSource() const;

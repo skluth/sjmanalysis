@@ -18,6 +18,8 @@
 #include "FastJetPxConeEminCalculator.hh"
 #include "FastJetPxConeRCalculator.hh"
 
+#include "SjmConfigParser.hh"
+
 #include <iostream>
 #include <algorithm>
 using std::cout;
@@ -27,95 +29,12 @@ using std::stringstream;
 #include <cctype>
 #include <stdexcept>
 
-ObservableFactory::ObservableFactory() : 
-  PxEminValues{ 2, 6, 10, 14, 18, 22, 25.5 },
-  PxRValues{ 0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5 }, 
-  Donkersycutd{ 4.93, 4.81, 4.68, 4.56, 4.43, 4.31, 4.18, 4.06, 
-      3.93, 3.81, 3.68, 3.56, 3.43, 3.31, 3.18, 3.06,
-      2.93, 2.81, 2.68, 2.56, 2.43, 2.31, 2.18, 2.06,
-      1.93, 3.81, 1.68, 1.56, 1.43, 1.31, 1.18, 1.06,
-      0.93, 3.81, 0.68, 0.56 },
-  Donkersycutj{ 2.30, 2.06, 1.90, 1.70, 1.52, 1.40, 1.30, 1.22, 
-      1.15, 1.10, 1.02, 0.94, 0.87, 0.80 } {
-    
-  // Thrust
-  thrustbins.resize( 13 );
-  thrustbins[0]= 0.00;
-  thrustbins[1]= 0.01;
-  thrustbins[2]= 0.02;
-  thrustbins[3]= 0.03;
-  thrustbins[4]= 0.04;
-  thrustbins[5]= 0.05;
-  thrustbins[6]= 0.07;
-  thrustbins[7]= 0.09;
-  thrustbins[8]= 0.12;
-  thrustbins[9]= 0.15;
-  thrustbins[10]= 0.22;
-  thrustbins[11]= 0.30;
-  thrustbins[12]= 0.50;
+ObservableFactory::ObservableFactory( const SjmConfigParser& sjmcp ) :
+  sjmConfigs( sjmcp) {}
 
-  // MR:
-  mrbins.resize( 6 );
-  mrbins[0]= 0.00;
-  mrbins[1]= 0.06;
-  mrbins[2]= 0.15;
-  mrbins[3]= 0.38;
-  mrbins[4]= 0.69;
-  mrbins[5]= 1.00;
-
-  // A14:
-  for( size_t i= 0; i < 21; i++ ) a14bins.push_back( i*0.05 );
-
-  // C202:
-  c202bins.resize( 6 );
-  c202bins[0]= 0.355;
-  c202bins[1]= 0.402;
-  c202bins[2]= 0.424;
-  c202bins[3]= 0.446;
-  c202bins[4]= 0.468;
-  c202bins[5]= 0.495;
-
-  // AS:
-  asbins.resize( 8 );
-  asbins[0]= -0.05;
-  asbins[1]= 0.04;
-  asbins[2]= 0.10;
-  asbins[3]= 0.16;
-  asbins[4]= 0.22;
-  asbins[5]= 0.28;
-  asbins[6]= 0.34;
-  asbins[7]= 0.43;
-
-  // incl. Jetrates and ynm distributions log scale:
-  yNMbins.resize( 11 );
-  for( size_t i= 0; i < yNMbins.size(); i++ ) {
-    yNMbins[i]= 0.5*i;
-  }
-
-  // Emin/Evis points:
-  eminFraction.resize( 9 );
-  eminFraction[0]= 0.02;
-  eminFraction[1]= 0.04;
-  eminFraction[2]= 0.06;
-  eminFraction[3]= 0.08;
-  eminFraction[4]= 0.10;
-  eminFraction[5]= 0.12;
-  eminFraction[6]= 0.14;
-  eminFraction[7]= 0.16;
-  eminFraction[8]= 0.18;
-
-  // R points:
-  Rvalues.resize( 8 );
-  Rvalues[0]= 0.2;
-  Rvalues[1]= 0.4;
-  Rvalues[2]= 0.6;
-  Rvalues[3]= 0.7;
-  Rvalues[4]= 0.8;
-  Rvalues[5]= 1.0;
-  Rvalues[6]= 1.2;
-  Rvalues[7]= 1.4;
-
-
+bool ObservableFactory::nameIs( const string& str, 
+				const string& name ) {
+  return str.find( name ) != string::npos;
 }
 
 // Handle all known observable names:
@@ -123,60 +42,107 @@ vector<Observable*>
 ObservableFactory::createObservables( const vector<string>& obsnames,
 				      const vector<Analysis>& analyses ) {
   vector<Observable*> vobs;
-  for( size_t iobs= 0; iobs < obsnames.size(); iobs++ ) {
-    string name= obsnames[iobs];
-    if( name.find( "thrust" ) != string::npos )
-      vobs.push_back( new ObsDifferential( "thrust", thrustbins, analyses, 
+  for( const string & name : obsnames ) {
+    if( nameIs( name, "thrust" ) ) {
+      vobs.push_back( new ObsDifferential( "thrust", 
+					   sjmConfigs.getPoints( "thrust" ),
+					   analyses, 
 					   new ThrustCalculator() ) );
-    else if( name.find( "partonshower" ) != string::npos )
-      vobs.push_back( new ObsPartonShower( a14bins, 
-					   c202bins,
-					   asbins,
-					   mrbins,
+    }
+    else if( nameIs( name, "partonshower" ) ) {
+      vobs.push_back( new ObsPartonShower( sjmConfigs.getPoints( "a14" ),
+					   sjmConfigs.getPoints( "c202" ),
+					   sjmConfigs.getPoints( "as" ),
+					   sjmConfigs.getPoints( "mr" ),
 					   analyses ) );
-    else if( name.find( "durhamymerge23" ) != string::npos ) 
-      vobs.push_back( new ObsDifferential( "durhamymerge23", yNMbins, analyses,
+    }
+    else if( nameIs( name, "durhamymerge23" ) ) {
+      vobs.push_back( new ObsDifferential( "durhamymerge23", 
+					   sjmConfigs.getPoints( "yNMPoints" ),
+					   analyses,
 					   new YnmdCalculator( 2 ) ) );
-    else if( name.find( "jadeymerge23" ) != string::npos ) 
-      vobs.push_back( new ObsDifferential( "jadeymerge23", yNMbins, analyses,
+    }
+    else if( nameIs( name, "jadeymerge23" ) ) {
+      vobs.push_back( new ObsDifferential( "jadeymerge23", 
+					   sjmConfigs.getPoints( "yNMPoints" ),
+					   analyses,
 					   new YnmjCalculator( 2 ) ) );
-    else if( name.find( "durhamymergefj" ) != string::npos ) 
-      vobs.push_back( new ObsFastJetDiff( name, "eekt", yNMbins, analyses ) );
-    else if( name.find( "jadeymergefj" ) != string::npos )
-      vobs.push_back( new ObsFastJetDiff( name, "jade", yNMbins, analyses ) );
-
-    else if( name.find( "durhamycutfj" ) != string::npos ) 
-      vobs.push_back( new ObsJetrate( name, Donkersycutd, analyses,
+    }
+    else if( nameIs( name, "durhamymergefj" ) ) {
+      vobs.push_back( new ObsFastJetDiff( name, 
+					  "eekt", 
+					  sjmConfigs.getPoints( "yNMPoints" ),
+					  analyses ) );
+    }
+    else if( nameIs( name, "jadeymergefj" ) ) {
+      vobs.push_back( new ObsFastJetDiff( name, 
+					  "jade", 
+					  sjmConfigs.getPoints( "yNMPoints" ),
+					  analyses ) );
+    }
+    else if( nameIs( name, "durhamycutfj" ) ) {
+      vobs.push_back( new ObsJetrate( name, 
+				      sjmConfigs.getPoints( "Donkersycutd" ),
+				      analyses,
 				      new FastJetYcutCalculator( "eekt" ) ) );
-    else if( name.find( "jadeycutfj" ) != string::npos )
-      vobs.push_back( new ObsJetrate( name, Donkersycutj, analyses,
+    }
+    else if( nameIs( name, "jadeycutfj" ) ) {
+      vobs.push_back( new ObsJetrate( name, 
+				      sjmConfigs.getPoints( "Donkersycutj" ),
+				      analyses,
 				      new FastJetYcutCalculator( "jade" ) ) );
-
-    else if( name.find( "durhamycut" ) != string::npos ) 
-      vobs.push_back( new ObsJetrate( name, Donkersycutd, analyses,
+    }
+    else if( nameIs( name, "durhamycut" ) ) {
+      vobs.push_back( new ObsJetrate( name, 
+				      sjmConfigs.getPoints( "Donkersycutd" ),
+				      analyses,
 				      new YcutCalculator( "durham" ) ) );
-    else if( name.find( "jadeycut" ) != string::npos )
-      vobs.push_back( new ObsJetrate( name, Donkersycutj, analyses,
+    }
+    else if( nameIs( name, "jadeycut" ) ) {
+      vobs.push_back( new ObsJetrate( name, 
+				      sjmConfigs.getPoints( "Donkersycutj" ),
+				      analyses,
 				      new YcutCalculator( "jade" ) ) );
-
-    else if( name.find( "antiktemin" ) != string::npos ) 
-      vobs.push_back( new ObsJetrate( name, eminFraction, analyses,
-				      new FastJetEminCalculator( "eeantikt", 0.7 ) ) );
-    else if( name.find( "antiktR" ) != string::npos ) 
-      vobs.push_back( new ObsJetrate( name, Rvalues, analyses,
-				      new FastJetRCalculator( "eeantikt", 0.06 ) ) );
-    else if( name.find( "sisconeemin" ) != string::npos ) 
-      vobs.push_back( new ObsJetrate( name, eminFraction, analyses,
-				      new FastJetEminCalculator( "eesiscone", 0.7 ) ) );
-    else if( name.find( "sisconeR" ) != string::npos ) 
-      vobs.push_back( new ObsJetrate( name, Rvalues, analyses,
-				      new FastJetRCalculator( "eesiscone", 0.06 ) ) );
-    else if( name.find( "pxconeemin" ) != string::npos ) 
-      vobs.push_back( new ObsJetrate( name, PxEminValues, analyses,
-				      new FastJetPxConeEminCalculator( 0.7 ) ) );
-    else if( name.find( "pxconeR" ) != string::npos ) 
-      vobs.push_back( new ObsJetrate( name, PxRValues, analyses,
-				      new FastJetPxConeRCalculator( 7.0 ) ) );
+    }
+    else if( nameIs( name, "antiktemin" ) ) {
+      vobs.push_back( new ObsJetrate( name,
+				      sjmConfigs.getPoints( "eminFractionPoints" ),
+				      analyses,
+				      new FastJetEminCalculator( "eeantikt", 
+								 sjmConfigs.getItem<float>( "Points.RValue" ) ) ) );
+    }
+    else if( nameIs( name, "antiktR" ) ) {
+      vobs.push_back( new ObsJetrate( name, 
+				      sjmConfigs.getPoints( "RPoints" ),
+				      analyses,
+				      new FastJetRCalculator( "eeantikt", 
+							      sjmConfigs.getItem<float>( "Points.eminFractionValue" ) ) ) );
+    }
+    else if( nameIs( name, "sisconeemin" ) ) {
+      vobs.push_back( new ObsJetrate( name, 
+				      sjmConfigs.getPoints( "eminFractionPoints" ),
+				      analyses,
+				      new FastJetEminCalculator( "eesiscone", 
+								 sjmConfigs.getItem<float>( "Points.RValue" ) ) ) );
+    }
+    else if( nameIs( name, "sisconeR" ) ) {
+      vobs.push_back( new ObsJetrate( name, 
+				      sjmConfigs.getPoints( "RPoints" ),
+				      analyses,
+				      new FastJetRCalculator( "eesiscone", 
+							      sjmConfigs.getItem<float>( "Points.eminFractionValue" ) ) ) );
+    }
+    else if( nameIs( name, "pxconeemin" ) ) 
+      vobs.push_back( new ObsJetrate( name, 
+				      sjmConfigs.getPoints( "PxEminPoints" ),
+				      analyses,
+				      new FastJetPxConeEminCalculator( sjmConfigs.getItem<float>( "Points.RValue" ) ) ) );
+    else if( nameIs( name, "pxconeR" ) ) {
+      vobs.push_back( new ObsJetrate( name, 
+				      sjmConfigs.getPoints( "PxRPoints" ),
+				      analyses,
+				      new FastJetPxConeRCalculator( sjmConfigs.getItem<float>( "Points.PxConeEmin" ) ) ) );
+    }
     else {
       string txt= "ObservableFactory::createObservables: wrong class name: " + name;
       throw std::logic_error( txt );

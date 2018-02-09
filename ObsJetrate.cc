@@ -19,22 +19,19 @@ ObsJetrate::ObsJetrate( string name,
   if( lprint ) {
     cout << "ObsJetrate::ObsJetrate: 2, 3, 4, 5, 6-jet fractions for " << name << endl;
     printVectorD( "Points:", pts );
+    calculator->print();
   }
 }
 
 ObsJetrate::~ObsJetrate() {}
 
-//void ObsJetrate::addAnalyses( const vector<Analysis>& variations ) {
 void ObsJetrate::addAnalysis( const Analysis& analysis ) {
-  //  for( size_t i= 0; i < variations.size(); i++ ) {
-  //    string tag= variations[i].getTag();
   string tag= analysis.getTag();
   jetrates2[tag]= new JetrateDataStructure( points, 2 );
   jetrates3[tag]= new JetrateDataStructure( points, 3 );
   jetrates4[tag]= new JetrateDataStructure( points, 4 );
   jetrates5[tag]= new JetrateDataStructure( points, 5 );
   jetrates6[tag]= new JetrateDataStructure( points, 6 );
-    //  }
 }
 
 void ObsJetrate::fill( NtupleReader* ntr, const Analysis& variation ) {

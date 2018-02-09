@@ -7,6 +7,11 @@
 FastJetPxConeRCalculator::FastJetPxConeRCalculator( const Double_t Emin ) :
   EminValue(Emin) {}
 
+void FastJetPxConeRCalculator::print() const {
+  std::cout << "FastJetPxConeRCalculator Emin value: " << EminValue << std::endl;
+}
+
+
 vector<Double_t> 
 FastJetPxConeRCalculator::getValues( NtupleReader* ntr, 
 				     const vector<Double_t>& RPoints,

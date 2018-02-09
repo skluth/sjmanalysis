@@ -33,9 +33,11 @@ public:
   void GetTC( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack );
   void GetMt( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack );
 
-  bool LEP1Preselection();
-  bool LEP1Selection();
-  std::map<std::string,bool> LEP1Selections();
+  // Selections via subclasses:
+  virtual bool Preselection( const std::string& ) = 0;
+  virtual bool Selection( const std::string& ) = 0;
+  virtual const std::map<std::string,bool> getSelections( const std::string& ) = 0;
+
   bool MCNonRad();
   bool isMC() { return nt_isMC; }
 
@@ -44,10 +46,13 @@ public:
   virtual Double_t getYmergeE( const TString& reco, Int_t njet );
   virtual Double_t getThrust( const TString& reco );
 
-private:
+protected:
 
   void Init();
   void SetBranchAddressChecked( const char*, void* );
+
+private:
+
   bool inRange( Int_t, Int_t );
   Double_t getRecoValue( const TString&, 
 			 Float_t, Float_t, Float_t, Float_t, Float_t, Float_t );
@@ -65,6 +70,8 @@ private:
   bool nt_vtlvcache;
   Int_t nt_nevents;
   bool lprint;
+
+protected:
 
   static const Int_t nt_maxtrk= 501;
   static const Int_t nt_maxp= 50;

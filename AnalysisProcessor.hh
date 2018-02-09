@@ -2,20 +2,19 @@
 #define ANALYSISPROCESSOR_HH
 
 #include "Analysis.hh"
+//#include "ObservableFactory.hh"
+#include "SjmConfigParser.hh"
 #include <string>
 #include <vector>
 
 class Observable;
 class FilledObservable;
-class SjmConfigParser;
+class NtupleReader;
 
 class AnalysisProcessor {
 
-  std::vector<std::string> datafilenames;
-  std::vector<std::string> pyfilenames;
-  std::vector<std::string> hwfilenames;
+  SjmConfigParser sjmConfigs;
   int maxevt;
-  std::vector<std::string> obsnames;
 
   void processAnalyses( const std::vector<Analysis>& analyses,
 			const std::vector<Observable*>& vobs,
@@ -27,6 +26,10 @@ class AnalysisProcessor {
 
   std::vector<FilledObservable*> getFilled( const std::vector<Observable*>& vobs );
 
+  std::vector<Analysis> fillAnalyses( const std::string& tag );
+
+  NtupleReader* createNtupleReader( const string& filename );
+
 public:
 
   // AnalysisProcessor() : datafilename( "da91_96_200.root" ),
@@ -34,7 +37,6 @@ public:
   //                       hwfilename( "mc12406_1_200.root" ),
   // 		        maxevt( 1000 ) {}
   AnalysisProcessor( const SjmConfigParser& sjmcp );
-
   ~AnalysisProcessor() {}
 
   void LEP1Analysis();

@@ -23,7 +23,8 @@ public:
 		   const vector<Double_t>&,
 		   const vector<Double_t>&,
 		   const vector<Analysis>&,
-		   Double_t y34c=0.0045, Double_t y34y23c=0.5 );
+		   Double_t y34c=0.0045, Double_t y34y23c=0.5,
+		   bool lprint=true );
   virtual ~ObsPartonShower() {}
   virtual void fill( NtupleReader*, const Analysis& );
   virtual vector<FilledObservable*> getFilledObservables() const;

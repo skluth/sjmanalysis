@@ -5,6 +5,7 @@
 #include "ObsPartonShower.hh"
 #include "Analysis.hh"
 #include "NtupleReader.hh"
+#include "LEP1NtupleReader.hh"
 #include "FilledObservable.hh"
 #include "ThrustCalculator.hh"
 #include "YnmdCalculator.hh"
@@ -156,7 +157,7 @@ namespace sjmtests {
   // getValues, getErrors:
   TEST_F( DifferentialDataStructureTest, testgetters ) {
     vector<Double_t> values= dds.getValues();
-    EXPECT_EQ( 8, values.size() );
+    EXPECT_EQ( 8u, values.size() );
     EXPECT_FLOAT_EQ( 1.0, values[0] );
     EXPECT_FLOAT_EQ( 3.0, values[2] );
     EXPECT_FLOAT_EQ( 2.0, values[3] );
@@ -179,7 +180,8 @@ namespace sjmtests {
 
   // Differential observables:
 
-  class MockNtupleReader: public NtupleReader {
+  //  class MockNtupleReader: public NtupleReader {
+  class MockNtupleReader: public LEP1NtupleReader {
   public:
     MOCK_METHOD1( getThrust, Double_t( const TString& ) );
     MOCK_METHOD2( getYmergeD, Double_t( const TString&, Int_t ) );
@@ -279,11 +281,11 @@ namespace sjmtests {
 		       Observable & obs, size_t nevnt=100 ) {
     for( size_t ievnt= 0; ievnt < nevnt; ievnt++ ) {
       ntr->GetEvent( ievnt );
-      map<string,Bool_t> selections= ntr->LEP1Selections();
+      const map<string,Bool_t> selections= ntr->getSelections( "91.2" );
       bool MCnonrad= ntr->MCNonRad();
       string cuts= analysis.getCuts();
       string mccuts= analysis.getMccuts();
-      if( ( cuts == "none" or selections[cuts] ) and
+      if( ( cuts == "none" or selections.at( cuts ) ) and
           ( mccuts == "none" or MCnonrad ) ) {
 	obs.fill( ntr, analysis );
       }
@@ -299,7 +301,7 @@ namespace sjmtests {
       analysis2( "data", "mt", "costt07" ),
       analyses{ analysis1, analysis2 },
       obsfjdd( "durhamymergefj", "eekt", ynmbinedges, analyses, false ) {
-	ntr= new NtupleReader( "mc5025_1_200.root", "h10", false );
+	ntr= new LEP1NtupleReader( "mc5025_1_200.root", "h10", false );
       }
     virtual ~ObsFastJetDiffTest() { delete ntr; }
     vector<Double_t> ynmbinedges;
@@ -332,8 +334,8 @@ namespace sjmtests {
       analysis2( "data", "mt", "costt07" ),
       analyses{ analysis1, analysis2 },
       obsps( binedgesA14, binedgesC202, binedgesAS, binedgesMR,
-	     analyses ) {
-	ntr= new NtupleReader( "mc5025_1_200.root", "h10", false );
+	     analyses, 0.0045, 0.5, false ) {
+	ntr= new LEP1NtupleReader( "mc5025_1_200.root", "h10", false );
       }
     virtual ~ObsPartonShowerTest() { delete ntr; }
     vector<double> binedgesA14;
@@ -394,7 +396,7 @@ namespace sjmtests {
       obsfjpxemin( "pxconeemin", EminPxpoints, analyses, &fjpxceminc, false ),
       obsfjpxr( "pxconer", RPxpoints, analyses, &fjpxcrc, false )
       {
-	ntr= new NtupleReader( "mc5025_1_200.root", "h10", false );
+	ntr= new LEP1NtupleReader( "mc5025_1_200.root", "h10", false );
       }
     virtual ~ObsJetrTest() { delete ntr; }
     vector<double> Ycutpoints;
@@ -576,44 +578,82 @@ namespace sjmtests {
       sjmcp( argc, argv ) {} 
   };
 
-  TEST_F( SjmConfigParserTest, testgetConfigFilename ) {
-    string cfgname= sjmcp.getConfigFileName();
+  TEST_F( SjmConfigParserTest, testgetItemString ) {
+    string cfgname= sjmcp.getItem<string>( "config" );
     EXPECT_EQ( "poconfig.cfg", cfgname );
+    string energy= sjmcp.getItem<string>( "energy" );
+    EXPECT_EQ( energy, "91.2" );
   }
-  TEST_F( SjmConfigParserTest, testgetEnergy ) {
-    float energy= sjmcp.getEnergy();
-    EXPECT_FLOAT_EQ( energy, 91.2 );
-  }
-  TEST_F( SjmConfigParserTest, testgetDataLumi ) {
-    float datalumi= sjmcp.getDataLumi();
+  TEST_F( SjmConfigParserTest, testgetItemFloat ) {
+    float datalumi= sjmcp.getItem<float>( "Data.lumi" );
     EXPECT_EQ( datalumi, 1.0 );
+    float smcxsec= sjmcp.getItem<float>( "SignalMC.xsec" );
+    EXPECT_EQ( smcxsec, 2.0 );
+    float asmcxsec= sjmcp.getItem<float>( "AltSignalMC.xsec" );
+    EXPECT_EQ( asmcxsec, 3.0 );
   }
-  TEST_F( SjmConfigParserTest, testgetDataFiles ) {
-    vector<string> files= sjmcp.getDataFiles();
-    EXPECT_EQ( files[0], "/path/to/data/da91_96_200.root" );
-    EXPECT_EQ( files[1], "/path/to/data/da91_97_200.root" );
+  TEST_F( SjmConfigParserTest, testgetItemInt ) {
+    int maxevt= sjmcp.getItem<int>( "maxevt" );
+    EXPECT_EQ( 999999, maxevt );
   }
-  TEST_F( SjmConfigParserTest, testgetSignalMCXsec ) {
-    float xsec= sjmcp.getSignalMCXsec();
-    EXPECT_EQ( xsec, 2.0 );
-  }
-  TEST_F( SjmConfigParserTest, testgetSignalMCFiles ) {
-    vector<string> files= sjmcp.getSignalMCFiles();
-    EXPECT_EQ( files[0], "/path/to/data/mc5025_1_200.root" );
-  }
-  TEST_F( SjmConfigParserTest, testgetAltSignalMCXsec ) {
-    float xsec= sjmcp.getAltSignalMCXsec();
-    EXPECT_EQ( xsec, 3.0 );
-  }
-  TEST_F( SjmConfigParserTest, testgetAltSignalMCFiles ) {
-    vector<string> files= sjmcp.getAltSignalMCFiles();
-    EXPECT_EQ( files[0], "/path/to/data/mc12406_1_200.root" );
-  }
-  TEST_F( SjmConfigParserTest, testgetObservables ) {
-    vector<string> obs= sjmcp.getObservables();
+  TEST_F( SjmConfigParserTest, testgetItemTokens ) {
+    vector<string> obs= sjmcp.getItem<vector<string>>( "Observables.observable" );
     EXPECT_EQ( obs[0], "thrust" );
+    vector<string> da= sjmcp.getItem<vector<string>>( "Analyses.data" );
+    vector<string> daexp= { "data mt stand",
+			    "data mt costt07",
+			    "data mt nch7",
+			    "data tc stand" };
+    EXPECT_EQ( da, daexp );
   }
-
+  TEST_F( SjmConfigParserTest, testgetFilepath ) {
+    vector<string> datafiles= sjmcp.getFilepath( "Data.files" );
+    EXPECT_EQ( datafiles[0], "/path/to/data/da91_96_200.root" );
+    EXPECT_EQ( datafiles[1], "/path/to/data/da91_97_200.root" );
+    vector<string> smcfiles= sjmcp.getFilepath( "SignalMC.files" );
+    EXPECT_EQ( smcfiles[0], "/path/to/data/mc5025_1_200.root" );
+    vector<string> asmcfiles= sjmcp.getFilepath( "AltSignalMC.files" );
+    EXPECT_EQ( asmcfiles[0], "/path/to/data/mc12406_1_200.root" );
+  }
+  TEST_F( SjmConfigParserTest, testgetPoints ) {
+    vector<double> bins= sjmcp.getPoints( "thrust" );
+    vector<double> thbins = { 0.00, 0.01, 0.02, 0.03, 0.04, 0.05, 0.07, 
+			      0.09, 0.12, 0.15, 0.22, 0.30, 0.50 };
+    EXPECT_EQ( thbins, bins );
+  }
+  TEST_F( SjmConfigParserTest, testgetItemDoubles ) {
+    vector<double> bins= sjmcp.getItem<vector<double>>( "Points.thrust" );
+    vector<double> thbins = { 0.00, 0.01, 0.02, 0.03, 0.04, 0.05, 0.07, 
+			      0.09, 0.12, 0.15, 0.22, 0.30, 0.50 };
+    EXPECT_EQ( thbins, bins );
+  }
+  
+  // Analysis tests:
+  class AnalysisTest : public ::testing::Test {
+  public:
+    string analysisOptions;
+    Analysis analysis;
+    AnalysisTest() : analysisOptions( "a b c d e f g h" ),
+		     analysis( analysisOptions ) {}
+  };
+  TEST_F( AnalysisTest, testget ) {
+    string src= analysis.getSource() ;
+    EXPECT_EQ( src, "a" );
+    string reco= analysis.getReco();
+    EXPECT_EQ( reco, "b" );
+    string cuts= analysis.getCuts();
+    EXPECT_EQ( cuts, "c" );
+    string mccuts= analysis.getMccuts();
+    EXPECT_EQ( mccuts, "d" );
+    string reco2= analysis.getReco2();
+    EXPECT_EQ( reco2, "e" );
+    string bkgst= analysis.getBkgStatus();
+    EXPECT_EQ( bkgst, "f" );
+    string unfs= analysis.getUnfoldSource();
+    EXPECT_EQ( unfs, "g" );
+    string unfm= analysis.getUnfoldMethod();
+    EXPECT_EQ( unfm, "h" );
+  }
 
 } // namespace
 

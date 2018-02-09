@@ -14,6 +14,7 @@ public:
   vector<Double_t> virtual getValues( NtupleReader*, 
 				      const vector<Double_t>&,
 				      const string& ) const = 0;
+  void virtual print() const = 0;
 };
 
 #endif

@@ -18,6 +18,7 @@ public:
   vector<Double_t> getValues( NtupleReader*, 
 			      const vector<Double_t>&,
 			      const string& ) const;
+  void print() const;
 };
 
 #endif

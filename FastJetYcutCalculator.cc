@@ -8,6 +8,10 @@
 FastJetYcutCalculator::FastJetYcutCalculator( const string& algo ) : 
   algorithm(algo) {}
 
+void FastJetYcutCalculator::print() const {
+  std::cout << "FastJetYcutCalculator algorithm: " << algorithm << std::endl;
+}
+
 vector<Double_t> 
 FastJetYcutCalculator::getValues( NtupleReader* ntr, 
 				  const vector<Double_t>& Ycutpoints,

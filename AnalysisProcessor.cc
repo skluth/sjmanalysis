@@ -9,6 +9,8 @@
 #include "Unfolder.hh"
 #include "OutputWriter.hh"
 #include "NtupleReader.hh"
+#include "LEP1NtupleReader.hh"
+#include "LEP2NtupleReader.hh"
 using std::vector;
 using std::string;
 #include <sstream>
@@ -20,42 +22,55 @@ using std::endl;
 using std::logic_error;
 
 
-AnalysisProcessor::AnalysisProcessor( const SjmConfigParser& sjmcp ) {
-  datafilenames= sjmcp.getDataFiles();
-  pyfilenames= sjmcp.getSignalMCFiles();
-  hwfilenames= sjmcp.getAltSignalMCFiles();
-  maxevt= sjmcp.getMaxEvent();
-  obsnames= sjmcp.getObservables();
+AnalysisProcessor::AnalysisProcessor( const SjmConfigParser& sjmcp ) :
+  sjmConfigs( sjmcp ), maxevt( sjmcp.getItem<int>( "maxevt" ) ) {
 }  
 
+NtupleReader* AnalysisProcessor::createNtupleReader( const string& filename ) {
+  string ecms= sjmConfigs.getItem<string>( "energy" );
+  vector<string> lep2ecms= { "130", "136", "161", "172", "183", "189", 
+			     "192", "196", "200", "202", "205", "207" };
+  NtupleReader* result= 0;
+  if( ecms == "91.2" ) {
+    cout << "AnalysisProcessor::createNtupleReader: LEP1NtupleReader" << endl;
+    result= new LEP1NtupleReader( filename.c_str() );
+  }
+  else if( std::find( lep2ecms.begin(), lep2ecms.end(), ecms ) != lep2ecms.end() ) {
+    cout << "AnalysisProcessor::createNtupleReader: LEP2NtupleReader" << endl;
+    result= new LEP2NtupleReader( filename.c_str() );
+  }
+  else {
+    throw std::runtime_error( "AnalysisProcessor::createNtupleReader: wrong ecms "+ecms );
+  }
+  return result;
+}
 
 void AnalysisProcessor::processAnalyses( const vector<Analysis>& analyses,
 					 const vector<Observable*>& vobs,
 					 const string& filename ) {
   cout << "processAnalyses: file " << filename << ", analyses:" << endl;
-  for( size_t i= 0; i < analyses.size(); i++ ) {
-    cout << analyses[i].getTag() << endl;
+  for( const Analysis& analysis : analyses ) {
+    cout << analysis.getTag() << endl;
   }
-  NtupleReader* ntr= new NtupleReader( filename.c_str() );
+  NtupleReader* ntr= createNtupleReader( filename );
   Int_t nevnt= ntr->GetNumberEntries();
   if( nevnt > maxevt ) cout << "processAnalyses: process " 
 			    << maxevt << " events" << endl;
+  string ecms= sjmConfigs.getItem<string>( "energy" );
   for( Int_t ievnt= 0; ievnt < TMath::Min( nevnt, maxevt ); ievnt++ ) {
     if( ntr->GetEvent( ievnt ) == 0 ) {
       ostringstream txt;
       txt << "processAnalyses: event not found: " << ievnt;
       throw logic_error( txt.str() );
     }
-    map<string,Bool_t> selections= ntr->LEP1Selections();
+    const map<string,Bool_t> selections= ntr->getSelections( ecms );
     bool MCnonrad= ntr->MCNonRad();
-    for( size_t ianal= 0; ianal < analyses.size(); ianal++ ) {
-      Analysis analysis= analyses[ianal];
+    for( const Analysis& analysis : analyses ) {
       string cuts= analysis.getCuts();
       string mccuts= analysis.getMccuts();
-      if( ( cuts == "none" or selections[cuts] ) and
+      if( ( cuts == "none" or selections.at( cuts ) ) and
 	  ( mccuts == "none" or MCnonrad ) ) {
-	for( size_t iobs= 0; iobs < vobs.size(); iobs++ ) {
-	  Observable* obs= vobs[iobs];
+	for( Observable* obs : vobs ) {
 	  // Not all observables have all analysis variants
 	  // due to filling of transfer matrices:
 	  if( obs->containsAnalysis( analysis ) ) {
@@ -77,18 +92,17 @@ void AnalysisProcessor::processAnalyses( const vector<Analysis>& analyses,
 
 void AnalysisProcessor::processUnfolding( const vector<Analysis>& measuredAnalyses, 
 					  const string& unfoldsource,
-					  const vector<FilledObservable*>& vobs ) {
+					  const vector<FilledObservable*>& vfobs ) {
   cout << "processUnfolding: bin-by-bin unfolding for analyses:" << endl;
   Analysis hadronlevel( unfoldsource, "hadron", "none", "nonrad" );
   cout << "Hadron level: " << hadronlevel.getTag() << endl;
-  for( size_t ianal= 0; ianal < measuredAnalyses.size(); ianal++ ) {
-    Analysis measured= measuredAnalyses[ianal];
+  for( const Analysis& measured : measuredAnalyses ) {
     Analysis measuredMC( measured );
     measuredMC.setSource( unfoldsource );
     cout << measured.getTag() << ", " << measuredMC.getTag() << endl;
     Unfolder unfolder( measured, measuredMC, hadronlevel );
-    for( size_t iobs= 0; iobs < vobs.size(); iobs++ ) {
-      unfolder.unfold( vobs[iobs] );
+    for( FilledObservable* fobs : vfobs ) {
+      unfolder.unfold( fobs );
     }
   }
   return;
@@ -97,39 +111,39 @@ void AnalysisProcessor::processUnfolding( const vector<Analysis>& measuredAnalys
 vector<FilledObservable*> 
 AnalysisProcessor::getFilled( const vector<Observable*>& vobs ) {
   vector<FilledObservable*> vfobs;
-  for( size_t iobs= 0; iobs < vobs.size(); iobs++ ) {
-    vector<FilledObservable*> vfobspart= vobs[iobs]->getFilledObservables();
+  for( Observable* obs : vobs ) {
+    vector<FilledObservable*> vfobspart= obs->getFilledObservables();
     vfobs.insert( vfobs.end(), vfobspart.begin(), vfobspart.end() );
   }
   return vfobs;
 }
 
+vector<Analysis> AnalysisProcessor::fillAnalyses( const string& tag ) {
+  vector<Analysis> result;
+  vector<string> AnalysisOptions= sjmConfigs.getItem<vector<string>>( tag );
+  for( const string& options : AnalysisOptions ) {
+    result.push_back( Analysis( options ) );
+  }  
+  return result;
+}
+
 void AnalysisProcessor::LEP1Analysis() {
 
-  // Define analysis variations:
-  vector<Analysis> measuredAnalyses;
-  measuredAnalyses.push_back( Analysis( "data", "mt", "stand" ) );
-  measuredAnalyses.push_back( Analysis( "data", "mt", "costt07" ) );
-  measuredAnalyses.push_back( Analysis( "data", "mt", "nch7" ) );
-  measuredAnalyses.push_back( Analysis( "data", "tc", "stand" ) );
-  vector<Analysis> pyAnalyses;
-  pyAnalyses.push_back( Analysis( "py", "mt", "stand" ) );
-  pyAnalyses.push_back( Analysis( "py", "mt", "costt07" ) );
-  pyAnalyses.push_back( Analysis( "py", "mt", "nch7" ) );
-  pyAnalyses.push_back( Analysis( "py", "tc", "stand" ) );
-  pyAnalyses.push_back( Analysis( "py", "hadron", "none", "nonrad" ) );
-  vector<Analysis> hwAnalyses;
-  hwAnalyses.push_back( Analysis( "hw", "mt", "stand" ) );
-  hwAnalyses.push_back( Analysis( "hw", "hadron", "none", "nonrad" ) );
+  // Get analysis variations from configuration:
+  vector<Analysis> measuredAnalyses= fillAnalyses( "Analyses.data" );
+  vector<Analysis> pyAnalyses= fillAnalyses( "Analyses.signal" );
+  vector<Analysis> hwAnalyses= fillAnalyses( "Analyses.altsignal" );
   vector<Analysis> allAnalyses( measuredAnalyses );
   allAnalyses.insert( allAnalyses.end(), pyAnalyses.begin(), pyAnalyses.end() );
   allAnalyses.insert( allAnalyses.end(), hwAnalyses.begin(), hwAnalyses.end() );
 
-  // Define observables:
-  ObservableFactory obsfac;
+  // Define observables from configuration:
+  ObservableFactory obsfac( sjmConfigs );
   vector<Observable*> vobs;
   try {
-    vobs= obsfac.createObservables( obsnames, allAnalyses );
+    vector<string> observables= 
+      sjmConfigs.getItem<vector<string>>( "Observables.observable" );
+    vobs= obsfac.createObservables( observables, allAnalyses );
   }
   catch( const std::exception& e ) {
     cout << "AnalysisProcessor::LEP1Analysis: cought exception: " << e.what() << endl;
@@ -145,8 +159,7 @@ void AnalysisProcessor::LEP1Analysis() {
   hwMatrixExtras.push_back( Analysis( "hw", "hadron", "stand", "nonrad" ) );
   hwMatrixExtras.push_back( Analysis( "hw", "mt", "stand", "nonrad", "hadron" ) );
   hwAnalyses.insert( hwAnalyses.end(), hwMatrixExtras.begin(), hwMatrixExtras.end() );
-  for( size_t iobs= 0; iobs < vobs.size(); iobs++ ) {
-    Observable* obs= vobs[iobs];
+  for( Observable* obs : vobs ) {
     if( obs->getName() == "thrust" or
 	obs->getName() == "durhamymerge23" or
 	obs->getName() == "jadeymerge23" or
@@ -158,18 +171,18 @@ void AnalysisProcessor::LEP1Analysis() {
 
   // Fill from data and mc (PYTHIA and HERWIG) ntuples:
   try {
-    for( const string& datafilename : datafilenames ) {
+    for( const string& datafilename : sjmConfigs.getFilepath( "Data.files" ) ) {
       processAnalyses( measuredAnalyses, vobs, datafilename );
     }
-    for( const string& pyfilename : pyfilenames ) {
+    for( const string& pyfilename : sjmConfigs.getFilepath( "SignalMC.files" ) ) {
       processAnalyses( pyAnalyses, vobs, pyfilename );
     }
-    for( const string& hwfilename : hwfilenames ) {
+    for( const string& hwfilename : sjmConfigs.getFilepath( "AltSignalMC.files" ) ) {
       processAnalyses( hwAnalyses, vobs, hwfilename );
     }
   }
   catch( const std::exception& e ) {
-    cout << "Cought exception: " << e.what() << endl;
+    cout << "AnalysisProcessor::LEP1Analysis: cought exception " << e.what() << endl;
     return;
   }
 
@@ -188,7 +201,7 @@ void AnalysisProcessor::LEP1Analysis() {
     vector<Analysis> measuredPyAnalyses;
     measuredPyAnalyses.push_back( Analysis( "py", "mt", "stand" ) );
     measuredPyAnalyses.push_back( Analysis( "py", "mt", "costt07" ) );
-    measuredPyAnalyses.push_back( Analysis( "py", "mt", "nch7" ) );
+    // measuredPyAnalyses.push_back( Analysis( "py", "mt", "nch7" ) );
     measuredPyAnalyses.push_back( Analysis( "py", "tc", "stand" ) );
     processUnfolding( measuredPyAnalyses, "py", vfobs );
     vector<Analysis> measuredHwAnalyses;
@@ -196,19 +209,19 @@ void AnalysisProcessor::LEP1Analysis() {
     processUnfolding( measuredHwAnalyses, "hw", vfobs );
   }
   catch( const std::exception& e ) {
-    cout << "Cought exception: " << e.what() << endl;
+    cout << "AnalysisProcessor::LEP1Analysis: cought exception: " << e.what() << endl;
     return;
   }
 
   // Normalise and calculate stat errors, print
   // Normalisation only during postprocessing
-  for( size_t i= 0; i < vfobs.size(); i++ ) {
-    //    vfobs[i]->finalise();
-    vfobs[i]->print();
+  for( FilledObservable* fobs : vfobs ) {
+    //    fobs->finalise();
+    fobs->print();
   }
 
   // Write root objects (TH1D or TGraphErrors, and TH2D):
-  OutputWriter writer( "LEP1Analysis.root" );
+  OutputWriter writer( sjmConfigs.getItem<string>( "outfile" ) );
   writer.write( vfobs );
 
   // The End:

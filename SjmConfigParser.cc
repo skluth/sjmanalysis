@@ -31,10 +31,10 @@ SjmConfigParser::SjmConfigParser( int argc, const char* argv[] ) {
     // Handle config file from cmd line:
     po::options_description specialOptions( "Special options" );
     specialOptions.add_options()
-      ( "energy", po::value<std::string>(), "Energy point" )
-      ( "maxevt", po::value<int>()->default_value(999999), "Max. number of events" )
-      ( "outfile", po::value<std::string>(), "Output file name" )
-      ( "sjmGeneralOptions", po::value<std::string>()->
+      ( "General.energy", po::value<std::string>(), "Energy point" )
+      ( "General.maxevt", po::value<int>()->default_value(999999), "Max. number of events" )
+      ( "General.outfile", po::value<std::string>(), "Output file name" )
+      ( "General.sjmGeneralOptions", po::value<std::string>()->
 	default_value( "sjmGeneralOptions.cfg" ), "Observable configuration file" )
       ( "Data.lumi", po::value<float>(), "Data Lumi" )
       ( "Data.files", po::value<std::vector<std::string>>(), 
@@ -63,7 +63,9 @@ SjmConfigParser::SjmConfigParser( int argc, const char* argv[] ) {
     // Configuratiom of general options:
     po::options_description generalOptions( "General options" );
     generalOptions.add_options()
-      ( "path", po::value<std::string>()->default_value("."), "Data path" )
+      ( "General.url", po::value<std::string>()->default_value( "" ), "Data URL" )
+      ( "General.normalise", po::value<bool>()->default_value( true ), "Normalise" )
+      ( "General.path", po::value<std::string>()->default_value( "." ), "Data path" )
       ( "Observables.observable", po::value<std::vector<std::string>>(),
 	"Observable names" )
       ( "Points.thrust", po::value<std::string>()->default_value( "none" ), 
@@ -91,7 +93,7 @@ SjmConfigParser::SjmConfigParser( int argc, const char* argv[] ) {
       ( "Points.eminFractionValue", po::value<float>()->default_value( 0.06 ), 
 	"Emin fraction value" )
       ( "Points.RValue", po::value<float>()->default_value( 0.7 ), "R value" );
-    std::ifstream generalOptionsFile( getItem<std::string>( "sjmGeneralOptions" ) );
+    std::ifstream generalOptionsFile( getItem<std::string>( "General.sjmGeneralOptions" ) );
     if( generalOptionsFile ) {
       po::store( po::parse_config_file( generalOptionsFile,
 					generalOptions ), vm );
@@ -119,6 +121,7 @@ T SjmConfigParser::getItem( const std::string& tag ) const {
     throw std::runtime_error( txt.str() );
   }
 }
+template bool SjmConfigParser::getItem( const std::string& tag ) const;
 template int SjmConfigParser::getItem( const std::string& tag ) const;
 template float SjmConfigParser::getItem( const std::string& tag ) const;
 template std::string SjmConfigParser::getItem( const std::string& tag ) const;
@@ -142,7 +145,7 @@ std::vector<double> SjmConfigParser::getItem( const std::string& tag ) const {
 std::vector<std::string> 
 SjmConfigParser::getFilepath( const std::string & tag ) const {
   std::vector<std::string> files= getItem<std::vector<std::string>>( tag );
-  std::string path= getItem<std::string>( "path" );
+  std::string path= getItem<std::string>( "General.path" );
   path+= "/";
   for( std::string & file : files ) {
     file.insert( 0, path );
@@ -150,17 +153,26 @@ SjmConfigParser::getFilepath( const std::string & tag ) const {
   return files;
 }
 
-std::vector<double> SjmConfigParser::getPoints( const std::string& tag ) const {
+std::vector<double>
+SjmConfigParser::getPoints( const std::string& tag ) const {
   std::string ptag= "Points."+tag;
   return getItem<std::vector<double>>( ptag );
 }
 
 void SjmConfigParser::printConfig() const {
   std::cout << "Configuration: " << getItem<std::string>( "config" ) << std::endl;
-  std::cout << "Path: " << getItem<std::string>( "path" ) << std::endl;
-  std::cout << "Energy: " << getItem<std::string>( "energy" ) << std::endl; 
-  std::cout << "Output file: " << getItem<std::string>( "outfile" ) << std::endl;
-  std::cout << "Max. events: " << getItem<int>( "maxevt" ) << std::endl;
+  std::cout << "Path: " << getItem<std::string>( "General.path" ) << std::endl;
+  std::cout << "Energy: " << getItem<std::string>( "General.energy" ) << std::endl;
+  std::cout << "Normalise: ";
+  if( getItem<bool>( "General.normalise" ) ) {
+    std::cout << "yes";
+  }
+  else {
+    std::cout << "no";
+  }
+  std::cout << std::endl;    
+  std::cout << "Output file: " << getItem<std::string>( "General.outfile" ) << std::endl;
+  std::cout << "Max. events: " << getItem<int>( "General.maxevt" ) << std::endl;
   printTokens( "Data files:", getFilepath( "Data.files" ) );
   std::cout << "Signal MC name: " << getItem<std::string>( "SignalMC.name" ) 
 	    << std::endl;

@@ -118,6 +118,14 @@ namespace sjmtests {
     EXPECT_FLOAT_EQ( errors[2], TMath::Sqrt( 2.0/3.0*(1.0-2.0/3.0)/3.0 ) );    
   }
 
+  // normalise exceptions:
+  TEST_F( JetrateDataStructureTest, testnormaliseExceptions ) {
+    jrds.normalise();
+    EXPECT_THROW( jrds.normalise(), std::logic_error );  
+    JetrateDataStructure localJrds;
+    EXPECT_THROW( localJrds.normalise(), std::logic_error ); 
+  }
+  
   // fill exceptions:
   TEST_F( JetrateDataStructureTest, testfillExceptions ) {
     vector<Double_t> njetstooshort{ 1., 1., 1., 1., 1. };
@@ -178,9 +186,16 @@ namespace sjmtests {
     EXPECT_FLOAT_EQ( 1.0, values[values.size()-1] );
   }
 
+  // normalise exceptions:
+  TEST_F( DifferentialDataStructureTest, testnormaliseExceptions ) {
+    dds.normalise();
+    EXPECT_THROW( dds.normalise(), std::logic_error );  
+    DifferentialDataStructure localDds;
+    EXPECT_THROW( localDds.normalise(), std::logic_error ); 
+  }
+  
   // Differential observables:
 
-  //  class MockNtupleReader: public NtupleReader {
   class MockNtupleReader: public LEP1NtupleReader {
   public:
     MOCK_METHOD1( getThrust, Double_t( const TString& ) );
@@ -581,7 +596,7 @@ namespace sjmtests {
   TEST_F( SjmConfigParserTest, testgetItemString ) {
     string cfgname= sjmcp.getItem<string>( "config" );
     EXPECT_EQ( "poconfig.cfg", cfgname );
-    string energy= sjmcp.getItem<string>( "energy" );
+    string energy= sjmcp.getItem<string>( "General.energy" );
     EXPECT_EQ( energy, "91.2" );
   }
   TEST_F( SjmConfigParserTest, testgetItemFloat ) {
@@ -593,8 +608,12 @@ namespace sjmtests {
     EXPECT_EQ( asmcxsec, 3.0 );
   }
   TEST_F( SjmConfigParserTest, testgetItemInt ) {
-    int maxevt= sjmcp.getItem<int>( "maxevt" );
+    int maxevt= sjmcp.getItem<int>( "General.maxevt" );
     EXPECT_EQ( 999999, maxevt );
+  }
+  TEST_F( SjmConfigParserTest, testgetItemBool ) {
+    bool normalise= sjmcp.getItem<bool>( "General.normalise" );
+    EXPECT_TRUE( normalise );
   }
   TEST_F( SjmConfigParserTest, testgetItemTokens ) {
     vector<string> obs= sjmcp.getItem<vector<string>>( "Observables.observable" );

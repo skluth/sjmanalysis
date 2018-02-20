@@ -10,7 +10,6 @@ using std::string;
 using std::vector;
 
 class FastJetRCalculator: public JetrateCalculator {
-  //vector<Double_t> points;
   string algorithm;
   Double_t EminFraction;
 public:

@@ -5,7 +5,8 @@ CXX      = g++
 LD       = $(CXX)
 RC       = rootcint
 OPT      = -g
-CXXFLAGS = -Wall -fPIC $(OPT) -std=c++11
+CXXSTD   = -std=c++11
+CXXFLAGS = -Wall -fPIC $(OPT) $(CXXSTD) -Wno-deprecated-declarations
 
 #GTESTPATH = $(HOME)/Downloads/googletest/googletest-master/googletest
 #GMOCKPATH = $(HOME)/Downloads/googletest/googletest-master/googlemock
@@ -16,17 +17,18 @@ GTESTPATH = $(HOME)/Downloads/googletest
 GINCS = -I $(GTESTPATH)/include
 GLIBS = -L $(GTESTPATH)/lib -l gmock -l gtest -l pthread
 
-FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.1.3/install/bin/fastjet-config
+FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.3.0/install/bin/fastjet-config
 FASTJETINC = $(shell $(FASTJETCONFIG) --cxxflags )
 FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --plugins )
 
-ROOTINC = $(shell root-config --noauxcflags --cflags )
-ROOTLIBS = $(shell root-config --libs )
-ROOTLIBDIR = $(shell root-config --libdir )
+ROOTCONFIG = $(HOME)/Downloads/root/root_v6.12.04/bin/root-config
+ROOTINC = $(shell $(ROOTCONFIG) --noauxcflags --cflags )
+ROOTLIBS = $(shell $(ROOTCONFIG) --libs )
+ROOTLIBDIR = $(shell $(ROOTCONFIG) --libdir )
 
 CPPFLAGS = $(ROOTINC) $(FASTJETINC)
 
-SRCS = NtupleReader.cc TFastJet.cc Analysis.cc \
+SRCS = NtupleReader.cc TFastJet.cc Analysis.cc DataStructure.cc \
 JetrateDataStructure.cc DifferentialDataStructure.cc MatrixDataStructure.cc \
 Observable.cc ObsDifferential.cc ObsJetrate.cc ObsFastJetDiff.cc \
 ObsPartonShower.cc ObservableFactory.cc \
@@ -43,7 +45,7 @@ DEPS = $(SRCS:.cc=.d)
 all: testsjmanalysis runjob
 
 $(DEPS): %.d: %.cc
-	$(CXX) $(CPPFLAGS) -MM $< -MF $@
+	$(CXX) $(CPPFLAGS) $(CXXSTD) -MM $< -MF $@
 -include $(DEPS)
 
 $(LIB): $(SRCS:.cc=.o)

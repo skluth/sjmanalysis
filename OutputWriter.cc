@@ -33,7 +33,9 @@ OutputWriter::~OutputWriter() {
   delete outputfile;
 }
 
-void OutputWriter::writeJetrate( JetrateDataStructure* jrds, const string& txt ) {
+void
+OutputWriter::writeJetrate( const JetrateDataStructure* jrds,
+			    const string& txt ) {
   vector<Double_t> points= jrds->getPoints();
   vector<Double_t> values= jrds->getValues();
   vector<Double_t> errors= jrds->getErrors();
@@ -41,8 +43,10 @@ void OutputWriter::writeJetrate( JetrateDataStructure* jrds, const string& txt )
   Double_t xerrors[n];
   for( Int_t i= 0; i < n; i++ ) xerrors[i]= 0.0;
   TGraphErrors tge( n, &(points[0]), &(values[0]), xerrors, &(errors[0]) );
-  tge.SetPoint( n, 99.0, jrds->getNEvents() );
-  tge.SetPointError( n, 0.0, 0.0 );
+  if( not jrds->getNormalised() ) {
+    tge.SetPoint( n, 99.0, jrds->getNEvents() );
+    tge.SetPointError( n, 0.0, 0.0 );
+  }
   tge.SetTitle( txt.c_str() );
   tge.SetMarkerStyle( 20 );
   tge.SetMarkerSize( 1.0 );
@@ -51,8 +55,9 @@ void OutputWriter::writeJetrate( JetrateDataStructure* jrds, const string& txt )
   return;
 }
 
-void OutputWriter::writeDifferentialDistribution( DifferentialDataStructure* dds, 
-						  const string& txt ) {
+void
+OutputWriter::writeDifferentialDistribution( const DifferentialDataStructure* dds, 
+					     const string& txt ) {
   vector<Double_t> binedges= dds->getBinedges();
   vector<Double_t> values= dds->getValues();
   vector<Double_t> errors= dds->getErrors();

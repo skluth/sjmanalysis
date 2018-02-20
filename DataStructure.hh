@@ -10,7 +10,7 @@ class DataStructure {
 
 public:
 
-  DataStructure() : Ntotal(0) {}
+  DataStructure() : Ntotal(0.0), normalised(false) {}
   virtual ~DataStructure() {}
 
   virtual const vector<Double_t>& getPoints() const { return points; }
@@ -20,6 +20,10 @@ public:
   virtual void setErrors( const vector<Double_t>& e ) { errors=e; }
   void setNEvents( Double_t nevents ) { Ntotal= nevents; }
   Double_t getNEvents() const { return Ntotal; }
+  void checkNormalised();
+  void setNormalisedTrue() { normalised= true; }
+  bool getNormalised() const { return normalised; }
+  void checkNtotalGTZero();
   virtual void normalise() = 0;
   virtual void print() = 0;
   virtual DataStructure* clone() = 0;
@@ -30,6 +34,10 @@ protected:
   vector<Double_t> points;
   vector<Double_t> values;
   vector<Double_t> errors;
+
+private:
+
+  bool normalised;
 
 };
 

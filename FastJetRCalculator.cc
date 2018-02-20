@@ -18,11 +18,15 @@ FastJetRCalculator::getValues( NtupleReader* ntr,
 			       const vector<Double_t>& Rpoints, 
 			       const string& reco ) const {
   const vector<TLorentzVector>& vtlv= ntr->GetLorentzVectors( reco );
+
+  Double_t Evis= ntr->Evis( vtlv );
+
   size_t n= Rpoints.size();
   vector<Double_t> NJets( n );
   for( size_t i= 0; i < n; i++ ) {
-    TFastJet tfj( vtlv, algorithm.c_str(), Rpoints[i] );
-    Double_t Evis= tfj.Evis();
+    // TFastJet tfj( vtlv, algorithm.c_str(), Rpoints[i] );
+    TFastJet tfj( vtlv, algorithm.c_str(), Rpoints[i], 0, EminFraction*Evis );
+    // Double_t Evis= tfj.Evis();
     vector<TLorentzVector> incljets= tfj.inclusive_eejets( EminFraction*Evis );
     NJets[i]= incljets.size();
   }

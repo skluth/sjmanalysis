@@ -44,10 +44,13 @@ void JetrateDataStructure::fill( const vector<Double_t>& NJets ) {
 }
 
 void JetrateDataStructure::normalise() {
+  checkNormalised();
+  checkNtotalGTZero();
   for( size_t i= 0; i < values.size(); i++ ) {
     values[i]/= Ntotal;
     errors[i]= TMath::Sqrt( values[i]*(1.0-values[i])/Ntotal ); 
   }
+  setNormalisedTrue();
 }
 
 void JetrateDataStructure::print() {

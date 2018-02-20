@@ -8,11 +8,6 @@
 using std::cout;
 using std::endl;
 
-// FilledObservable::FilledObservable( const string& obsname,
-// 				    const map<string,DataStructure*>& dss,
-// 				    const map<string,MatrixDataStructure*>& mds ) : 
-//   name(obsname), datastructures(dss), matrices(mds) {}
-
 FilledObservable::FilledObservable( const string& obsname,
 				    const map<string,DifferentialDataStructure*>& ddss,
 				    const map<string,MatrixDataStructure*>& mdss ) : 

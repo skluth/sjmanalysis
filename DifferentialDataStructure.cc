@@ -6,6 +6,11 @@ using std::lower_bound;
 #include <iostream>
 using std::cout;
 using std::endl;
+#include <sstream>
+using std::ostringstream;
+#include <stdexcept>
+using std::logic_error;
+
 
 DifferentialDataStructure::DifferentialDataStructure( const vector<Double_t>& bins ) : 
   DataStructure(), binedges(bins) {
@@ -29,21 +34,25 @@ DataStructure* DifferentialDataStructure::clone() {
 // Underflow goes in value[0], overflow goes in values[n+1]:
 void DifferentialDataStructure::fill( Double_t value, Double_t weight ) {
   Ntotal++;
-  vector<double>::iterator iter= lower_bound( binedges.begin(), binedges.end(), value );
+  vector<double>::iterator iter= lower_bound( binedges.begin(),
+					      binedges.end(),
+					      value );
   size_t index= iter-binedges.begin();
   values[index]+= weight;
-  errors[index]= TMath::Sqrt( TMath::Power( errors[index], 2 ) + TMath::Power( weight, 2 ) );
+  errors[index]= TMath::Sqrt( TMath::Power( errors[index], 2 ) +
+			      TMath::Power( weight, 2 ) );
 }
 
 // Normalise only bins, not under- or underflow, because binwidth is not defined:
 void DifferentialDataStructure::normalise() {
-  if( Ntotal > 0.0 ) {
-    for( size_t i= 0; i < points.size(); i++ ) {
-      Double_t binw= binedges[i+1]-binedges[i];
-      values[i+1]/= (Ntotal*binw);
-      errors[i+1]/= (Ntotal*binw);
-    }
+  checkNormalised();
+  checkNtotalGTZero();
+  for( size_t i= 0; i < points.size(); i++ ) {
+    Double_t binw= binedges[i+1]-binedges[i];
+    values[i+1]/= (Ntotal*binw);
+    errors[i+1]/= (Ntotal*binw);
   }
+  setNormalisedTrue();
 }
 
 void DifferentialDataStructure::print() {

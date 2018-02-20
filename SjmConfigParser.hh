@@ -13,7 +13,6 @@ class SjmConfigParser {
 
   void printTokens( const std::string& txt,
 		    const std::vector<std::string> names ) const;
-  //std::string getPath() const;
 
 public:
 

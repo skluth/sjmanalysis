@@ -33,6 +33,9 @@ public:
   void GetTC( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack );
   void GetMt( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack );
 
+  Double_t Evis( const std::vector<TLorentzVector>& v ) const;
+
+  
   // Selections via subclasses:
   virtual bool Preselection( const std::string& ) = 0;
   virtual bool Selection( const std::string& ) = 0;

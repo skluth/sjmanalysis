@@ -12,6 +12,7 @@ using std::string;
 #include <stdexcept>
 using std::logic_error;
 
+// Link PXLIB Fortran
 // extern "C" {
 //   void pxlth4_( Int_t*, Int_t*, Float_t*, Float_t*, Float_t*, Int_t* );
 // };
@@ -417,5 +418,14 @@ void NtupleReader::GetMt( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack ) 
   ntrack= ifill;
   return;
 
+}
+
+Double_t NtupleReader::Evis( const std::vector<TLorentzVector>& v ) const {
+  Double_t evis= std::accumulate( v.begin(), v.end(), 0.0,
+				  []( Double_t sum, const TLorentzVector& tlv ) {
+				    return sum+= tlv.E();
+				  }
+				  );
+  return evis;
 }
 

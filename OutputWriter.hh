@@ -23,8 +23,10 @@ public:
 
 private:
 
-  void writeJetrate( JetrateDataStructure*, const string& );
-  void writeDifferentialDistribution( DifferentialDataStructure*, const string& );
+  void writeJetrate( const JetrateDataStructure*,
+		     const string& );
+  void writeDifferentialDistribution( const DifferentialDataStructure*,
+				      const string& );
   void writeMatrix( MatrixDataStructure*, const string& );
 
   TFile* outputfile;

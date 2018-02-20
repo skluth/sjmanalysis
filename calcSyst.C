@@ -174,7 +174,9 @@ protected:
   TVectorD syerrs;
 public:
   AnalysisObservable( const TString& name ) : obs(name) {}
-  virtual void printResults( TString opt="?", Int_t width=6, Int_t precision=3 ) {
+  virtual void printResults( TString opt="?",
+			     Int_t width=6,
+			     Int_t precision=3 ) {
     cout << "Results for " << obs << endl;
     Int_t imax= points.GetNoElements()-1;
     if( opt.Contains( "n" ) ) imax+=1;

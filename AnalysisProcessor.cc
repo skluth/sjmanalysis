@@ -23,11 +23,12 @@ using std::logic_error;
 
 
 AnalysisProcessor::AnalysisProcessor( const SjmConfigParser& sjmcp ) :
-  sjmConfigs( sjmcp ), maxevt( sjmcp.getItem<int>( "maxevt" ) ) {
+  sjmConfigs( sjmcp ), maxevt( sjmcp.getItem<int>( "General.maxevt" ) ) {
 }  
 
-NtupleReader* AnalysisProcessor::createNtupleReader( const string& filename ) {
-  string ecms= sjmConfigs.getItem<string>( "energy" );
+NtupleReader*
+AnalysisProcessor::createNtupleReader( const string& filename ) {
+  string ecms= sjmConfigs.getItem<string>( "General.energy" );
   vector<string> lep2ecms= { "130", "136", "161", "172", "183", "189", 
 			     "192", "196", "200", "202", "205", "207" };
   NtupleReader* result= 0;
@@ -45,9 +46,10 @@ NtupleReader* AnalysisProcessor::createNtupleReader( const string& filename ) {
   return result;
 }
 
-void AnalysisProcessor::processAnalyses( const vector<Analysis>& analyses,
-					 const vector<Observable*>& vobs,
-					 const string& filename ) {
+void
+AnalysisProcessor::processAnalyses( const vector<Analysis>& analyses,
+				    const vector<Observable*>& vobs,
+				    const string& filename ) {
   cout << "processAnalyses: file " << filename << ", analyses:" << endl;
   for( const Analysis& analysis : analyses ) {
     cout << analysis.getTag() << endl;
@@ -56,7 +58,7 @@ void AnalysisProcessor::processAnalyses( const vector<Analysis>& analyses,
   Int_t nevnt= ntr->GetNumberEntries();
   if( nevnt > maxevt ) cout << "processAnalyses: process " 
 			    << maxevt << " events" << endl;
-  string ecms= sjmConfigs.getItem<string>( "energy" );
+  string ecms= sjmConfigs.getItem<string>( "General.energy" );
   for( Int_t ievnt= 0; ievnt < TMath::Min( nevnt, maxevt ); ievnt++ ) {
     if( ntr->GetEvent( ievnt ) == 0 ) {
       ostringstream txt;
@@ -90,9 +92,10 @@ void AnalysisProcessor::processAnalyses( const vector<Analysis>& analyses,
   return;
 }
 
-void AnalysisProcessor::processUnfolding( const vector<Analysis>& measuredAnalyses, 
-					  const string& unfoldsource,
-					  const vector<FilledObservable*>& vfobs ) {
+void
+AnalysisProcessor::processUnfolding( const vector<Analysis>& measuredAnalyses, 
+				     const string& unfoldsource,
+				     const vector<FilledObservable*>& vfobs ) {
   cout << "processUnfolding: bin-by-bin unfolding for analyses:" << endl;
   Analysis hadronlevel( unfoldsource, "hadron", "none", "nonrad" );
   cout << "Hadron level: " << hadronlevel.getTag() << endl;
@@ -216,12 +219,12 @@ void AnalysisProcessor::LEP1Analysis() {
   // Normalise and calculate stat errors, print
   // Normalisation only during postprocessing
   for( FilledObservable* fobs : vfobs ) {
-    //    fobs->finalise();
+    if( sjmConfigs.getItem<bool>( "General.normalise" ) ) fobs->finalise();
     fobs->print();
   }
 
   // Write root objects (TH1D or TGraphErrors, and TH2D):
-  OutputWriter writer( sjmConfigs.getItem<string>( "outfile" ) );
+  OutputWriter writer( sjmConfigs.getItem<string>( "General.outfile" ) );
   writer.write( vfobs );
 
   // The End:

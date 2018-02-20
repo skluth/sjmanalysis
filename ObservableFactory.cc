@@ -132,6 +132,19 @@ ObservableFactory::createObservables( const vector<string>& obsnames,
 				      new FastJetRCalculator( "eesiscone", 
 							      sjmConfigs.getItem<float>( "Points.eminFractionValue" ) ) ) );
     }
+    else if( nameIs( name, "pxconeemin2" ) ) 
+      vobs.push_back( new ObsJetrate( name, 
+				      sjmConfigs.getPoints( "eminFractionPoints" ),
+				      analyses,
+				      new FastJetEminCalculator( "pxcone",
+								 sjmConfigs.getItem<float>( "Points.RValue" ) ) ) );
+    else if( nameIs( name, "pxconeR2" ) ) {
+      vobs.push_back( new ObsJetrate( name,
+				      sjmConfigs.getPoints( "RPoints" ),
+				      analyses,
+				      new FastJetRCalculator( "pxcone",
+							      sjmConfigs.getItem<float>( "Points.eminFractionValue" ) ) ) );
+    }
     else if( nameIs( name, "pxconeemin" ) ) 
       vobs.push_back( new ObsJetrate( name, 
 				      sjmConfigs.getPoints( "PxEminPoints" ),
@@ -142,7 +155,7 @@ ObservableFactory::createObservables( const vector<string>& obsnames,
 				      sjmConfigs.getPoints( "PxRPoints" ),
 				      analyses,
 				      new FastJetPxConeRCalculator( sjmConfigs.getItem<float>( "Points.PxConeEmin" ) ) ) );
-    }
+    }    
     else {
       string txt= "ObservableFactory::createObservables: wrong class name: " + name;
       throw std::logic_error( txt );

@@ -70,6 +70,10 @@ SjmConfigParser::SjmConfigParser( int argc, const char* argv[] ) {
 	"Observable names" )
       ( "Points.thrust", po::value<std::string>()->default_value( "none" ), 
 	"Thrust bin edges" )
+      
+      ( "Points.EEC", po::value<std::string>()->default_value( "none" ), 
+	"EEC bin edges" )
+      
       ( "Points.y34cut", po::value<float>()->default_value( 0.0045 ), "y34 cut" )
       ( "Points.y34y23cut", po::value<float>()->default_value( 0.5 ), "y34/y23 cut" )
       ( "Points.a14", po::value<std::string>()->default_value( "none" ), "A14 bin edges" )

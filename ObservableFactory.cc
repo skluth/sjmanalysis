@@ -3,6 +3,7 @@
 #include "Observable.hh"
 
 #include "ObsDifferential.hh"
+#include "ObsEEC.hh"
 #include "ThrustCalculator.hh"
 #include "YnmdCalculator.hh"
 #include "YnmjCalculator.hh"
@@ -49,6 +50,12 @@ ObservableFactory::createObservables( const vector<string>& obsnames,
 					   analyses, 
 					   new ThrustCalculator() ) );
     }
+
+    else if( nameIs( name, "EEC" ) ) {
+      vobs.push_back( new ObsEEC( sjmConfigs.getPoints( "EEC" ),
+				  analyses ) );
+    }
+    
     else if( nameIs( name, "partonshower" ) ) {
       vobs.push_back( new ObsPartonShower( sjmConfigs.getPoints( "a14" ),
 					   sjmConfigs.getPoints( "c202" ),

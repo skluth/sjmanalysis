@@ -2,7 +2,7 @@
 #include "DifferentialDataStructure.hh"
 #include "TMath.h"
 #include <algorithm>
-using std::lower_bound;
+using std::upper_bound;
 #include <iostream>
 using std::cout;
 using std::endl;
@@ -34,7 +34,7 @@ DataStructure* DifferentialDataStructure::clone() {
 // Underflow goes in value[0], overflow goes in values[n+1]:
 void DifferentialDataStructure::fill( Double_t value, Double_t weight ) {
   Ntotal++;
-  vector<double>::iterator iter= lower_bound( binedges.begin(),
+  vector<double>::iterator iter= upper_bound( binedges.begin(),
 					      binedges.end(),
 					      value );
   size_t index= iter-binedges.begin();

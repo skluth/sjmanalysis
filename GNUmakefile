@@ -31,7 +31,7 @@ CPPFLAGS = $(ROOTINC) $(FASTJETINC)
 SRCS = NtupleReader.cc TFastJet.cc Analysis.cc DataStructure.cc \
 JetrateDataStructure.cc DifferentialDataStructure.cc MatrixDataStructure.cc \
 Observable.cc ObsDifferential.cc ObsJetrate.cc ObsFastJetDiff.cc \
-ObsPartonShower.cc ObservableFactory.cc \
+ObsPartonShower.cc ObsEEC.cc ObservableFactory.cc \
 FilledObservable.cc Unfolder.cc OutputWriter.cc \
 ThrustCalculator.cc YnmdCalculator.cc YnmjCalculator.cc \
 FastJetYcutCalculator.cc FastJetEminCalculator.cc FastJetRCalculator.cc \

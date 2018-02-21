@@ -21,8 +21,10 @@ class ObsEEC : public Observable {
 
 public:
 
-  ObsEEC( const vector<Double_t>& bins,
+  ObsEEC( const string& name,
+	  const vector<Double_t>& bins,
 	  const vector<Analysis>& variations,
+	  const bool scOpt=true,
 	  const bool lprint=true );
   virtual ~ObsEEC();
   virtual vector<FilledObservable*> getFilledObservables() const;
@@ -33,7 +35,7 @@ private:
   virtual void addAnalysis( const Analysis& );
 
   vector<Double_t> binedges;
-  const Double_t rad2grad;
+  bool selfCorrelation;
   map<string,DifferentialDataStructure*> data;
 
 };

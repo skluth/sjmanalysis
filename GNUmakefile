@@ -42,6 +42,10 @@ LEP1NtupleReader.cc LEP2NtupleReader.cc
 LIB = libNtupleReader.so
 DEPS = $(SRCS:.cc=.d)
 
+DICT = AnalysisDict.cc
+DICTLIB = lib$(DICT:.cc=.so)
+DICTSRCS = Analysis.cc TH1DAnalysisObject.cc TGEAnalysisObject.cc
+
 all: testsjmanalysis runjob
 
 $(DEPS): %.d: %.cc
@@ -57,6 +61,14 @@ testsjmanalysis: testsjmanalysis.cc $(LIB)
 
 runjob: runjob.cc $(LIB)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) -lboost_program_options
+
+
+$(DICT): $(DICTSRCS:.cc=.hh) $(DICT:Dict.cc=LinkDef.h)
+	$(RC) -f $@ -c $^
+
+$(DICTLIB): $(DICT:.cc=.o) $(DICTSRCS:.cc=.o)
+	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) -o $@ $^
+
 
 clean:
 	rm -f $(SRCS:.cc=.o) $(LIB) $(DEPS) testsjmanalysis testsjmanalysis.o runjob

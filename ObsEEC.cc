@@ -11,14 +11,17 @@
 using std::cout;
 using std::endl;
 
-ObsEEC::ObsEEC( const vector<Double_t>& bins,
+ObsEEC::ObsEEC( const string& name,
+		const vector<Double_t>& bins,
 		const vector<Analysis>& variations,
+		const bool scOpt,
 		const bool lprint ) :
-  Observable( "EEC" ), binedges( bins ), rad2grad(180.0/3.141592653589793) {
+  Observable( name ), binedges( bins ), selfCorrelation(scOpt) {
   addAnalyses( variations );
   if( lprint ) {
-    cout << "ObsEEC::ObsEEC: Energy-Energy Correlation for " 
-	 << name << endl;
+    cout << "ObsEEC::ObsEEC: Energy-Energy Correlation for " << name;
+    if( not selfCorrelation ) cout << " w/o self-correlation";
+    cout << endl;
     printVectorD( "Binedges:", bins );
   }
   return;
@@ -31,6 +34,8 @@ void ObsEEC::addAnalysis( const Analysis& analysis ) {
   data[tag]= new DifferentialDataStructure( binedges );
 }
 
+// Calculuate EEC as 1/sigma*dEEC/dchi with chi in radian
+// incl. self-correlation
 void ObsEEC::fill( NtupleReader* ntr, const Analysis& variation ) {
   string tag= variation.getTag();  
   const vector<TLorentzVector>& vtlv= ntr->GetLorentzVectors( variation.getReco() );
@@ -40,17 +45,12 @@ void ObsEEC::fill( NtupleReader* ntr, const Analysis& variation ) {
   Double_t nevents= dds->getNEvents();
   for( const TLorentzVector& tlv1 : vtlv ) {
     for( const TLorentzVector& tlv2 : vtlv ) {
-      if( &tlv1 == &tlv2 ) {
-	dds->fill( 0.0, tlv1.E()/evis );
-      }
-      else {
-	TVector3 v1= tlv1.Vect();
-	TVector3 v2= tlv2.Vect();
-	//      Double_t angle= v1.Angle( v2 )*rad2grad;
-	Double_t angle= v1.Angle( v2 );
-	Double_t eecvalue= tlv1.E()*tlv2.E()/evis2;
-	dds->fill( angle, eecvalue );
-      }
+      if( not selfCorrelation and ( &tlv1 == &tlv2 ) ) continue;
+      TVector3 v1= tlv1.Vect();
+      TVector3 v2= tlv2.Vect();
+      Double_t angle= v1.Angle( v2 );
+      Double_t eecvalue= tlv1.E()*tlv2.E()/evis2;
+      dds->fill( angle, eecvalue );
     }
   }
   nevents+= 1.0;

@@ -602,9 +602,9 @@ namespace sjmtests {
   TEST_F( SjmConfigParserTest, testgetItemFloat ) {
     float datalumi= sjmcp.getItem<float>( "Data.lumi" );
     EXPECT_EQ( datalumi, 1.0 );
-    float smcxsec= sjmcp.getItem<float>( "SignalMC.xsec" );
+    float smcxsec= sjmcp.getItem<float>( "Signal.xsec" );
     EXPECT_EQ( smcxsec, 2.0 );
-    float asmcxsec= sjmcp.getItem<float>( "AltSignalMC.xsec" );
+    float asmcxsec= sjmcp.getItem<float>( "AltSignal.xsec" );
     EXPECT_EQ( asmcxsec, 3.0 );
   }
   TEST_F( SjmConfigParserTest, testgetItemInt ) {
@@ -629,9 +629,9 @@ namespace sjmtests {
     vector<string> datafiles= sjmcp.getFilepath( "Data.files" );
     EXPECT_EQ( datafiles[0], "/path/to/data/da91_96_200.root" );
     EXPECT_EQ( datafiles[1], "/path/to/data/da91_97_200.root" );
-    vector<string> smcfiles= sjmcp.getFilepath( "SignalMC.files" );
+    vector<string> smcfiles= sjmcp.getFilepath( "Signal.files" );
     EXPECT_EQ( smcfiles[0], "/path/to/data/mc5025_1_200.root" );
-    vector<string> asmcfiles= sjmcp.getFilepath( "AltSignalMC.files" );
+    vector<string> asmcfiles= sjmcp.getFilepath( "AltSignal.files" );
     EXPECT_EQ( asmcfiles[0], "/path/to/data/mc12406_1_200.root" );
   }
   TEST_F( SjmConfigParserTest, testgetPoints ) {
@@ -645,6 +645,14 @@ namespace sjmtests {
     vector<double> thbins = { 0.00, 0.01, 0.02, 0.03, 0.04, 0.05, 0.07, 
 			      0.09, 0.12, 0.15, 0.22, 0.30, 0.50 };
     EXPECT_EQ( thbins, bins );
+  }
+  TEST_F( SjmConfigParserTest, testgetMissingsection ) {
+    EXPECT_THROW( sjmcp.getFilepath( "BkgWWllqq.files" ), std::runtime_error );
+  }
+
+  TEST_F( SjmConfigParserTest, testgetitemTest ) {
+    string str= sjmcp.getItem<string>( "General.test" );
+    EXPECT_EQ( str, "a b c" );
   }
   
   // Analysis tests:

@@ -8,12 +8,17 @@ namespace po= boost::program_options;
 
 class SjmConfigParser {
 
+  po::options_description cmdlineOptions;
+  po::options_description specialOptions;
+  po::options_description generalOptions;
+
   po::variables_map vm;
   std::string cfgfilename;
 
-  void printTokens( const std::string& txt,
-		    const std::vector<std::string> names ) const;
-
+  void setDefault( const std::string& key,
+		   const std::string& value );
+  void printOption(  boost::shared_ptr<po::option_description> option ) const;
+  
 public:
 
   SjmConfigParser( int argc, const char* argv[] );

@@ -140,6 +140,22 @@ void AnalysisProcessor::LEP1Analysis() {
   allAnalyses.insert( allAnalyses.end(), pyAnalyses.begin(), pyAnalyses.end() );
   allAnalyses.insert( allAnalyses.end(), hwAnalyses.begin(), hwAnalyses.end() );
 
+  // Background analyses:
+  vector<Analysis> bkgllqqAnalyses;
+  vector<Analysis> bkgqqqqAnalyses;
+  vector<Analysis> bkgeeqqAnalyses;
+  try {
+    bkgllqqAnalyses= fillAnalyses( "Analyses.bkgllqq" );
+    bkgqqqqAnalyses= fillAnalyses( "Analyses.bkgqqqq" );
+    bkgeeqqAnalyses= fillAnalyses( "Analyses.bkgeeqq" );
+    allAnalyses.insert( allAnalyses.end(), bkgllqqAnalyses.begin(), bkgllqqAnalyses.end() );
+    allAnalyses.insert( allAnalyses.end(), bkgqqqqAnalyses.begin(), bkgqqqqAnalyses.end() );
+    allAnalyses.insert( allAnalyses.end(), bkgeeqqAnalyses.begin(), bkgeeqqAnalyses.end() );
+  }
+  catch( const std::exception e ) {
+    cout << "AnalysisProcessor::LEP1Analysis: cought exception: " << e.what() << endl;
+  }
+  
   // Define observables from configuration:
   ObservableFactory obsfac( sjmConfigs );
   vector<Observable*> vobs;
@@ -153,7 +169,7 @@ void AnalysisProcessor::LEP1Analysis() {
     return;
   }
 
-  // Add extras for migration matrices where needed:
+  // Add extra analyses to observables for migration matrices where needed:
   vector<Analysis> pyMatrixExtras;
   pyMatrixExtras.push_back( Analysis( "py", "hadron", "stand", "nonrad" ) );
   pyMatrixExtras.push_back( Analysis( "py", "mt", "stand", "nonrad", "hadron" ) );
@@ -177,12 +193,28 @@ void AnalysisProcessor::LEP1Analysis() {
     for( const string& datafilename : sjmConfigs.getFilepath( "Data.files" ) ) {
       processAnalyses( measuredAnalyses, vobs, datafilename );
     }
-    for( const string& pyfilename : sjmConfigs.getFilepath( "SignalMC.files" ) ) {
+    for( const string& pyfilename : sjmConfigs.getFilepath( "Signal.files" ) ) {
       processAnalyses( pyAnalyses, vobs, pyfilename );
     }
-    for( const string& hwfilename : sjmConfigs.getFilepath( "AltSignalMC.files" ) ) {
+    for( const string& hwfilename : sjmConfigs.getFilepath( "AltSignal.files" ) ) {
       processAnalyses( hwAnalyses, vobs, hwfilename );
     }
+
+    // And from background if present:
+    if( bkgllqqAnalyses.size() > 0 and
+	bkgqqqqAnalyses.size() > 0 and
+	bkgeeqqAnalyses.size() > 0 ) {
+      for( const string& bkgfilename : sjmConfigs.getFilepath( "BkgWWllqq.files" ) ) {
+	processAnalyses( bkgllqqAnalyses, vobs, bkgfilename );
+      }
+      for( const string& bkgfilename : sjmConfigs.getFilepath( "BkgWWqqqq.files" ) ) {
+	processAnalyses( bkgqqqqAnalyses, vobs, bkgfilename );
+      }
+      for( const string& bkgfilename : sjmConfigs.getFilepath( "BkgWWeeqq.files" ) ) {
+	processAnalyses( bkgeeqqAnalyses, vobs, bkgfilename );
+      }
+    }
+
   }
   catch( const std::exception& e ) {
     cout << "AnalysisProcessor::LEP1Analysis: cought exception " << e.what() << endl;

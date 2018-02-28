@@ -7,6 +7,9 @@
 #include <sstream>
 #include <boost/algorithm/string.hpp>
 #include <boost/any.hpp>
+#include <boost/program_options.hpp>
+
+namespace po= boost::program_options;
 
 using std::cout;
 using std::endl;
@@ -16,19 +19,17 @@ typedef std::vector<std::string> VS;
 template <>
 std::string SjmConfigParser::getItem( const std::string& tag ) const;
 
-SjmConfigParser::SjmConfigParser( int argc, const char* argv[] ) :
-  cmdlineOptions( "Cmdline" ),
-  specialOptions( "Special options" ),
-  generalOptions( "General options" ) {
+SjmConfigParser::SjmConfigParser( int argc, const char* argv[] ) {
 
+  // Handle cmdline:
   try {
-
-    // Handle cmdline:
+    po::options_description cmdlineOptions( "Cmdline" );
     cmdlineOptions.add_options()
       ( "help,h", "Help screen" )
       ( "config", po::value<VS>(), "Config file" );
     po::positional_options_description posOpts; 
     posOpts.add( "config", 1 );
+    po::variables_map vm;
     po::store( po::command_line_parser( argc, argv ).
 	       options( cmdlineOptions ).positional( posOpts ).run(),
 	       vm );
@@ -37,121 +38,132 @@ SjmConfigParser::SjmConfigParser( int argc, const char* argv[] ) :
     }
     if( not vm.count( "config" ) ) {
       throw std::runtime_error( "Config file name not given" );
-    }
-
-    // Handle config file from cmd line:
-    specialOptions.add_options()
-
-      ( "General.test", po::value<VS>(), "test field" )
-
-      ( "General.energy", po::value<VS>(), "Energy point" )
-      ( "General.maxevt", po::value<VS>(), "Max. number of events" )
-      ( "General.outfile", po::value<VS>(), "Output file name" )
-      ( "General.sjmGeneralOptions", po::value<VS>(), "Observable configuration file" )
-      ( "Data.lumi", po::value<VS>(), "Data Lumi" )
-      ( "Data.files", po::value<VS>(), "Data file names" )
-      ( "Signal.xsec", po::value<VS>(), "Signal MC xsec" )
-      ( "Signal.name", po::value<VS>(), "Signal MC name" )
-      ( "Signal.files", po::value<VS>(), "Signal MC file names" )
-      ( "AltSignal.xsec", po::value<VS>(), "Alt. signal MC xsec" )
-      ( "AltSignal.name", po::value<VS>(), "Alt. signal MC name" )
-      ( "AltSignal.files", po::value<VS>(), "Alt. signal MC file names" )
-
-      ( "BkgWWllqq.xsec", po::value<VS>(), "Bkg WW->llqq MC xsec" )
-      ( "BkgWWllqq.name", po::value<VS>(), "Bkg WW->llqq MC name" )
-      ( "BkgWWllqq.files", po::value<VS>(), "Bkg WW->llqq MC file names" )
-      
-      ( "BkgWWqqqq.xsec", po::value<VS>(), "Bkg WW->qqqq MC xsec" )
-      ( "BkgWWqqqq.name", po::value<VS>(), "Bkg WW->qqqq MC name" )
-      ( "BkgWWqqqq.files", po::value<VS>(), "Bkg WW->qqqq MC file names" )
-
-      ( "BkgWWeeqq.xsec", po::value<VS>(), "Bkg WW->eeqq MC xsec" )
-      ( "BkgWWeeqq.name", po::value<VS>(), "Bkg WW->eeqq MC name" )
-      ( "BkgWWeeqq.files", po::value<VS>(), "Bkg WW->eeqq MC file names" )      
-
-      ( "Analyses.data", po::value<VS>(), "Data analyses" )
-      ( "Analyses.signal", po::value<VS>(), "Signal MC analyses" )
-      ( "Analyses.altsignal", po::value<VS>(), "Alt. signal MC analyses" )
-
-      ( "Analyses.bkgllqq", po::value<VS>(), "Bkg WW->llqq MC analyses" )
-      ( "Analyses.bkgqqqq", po::value<VS>(), "Bkg WW->qqqq MC analyses" )
-      ( "Analyses.bkgeeqq", po::value<VS>(), "Bkg WW->eeqq MC analyses" );
-
-    cfgfilename= getItem<std::string>( "config" );
-    std::ifstream ifs( cfgfilename );
-    if( ifs ) po::store( po::parse_config_file( ifs, specialOptions ), vm );
-    else throw std::runtime_error( "Config file not found" );
-    setDefault( "General.test", "bla" );
-    setDefault( "General.maxevt", "999999" );
-    setDefault( "General.sjmGeneralOptions", "sjmGeneralOptions.cfg" );
-    po::notify( vm );
-    
-    // Configuratiom of general options:
-    generalOptions.add_options()
-      ( "General.url", po::value<VS>(), "Data URL" )
-      ( "General.normalise", po::value<VS>(), "Normalise" )
-      ( "General.path", po::value<VS>(), "Data path" )
-      ( "Observables.observable", po::value<VS>(), "Observable names" )
-
-      ( "Points.thrust", po::value<VS>(), "Thrust bin edges" )      
-      ( "Points.EEC", po::value<VS>(), "EEC bin edges" )
-
-      ( "Points.y34cut", po::value<VS>(), "y34 cut" )
-      ( "Points.y34y23cut", po::value<VS>(), "y34/y23 cut" )
-      ( "Points.a14", po::value<VS>(), "A14 bin edges" )
-      ( "Points.c202", po::value<VS>(), "C202 bin edges" )
-      ( "Points.as", po::value<VS>(), "AS bin edges" )
-      ( "Points.mr", po::value<VS>(), "MR bin edges" )
-
-      ( "Points.yNMPoints", po::value<VS>(), "Ynm points" )
-      ( "Points.PxEminPoints", po::value<VS>(), "PXCONE Emin points" )
-      ( "Points.PxRPoints", po::value<VS>(), "PXCONE R points" )
-      ( "Points.PxConeEmin", po::value<VS>(), "PXCONE Emin value" )
-      ( "Points.PxConeR", po::value<VS>(), "PXCONE R value" )
-      ( "Points.Donkersycutd", po::value<VS>(), "Donkers Ycut D values" )
-      ( "Points.Donkersycutj", po::value<VS>(), "Donkers Ycut J values" )
-      ( "Points.eminFractionPoints", po::value<VS>(), "Emin fraction points" )
-      ( "Points.RPoints", po::value<VS>(), "R points" )
-      ( "Points.eminFractionValue", po::value<VS>(), "Emin fraction value" )
-      ( "Points.RValue", po::value<VS>(), "R value" );
-
-    std::string filename= getItem<std::string>( "General.sjmGeneralOptions" );
-    std::ifstream generalOptionsFile( filename );
-    if( generalOptionsFile ) {
-      po::store( po::parse_config_file( generalOptionsFile,
-					generalOptions ), vm );
-    }
-    else {
-      throw std::runtime_error( "General options file not found" );
-    }
-    setDefault( "General.url", "" );
-    setDefault( "General.normalise", "1" );
-    setDefault( "General.path", "." );
-    setDefault( "Points.y34cut", "0.0045" );
-    setDefault( "Points.y34y23cut", "0.5" );
-    setDefault( "Points.PxConeEmin", "0.07" );
-    setDefault( "Points.PxConeR", "0.7" );
-    setDefault( "Points.eminFractionValue", "0.06" );
-    setDefault( "Points.RValue", "0.7" );
-    po::notify( vm );
-    
+    }    
+    for( const auto & keyValue : vm ) {
+      valuesMap[keyValue.first]= keyValue.second.as<VS>();
+    }    
+    descriptionMap["config"]= "Config file";
   }
   catch( const po::error & ex ) {
     std::cerr << ex.what() << std::endl;
   }
 
+  // Handle config file from cmd line:
+  std::map< std::string, std::string > specialOptsDescriptionMap;
+  specialOptsDescriptionMap["General.test"]= "test field";
+  specialOptsDescriptionMap["General.energy"]= "Energy point";
+  specialOptsDescriptionMap["General.maxevt"]= "Max. number of events";
+  specialOptsDescriptionMap["General.outfile"]= "Output file name";
+  specialOptsDescriptionMap["General.sjmGeneralOptions"]= "Observable configuration file";
+  specialOptsDescriptionMap["Data.lumi"]= "Data Lumi";
+  specialOptsDescriptionMap["Data.files"]= "Data file names";
+  specialOptsDescriptionMap["Signal.xsec"]= "Signal MC xsec";
+  specialOptsDescriptionMap["Signal.name"]= "Signal MC name";
+  specialOptsDescriptionMap["Signal.files"]= "Signal MC file names";
+  specialOptsDescriptionMap["AltSignal.xsec"]= "Alt. signal MC xsec";
+  specialOptsDescriptionMap["AltSignal.name"]= "Alt. signal MC name";
+  specialOptsDescriptionMap["AltSignal.files"]= "Alt. signal MC file names";
+  
+  specialOptsDescriptionMap["BkgWWllqq.xsec"]= "Bkg WW->llqq MC xsec";
+  specialOptsDescriptionMap["BkgWWllqq.name"]= "Bkg WW->llqq MC name";
+  specialOptsDescriptionMap["BkgWWllqq.files"]= "Bkg WW->llqq MC file names";
+  
+  specialOptsDescriptionMap["BkgWWqqqq.xsec"]= "Bkg WW->qqqq MC xsec";
+  specialOptsDescriptionMap["BkgWWqqqq.name"]= "Bkg WW->qqqq MC name";
+  specialOptsDescriptionMap["BkgWWqqqq.files"]= "Bkg WW->qqqq MC file names";
+  
+  specialOptsDescriptionMap["BkgWWeeqq.xsec"]= "Bkg WW->eeqq MC xsec";
+  specialOptsDescriptionMap["BkgWWeeqq.name"]= "Bkg WW->eeqq MC name";
+  specialOptsDescriptionMap["BkgWWeeqq.files"]= "Bkg WW->eeqq MC file names";      
+  
+  specialOptsDescriptionMap["Analyses.data"]= "Data analyses";
+  specialOptsDescriptionMap["Analyses.signal"]= "Signal MC analyses";
+  specialOptsDescriptionMap["Analyses.altsignal"]= "Alt. signal MC analyses";
+  
+  specialOptsDescriptionMap["Analyses.bkgllqq"]= "Bkg WW->llqq MC analyses";
+  specialOptsDescriptionMap["Analyses.bkgqqqq"]= "Bkg WW->qqqq MC analyses";
+  specialOptsDescriptionMap["Analyses.bkgeeqq"]= "Bkg WW->eeqq MC analyses";
+  
+
+  valuesMap["General.test"]= VS { "bla" };
+  valuesMap["General.maxevt"]= VS { "999999" };
+  valuesMap["General.sjmGeneralOptions"]= VS { "sjmGeneralOptions.cfg" };
+
+  declareOptions( getItem<std::string>( "config" ),
+		  specialOptsDescriptionMap );
+    
+  // General options:
+  std::map< std::string, std::string > generalOptsDescriptionMap;
+  generalOptsDescriptionMap["General.url"]= "Data URL";
+  generalOptsDescriptionMap["General.normalise"]= "Normalise";
+  generalOptsDescriptionMap["General.path"]= "Data path";
+  generalOptsDescriptionMap["Observables.observable"]= "Observable names";
+  
+  generalOptsDescriptionMap["Points.thrust"]= "Thrust bin edges";      
+  generalOptsDescriptionMap["Points.EEC"]= "EEC bin edges";
+  
+  generalOptsDescriptionMap["Points.y34cut"]= "y34 cut";
+  generalOptsDescriptionMap["Points.y34y23cut"]= "y34/y23 cut";
+  generalOptsDescriptionMap["Points.a14"]= "A14 bin edges";
+  generalOptsDescriptionMap["Points.c202"]= "C202 bin edges";
+  generalOptsDescriptionMap["Points.as"]= "AS bin edges";
+  generalOptsDescriptionMap["Points.mr"]= "MR bin edges";
+  
+  generalOptsDescriptionMap["Points.yNMPoints"]= "Ynm points";
+  generalOptsDescriptionMap["Points.PxEminPoints"]= "PXCONE Emin points";
+  generalOptsDescriptionMap["Points.PxRPoints"]= "PXCONE R points";
+  generalOptsDescriptionMap["Points.PxConeEmin"]= "PXCONE Emin value";
+  generalOptsDescriptionMap["Points.PxConeR"]= "PXCONE R value";
+  generalOptsDescriptionMap["Points.Donkersycutd"]= "Donkers Ycut D values";
+  generalOptsDescriptionMap["Points.Donkersycutj"]= "Donkers Ycut J values";
+  generalOptsDescriptionMap["Points.eminFractionPoints"]= "Emin fraction points";
+  generalOptsDescriptionMap["Points.RPoints"]= "R points";
+  generalOptsDescriptionMap["Points.eminFractionValue"]= "Emin fraction value";
+  generalOptsDescriptionMap["Points.RValue"]= "R value";
+    
+  valuesMap["General.url"]= VS { "" };
+  valuesMap["General.normalise"]= VS {"1" };
+  valuesMap["General.path"]= VS { "." };
+  valuesMap["Points.y34cut"]= VS { "0.0045" };
+  valuesMap["Points.y34y23cut"]= VS { "0.5" };
+  valuesMap["Points.PxConeEmin"]= VS { "0.07" };
+  valuesMap["Points.PxConeR"]= VS { "0.7" };
+  valuesMap["Points.eminFractionValue"]= VS { "0.06" };
+  valuesMap["Points.RValue"]= VS { "0.7" };
+
+  declareOptions( getItem<std::string>( "General.sjmGeneralOptions" ),
+		  generalOptsDescriptionMap );
+
   return;
 }
 
-// Set default values directly (builtin default(...) method
-// of add_options(...) does not handle vector<string> argument)
-void SjmConfigParser::setDefault( const std::string& key,
-				  const std::string& value ) {
-  if( not vm.count( key ) ) {
-    vm.insert( std::make_pair( key,
-			       po::variable_value( boost::any( VS { value } ), false ) ) );
+// Setup options described in map by reading file
+void SjmConfigParser::
+declareOptions( const std::string & filename,
+		const std::map< std::string, std::string > & descriptions ) {
+  try {
+    po::options_description options( "Options" );
+    for( const auto & keyValue : descriptions ) {
+      options.add_options()( keyValue.first.c_str(),
+			     po::value<VS>(),
+			     keyValue.second.c_str() );
+    }
+    std::ifstream ifs( filename );
+    po::variables_map vm;
+    if( ifs ) po::store( po::parse_config_file( ifs, options ), vm );
+    else throw std::runtime_error( "Config file not found" );
+    po::notify( vm );    
+    for( const auto & keyValue : vm ) {
+      valuesMap[keyValue.first]= keyValue.second.as<VS>();
+    }
+    descriptionMap.insert( descriptions.begin(),
+			   descriptions.end() );
+  }
+  catch( const po::error & ex ) {
+    std::cerr << ex.what() << std::endl;
   }
 }
+
 
 // Accessor template methods to options:
 
@@ -177,8 +189,8 @@ T SjmConfigParser::getItem( const std::string& tag ) const {
 template <>
 VS SjmConfigParser::getItem( const std::string& tag ) const {
   VS lines;
-  if( vm.count( tag ) ) {
-    lines= vm[tag].as<VS>();
+  if( valuesMap.count( tag ) ) {
+    lines= valuesMap.at( tag );
   }
   else {
     std::ostringstream txt;
@@ -226,42 +238,25 @@ SjmConfigParser::getPoints( const std::string& tag ) const {
   return getItem<std::vector<double>>( ptag );
 }
 
-// Print all configured items:
+// Print all options:
 void SjmConfigParser::printConfig() const {
-  std::vector< boost::shared_ptr<po::option_description> > cmdlineptions=
-    cmdlineOptions.options();
-  for( auto option : cmdlineptions ) {
-    printOption( option );
-  }
-  std::vector< boost::shared_ptr<po::option_description> > specialopts=
-    specialOptions.options();
-  for( auto option : specialopts ) {
-    printOption( option );
-  }
-  std::vector< boost::shared_ptr<po::option_description> > generalopts=
-    generalOptions.options();
-  for( auto option : generalopts ) {
-    printOption( option );
+  cout << "SjmConfigParser: print all known options" << endl;
+  for( auto keyValue : descriptionMap ) {
+    cout << keyValue.first << " (" << keyValue.second << "): ";
+    if( valuesMap.count( keyValue.first ) ) {
+      VS lines= getItem<VS>( keyValue.first );
+      if( lines.size() == 1 ) {
+	cout << lines[0] << endl;
+      }
+      else {
+	cout << endl;
+	for( const std::string line : lines ) cout << line << endl;
+      }
+    }
+    else {
+      cout << "not given" << endl;
+    }
   }
 }
 
-// Print a option:
-void SjmConfigParser::printOption( boost::shared_ptr<po::option_description> option ) const {
-  std::string key= option->key( "*" );
-  cout << key << " (" << option->description() << "): ";
-  if( vm.count( key ) ) {
-    VS lines= getItem<VS>( key );
-    if( lines.size() == 1 ) {
-      cout << lines[0] << endl;
-    }
-    else {
-      cout << endl;
-      for( const std::string line : lines ) cout << line << endl;
-    }
-  }
-  else {
-    cout << "not given" << endl;
-  }
-  return;
-}
 

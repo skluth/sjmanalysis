@@ -132,6 +132,8 @@ vector<Analysis> AnalysisProcessor::fillAnalyses( const string& tag ) {
 
 void AnalysisProcessor::LEP1Analysis() {
 
+  cout << "AnalysisProcessor::LEP1Analysis: Welcome" << endl;
+
   // Get analysis variations from configuration:
   vector<Analysis> measuredAnalyses= fillAnalyses( "Analyses.data" );
   vector<Analysis> pyAnalyses= fillAnalyses( "Analyses.signal" );
@@ -153,10 +155,11 @@ void AnalysisProcessor::LEP1Analysis() {
     allAnalyses.insert( allAnalyses.end(), bkgeeqqAnalyses.begin(), bkgeeqqAnalyses.end() );
   }
   catch( const std::exception e ) {
-    cout << "AnalysisProcessor::LEP1Analysis: cought exception: " << e.what() << endl;
+    cout << "AnalysisProcessor::LEP1Analysis: no background analyses" << endl;
   }
   
   // Define observables from configuration:
+  cout << "AnalysisProcessor::LEP1Analysis: create observables" << endl;
   ObservableFactory obsfac( sjmConfigs );
   vector<Observable*> vobs;
   try {
@@ -165,7 +168,8 @@ void AnalysisProcessor::LEP1Analysis() {
     vobs= obsfac.createObservables( observables, allAnalyses );
   }
   catch( const std::exception& e ) {
-    cout << "AnalysisProcessor::LEP1Analysis: cought exception: " << e.what() << endl;
+    cout << "AnalysisProcessor::LEP1Analysis: create observables cought exception: "
+	 << e.what() << endl;
     return;
   }
 
@@ -189,6 +193,7 @@ void AnalysisProcessor::LEP1Analysis() {
   }
 
   // Fill from data and mc (PYTHIA and HERWIG) ntuples:
+  cout << "AnalysisProcessor::LEP1Analysis: fill from ntuples" << endl;
   try {
     for( const string& datafilename : sjmConfigs.getFilepath( "Data.files" ) ) {
       processAnalyses( measuredAnalyses, vobs, datafilename );
@@ -217,7 +222,7 @@ void AnalysisProcessor::LEP1Analysis() {
 
   }
   catch( const std::exception& e ) {
-    cout << "AnalysisProcessor::LEP1Analysis: cought exception " << e.what() << endl;
+    cout << "AnalysisProcessor::LEP1Analysis: filling cought exception: " << e.what() << endl;
     return;
   }
 
@@ -244,12 +249,12 @@ void AnalysisProcessor::LEP1Analysis() {
     processUnfolding( measuredHwAnalyses, "hw", vfobs );
   }
   catch( const std::exception& e ) {
-    cout << "AnalysisProcessor::LEP1Analysis: cought exception: " << e.what() << endl;
+    cout << "AnalysisProcessor::LEP1Analysis: unfolding cought exception: "
+	 << e.what() << endl;
     return;
   }
 
   // Normalise and calculate stat errors, print
-  // Normalisation only during postprocessing
   for( FilledObservable* fobs : vfobs ) {
     if( sjmConfigs.getItem<bool>( "General.normalise" ) ) fobs->finalise();
     fobs->print();

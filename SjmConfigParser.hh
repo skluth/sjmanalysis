@@ -3,22 +3,16 @@
 
 #include <vector>
 #include <string>
-#include <boost/program_options.hpp>
-namespace po= boost::program_options;
+#include <map>
 
 class SjmConfigParser {
 
-  po::options_description cmdlineOptions;
-  po::options_description specialOptions;
-  po::options_description generalOptions;
+  std::map< std::string, std::string > descriptionMap;
+  std::map< std::string, std::vector<std::string> > valuesMap;
 
-  po::variables_map vm;
-  std::string cfgfilename;
+  void declareOptions( const std::string & filename,
+		       const std::map< std::string, std::string > & descriptions );
 
-  void setDefault( const std::string& key,
-		   const std::string& value );
-  void printOption(  boost::shared_ptr<po::option_description> option ) const;
-  
 public:
 
   SjmConfigParser( int argc, const char* argv[] );
@@ -28,7 +22,7 @@ public:
   std::vector<std::string> getFilepath( const std::string & tag ) const;
   std::vector<double> getPoints( const std::string& tag ) const;
   void printConfig() const;
-
+ 
 };
 
 #endif

@@ -2,7 +2,10 @@
 #include "FastJetRCalculator.hh"
 #include "NtupleReader.hh"
 #include "TFastJet.hh"
+
 #include "TLorentzVector.h"
+
+#include <iostream>
 
 FastJetRCalculator::FastJetRCalculator( const string& algo, 
 					Double_t eminf ) : 

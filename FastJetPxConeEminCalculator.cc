@@ -3,6 +3,7 @@
 #include "NtupleReader.hh"
 #include "TFastJet.hh"
 #include "TLorentzVector.h"
+#include <iostream>
 
 FastJetPxConeEminCalculator::FastJetPxConeEminCalculator( const Double_t R ) :
   RValue(R) {}

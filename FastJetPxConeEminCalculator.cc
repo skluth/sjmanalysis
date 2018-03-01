@@ -20,7 +20,7 @@ FastJetPxConeEminCalculator::getValues( NtupleReader* ntr,
   size_t n= EminPoints.size();
   vector<Double_t> NJets( n );
   for( size_t i= 0; i < n; i++ ) {
-    TFastJet tfj( vtlv, "pxcone", RValue, 0, EminPoints[i] );
+    TFastJet tfj( vtlv, "pxcone", RValue, EminPoints[i] );
     vector<TLorentzVector> incljets= tfj.inclusive_eejets( EminPoints[i] );      
     NJets[i]= incljets.size();
   }

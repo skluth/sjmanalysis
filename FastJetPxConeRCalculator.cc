@@ -13,7 +13,6 @@ void FastJetPxConeRCalculator::print() const {
 	    << EminValue << " GeV" << std::endl;
 }
 
-
 vector<Double_t> 
 FastJetPxConeRCalculator::getValues( NtupleReader* ntr, 
 				     const vector<Double_t>& RPoints,
@@ -22,7 +21,7 @@ FastJetPxConeRCalculator::getValues( NtupleReader* ntr,
   size_t n= RPoints.size();
   vector<Double_t> NJets( n );
   for( size_t i= 0; i < n; i++ ) {
-    TFastJet tfj( vtlv, "pxcone", RPoints[i], 0, EminValue );
+    TFastJet tfj( vtlv, "pxcone", RPoints[i], EminValue );
     vector<TLorentzVector> incljets= tfj.inclusive_eejets( EminValue );
     NJets[i]= incljets.size();
   }

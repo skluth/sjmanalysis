@@ -23,52 +23,48 @@ using std::endl;
 #include <stdexcept>
 using std::logic_error;
 
-
+// Declare Recombiner class for E0 scheme e+e- algorithms:
 class EEE0Recombiner: public fastjet::JetDefinition::Recombiner {
-
 public:
-
   EEE0Recombiner() {}
   ~EEE0Recombiner() {}
   virtual string description() const;
   virtual void recombine( const fastjet::PseudoJet& pa,
 			  const fastjet::PseudoJet& pb, 
 			  fastjet::PseudoJet& pab ) const;
-
 };
 
 
 TFastJet::TFastJet( const vector<TLorentzVector>& vtl, 
 		    const char* jetalg, 
-		    const double& R, 
-		    const vector<int>* vindx,
+		    const double R, 
+		    // const vector<int>* vindx,
 		    const double Emin ) : clusseq(0) {
 
-  // Hide map from rootcint
-  static map<string,fastjet::JetAlgorithm> jamap;
-  if( jamap.size() == 0 ) {
-    jamap["kt"]= fastjet::kt_algorithm;
-    jamap["cambridge"]= fastjet::cambridge_algorithm;
-    jamap["antikt"]= fastjet::antikt_algorithm;
-    jamap["genkt"]= fastjet::genkt_algorithm;
-    jamap["siscone"]= fastjet::plugin_algorithm;
-    jamap["eesiscone"]= fastjet::plugin_algorithm;
-    jamap["eekt"]= fastjet::ee_kt_algorithm;
-    jamap["jade"]= fastjet::plugin_algorithm;
-    jamap["eeantikt"]= fastjet::ee_genkt_algorithm;
-    jamap["pxcone"]= fastjet::plugin_algorithm;
-  }
-  // Check input:
+  // Map of supported algorithms to fastjet enum:
+  map<string,fastjet::JetAlgorithm> jamap {
+    { "kt", fastjet::kt_algorithm },
+    { "cambridge", fastjet::cambridge_algorithm },
+    { "antikt", fastjet::antikt_algorithm },
+    { "genkt", fastjet::genkt_algorithm },
+    { "siscone", fastjet::plugin_algorithm },
+    { "eesiscone", fastjet::plugin_algorithm },
+    { "eekt", fastjet::ee_kt_algorithm },
+    { "jade", fastjet::plugin_algorithm },
+    { "eeantikt", fastjet::ee_genkt_algorithm },
+    { "pxcone", fastjet::plugin_algorithm }
+  };
   string jetalgString( jetalg );
   if( jamap.find( jetalgString ) == jamap.end() ) {
     string txt= "TFastJet::TFastJet: wrong algorithm: " + jetalgString;
     throw logic_error( txt );
   }
+
   // Setup fastjet:
   fastjet::JetAlgorithm ja= jamap[jetalgString];
   fastjet::JetDefinition jetdef;
   fastjet::JetDefinition::Recombiner* recombiner= 0;
-  fastjet::JetDefinition::Plugin* plugin;
+  fastjet::JetDefinition::Plugin* plugin= 0;
   if( ja == fastjet::plugin_algorithm ) {
     if( jetalgString == "siscone" ) {
       plugin= new fastjet::SISConePlugin( R, 0.75 );
@@ -103,31 +99,25 @@ TFastJet::TFastJet( const vector<TLorentzVector>& vtl,
   else {
     jetdef= fastjet::JetDefinition( ja, R );
   }
-  // Prepare input 4-vectors:
-  vector<fastjet::PseudoJet> particles;
-  for( UInt_t i= 0; i < vtl.size(); i++ ) {
-    fastjet::PseudoJet pj( vtl[i] );
-    if( vindx == 0 ) pj.set_user_index( i );
-    else pj.set_user_index( vindx->at(i) );
-    particles.push_back( pj );
-  }
+
   // Run jet algorithm:
-  clusseq= new fastjet::ClusterSequence( particles, jetdef );
+  clusseq= new fastjet::ClusterSequence( vtl, jetdef );
+
 }
 
 TFastJet::~TFastJet() {
   if( clusseq ) delete clusseq;
 }
 
-// All jets with p_t > p_t,min (or E > Emin for e+e-):
-const vector<TLorentzVector> TFastJet::inclusive_jets( const double& ptmin ) {
+// All jets with p_t > p_t,min:
+const vector<TLorentzVector> TFastJet::inclusive_jets( const double ptmin ) {
   vector<fastjet::PseudoJet> incljets= clusseq->inclusive_jets( ptmin );
   vector<fastjet::PseudoJet> pjets= sorted_by_pt( incljets );
   return copyPseudoJetsToLorentzVectors( pjets );
 }
 
 // All jets with E > Emin for e+e-:
-const vector<TLorentzVector> TFastJet::inclusive_eejets( const double& Emin ) {
+const vector<TLorentzVector> TFastJet::inclusive_eejets( const double Emin ) {
   vector<fastjet::PseudoJet> incljets= clusseq->inclusive_jets( 0.0 );
   vector<fastjet::PseudoJet> pjets= sorted_by_E( incljets );
   return copyPseudoJetsToLorentzVectors( pjets, Emin );
@@ -145,10 +135,11 @@ const vector<TLorentzVector>
 TFastJet::copyPseudoJetsToLorentzVectors( const vector<fastjet::PseudoJet>& pjets,
 					  const double Emin ) {
   vector<TLorentzVector> jetstlv;
-  jetstlv.clear();
+  //jetstlv.clear();
   jetstlv.reserve( pjets.size() );
-  for( UInt_t i= 0; i < pjets.size(); i++ ) {
-    fastjet::PseudoJet pj= pjets[i];
+  //for( UInt_t i= 0; i < pjets.size(); i++ ) {
+  //  fastjet::PseudoJet pj= pjets[i];
+  for( const fastjet::PseudoJet& pj : pjets ) {
     if( pj.E() > Emin ) {
       TLorentzVector tlv( pj.px(), pj.py(), pj.pz(), pj.E() );
       jetstlv.push_back( tlv );
@@ -191,8 +182,7 @@ double TFastJet::Evis() {
   return clusseq->Q();
 }
 
-// class EEE0Recombiner to study remobination effects with Jade:
-
+// class EEE0Recombiner implementation to study remobination effects with Jade:
 string EEE0Recombiner::description() const {
   return "E0 scheme for EE"; 
 }

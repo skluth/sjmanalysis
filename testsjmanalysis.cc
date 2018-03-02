@@ -19,9 +19,9 @@
 #include "FastJetPxConeEminCalculator.hh"
 #include "FastJetPxConeRCalculator.hh"
 
-
 #include "SjmConfigParser.hh"
 
+#include "VectorHelpers.hh"
 
 #include "TMath.h"
 
@@ -682,6 +682,94 @@ namespace sjmtests {
     EXPECT_EQ( unfm, "h" );
   }
 
+  class TransformTest : public ::testing::Test {
+  public:
+    vector<double> v1 { 4, 5, 6 };
+    vector<double> v2 { 1, 2, 3 };
+  };
+  TEST_F( TransformTest, multiplyVector ) {
+    vector<double> result= multiplyVectors( v1, v2 );
+    vector<double> expectation { 4, 10, 18 };
+    EXPECT_EQ( expectation, result );
+  }
+  TEST_F( TransformTest, subtractVector ) {
+    vector<double> result= subtractVectors( v1, v2 );
+    vector<double> expectation { 3, 3, 3 };
+    EXPECT_EQ( expectation, result );
+  }
+  TEST_F( TransformTest, divideChecked ) {
+    vector<double> result= divideChecked( v1, v2 );
+    vector<double> expectation { 4, 5.0/2.0, 2.0 };
+    EXPECT_EQ( expectation, result );
+  }
+  TEST_F( TransformTest, divideCheckedDividebyzero ) {
+    v2[1]= 0.0;
+    vector<double> result= divideChecked( v1, v2 );
+    vector<double> expectation { 4, 0.0, 2 };
+    EXPECT_EQ( expectation, result );
+  }
+  TEST_F( TransformTest, divideCheckedDividebyzeroThrow ) {
+    v2[1]= 0.0;
+    try {
+      vector<double> result= divideChecked( v1, v2, true );
+      FAIL() << "Was expecting runtime_error divide by zero" << std::endl;
+    }
+    catch( const std::runtime_error& e ) {
+      std::string txt= e.what();
+      EXPECT_EQ( txt, "divide by zero" );
+    }
+  }
+  TEST_F( TransformTest, operatorMinus ) {
+    vector<double> result= v1-v2;
+    vector<double> expectation { 3, 3, 3 };
+    EXPECT_EQ( expectation, result );
+  }
+  TEST_F( TransformTest, operatorPlus ) {
+    vector<double> result= v1+v2;
+    vector<double> expectation { 5, 7, 9 };
+    EXPECT_EQ( expectation, result );
+  }
+  TEST_F( TransformTest, operatorMultiplyVectors ) {
+    vector<double> result= v1*v2;
+    vector<double> expectation { 4, 10, 18 };
+    EXPECT_EQ( expectation, result );
+  }
+  TEST_F( TransformTest, operatorMultiplyVectorWeight ) {
+    vector<double> expectation { 8, 10, 12 }; 
+    EXPECT_EQ( expectation, v1*2.0 ); 
+    EXPECT_EQ( expectation, 2.0*v1 ); 
+  }
+  TEST_F( TransformTest, operatorDivideVectors ) {
+    vector<double> result= v1/v2;
+    vector<double> expectation { 4, 5.0/2.0, 2 };
+    EXPECT_EQ( expectation, result );
+  }
+  TEST_F( TransformTest, SqrtVector ) {
+    vector<double> expectation { 2, sqrt(5.0), sqrt(6) };
+    vector<double> result= sqrt( v1 );
+    for( size_t i= 0; i < expectation.size(); i++ ) {
+      EXPECT_FLOAT_EQ( expectation[i], result[i] );
+    }
+  }
+  TEST_F( TransformTest, SquareVector ) {
+    vector<double> expectation { 16, 25, 36 };
+    vector<double> result= square( v1 );
+    for( size_t i= 0; i < expectation.size(); i++ ) {
+      EXPECT_FLOAT_EQ( expectation[i], result[i] );
+    }
+  }
+  TEST_F( TransformTest, chain ) {
+    vector<double> expectation { sqrt(11.0), 4.0, sqrt(21.0) };
+    vector<double> result= sqrt( v1*2.0 + v2*3.0 );
+    for( size_t i= 0; i < expectation.size(); i++ ) {
+      EXPECT_FLOAT_EQ( expectation[i], result[i] );
+    }
+  }
+   
+
+
+  
+  
 } // namespace
 
 // main must be provided:

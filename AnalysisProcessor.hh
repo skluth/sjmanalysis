@@ -2,10 +2,11 @@
 #define ANALYSISPROCESSOR_HH
 
 #include "Analysis.hh"
-//#include "ObservableFactory.hh"
 #include "SjmConfigParser.hh"
+
 #include <string>
 #include <vector>
+#include "Rtypes.h"
 
 class Observable;
 class FilledObservable;
@@ -16,9 +17,9 @@ class AnalysisProcessor {
   SjmConfigParser sjmConfigs;
   int maxevt;
 
-  void processAnalyses( const std::vector<Analysis>& analyses,
-			const std::vector<Observable*>& vobs,
-			const std::string& filename );
+  Int_t processAnalyses( const std::vector<Analysis>& analyses,
+			 const std::vector<Observable*>& vobs,
+			 const std::string& filename );
 
   void processUnfolding( const std::vector<Analysis>& measuredAnalyses, 
 			 const std::string& unfoldsource,

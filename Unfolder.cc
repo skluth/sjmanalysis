@@ -2,34 +2,11 @@
 #include "Unfolder.hh"
 #include "FilledObservable.hh"
 #include "DataStructure.hh"
+#include "VectorHelpers.hh"
+
+#include <iostream>
+#include <vector>
 #include <stdexcept>
-using std::logic_error;
-
-
-template <typename T>
-vector<T> divideVectors( const vector<T>& lhs, const vector<T>& rhs ) { 
-  size_t n= lhs.size();
-  vector<T> result( n );
-  for( size_t i= 0; i < n; i++ ) {
-    if( rhs[i] != 0.0 ) result[i]= lhs[i]/rhs[i];
-    else result[i]= 0.0;
-  }
-  return result;
-}
-template <typename T>
-vector<T> multiplyVectors( const vector<T>& lhs, const vector<T>& rhs ) {
-  size_t n= lhs.size();
-  vector<T> result( n );
-  for( size_t i= 0; i < n; i++ ) result[i]= lhs[i]*rhs[i];
-  return result;
-}
-template <typename T>
-vector<T> subtractVectors( const vector<T>& lhs, const vector<T>& rhs ) {
-  size_t n= lhs.size();
-  vector<T> result( n );
-  for( size_t i= 0; i < n; i++ ) result[i]= lhs[i]-rhs[i];
-  return result;
-}
 
 
 Unfolder::Unfolder( const Analysis& measured, 
@@ -43,37 +20,37 @@ void Unfolder::unfold( FilledObservable* obs ) const {
 
   // Check that all inputs are there:
   if( not obs->containsAnalysis( hadronlevelAnalysis ) ) {
-    throw logic_error( "Unfolder::unfold: hadronlevel analysis not found: " +
-		       hadronlevelAnalysis.getTag() );
+    throw std::runtime_error( "Unfolder::unfold: hadronlevel analysis not found: " +
+			      hadronlevelAnalysis.getTag() );
   }
   if( not obs->containsAnalysis( measuredAnalysis ) ) {
-    throw logic_error( "Unfolder::unfold: measured analysis not found: " +
-		       measuredAnalysis.getTag() );
+    throw std::runtime_error( "Unfolder::unfold: measured analysis not found: " +
+			      measuredAnalysis.getTag() );
   }
   if( not obs->containsAnalysis( measuredMCAnalysis ) ) {
-    throw logic_error( "Unfolder::unfold: measuredMC analysis not found: " +
-		       measuredMCAnalysis.getTag() );
+    throw std::runtime_error( "Unfolder::unfold: measuredMC analysis not found: " +
+			      measuredMCAnalysis.getTag() );
   }
 
   // Get real and simulated data:
   DataStructure* hadronlevel= obs->getDataStructure( hadronlevelAnalysis );
   DataStructure* measured= obs->getDataStructure( measuredAnalysis );
   DataStructure* measuredMC= obs->getDataStructure( measuredMCAnalysis  );
-  vector<Double_t> valuesHadronlevel= hadronlevel->getValues();
-  vector<Double_t> valuesMeasuredMC= measuredMC->getValues();
-  vector<Double_t> valuesMeasured= measured->getValues();
+  std::vector<Double_t> valuesHadronlevel= hadronlevel->getValues();
+  std::vector<Double_t> valuesMeasuredMC= measuredMC->getValues();
+  std::vector<Double_t> valuesMeasured= measured->getValues();
   Double_t neventsMeasured= measured->getNEvents();
   Double_t neventsMeasuredMC= measuredMC->getNEvents();
   Double_t neventsHadronlevel= hadronlevel->getNEvents();
 
   // Calculate correction:
-  vector<Double_t> correctionFactors= divideVectors( valuesHadronlevel,
-						     valuesMeasuredMC );
-  vector<Double_t> correctedValues= multiplyVectors( valuesMeasured, 
-						     correctionFactors );
-  vector<Double_t> errorsMeasured= measured->getErrors();
-  vector<Double_t> correctedErrors= multiplyVectors( errorsMeasured, 
-						     correctionFactors );
+  std::vector<Double_t> correctionFactors= divideChecked( valuesHadronlevel,
+							  valuesMeasuredMC );
+  std::vector<Double_t> correctedValues= multiplyVectors( valuesMeasured, 
+							  correctionFactors );
+  std::vector<Double_t> errorsMeasured= measured->getErrors();
+  std::vector<Double_t> correctedErrors= multiplyVectors( errorsMeasured, 
+							  correctionFactors );
   Double_t neventsCorrected= neventsMeasured*neventsHadronlevel/neventsMeasuredMC;
 
   // Create corrected distribution:

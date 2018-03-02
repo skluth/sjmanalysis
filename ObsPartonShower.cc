@@ -81,7 +81,7 @@ vector<Double_t> ObsPartonShower::getValues( NtupleReader* ntr,
   vector<Double_t> values( 4 );
   for( size_t i= 0; i < 4; i++ ) values[i]= -1.0;
   if( tfj.ymerge( 3 ) > y34cut ) {
-    vector<TLorentzVector> jets= tfj.exclusive_jets( 4 );
+    vector<TLorentzVector> jets= tfj.exclusive_eejets( 4 );
     Double_t angle12= calcAngle( jets[0], jets[1] );
     Double_t angle13= calcAngle( jets[0], jets[2] );
     Double_t angle23= calcAngle( jets[1], jets[2] );
@@ -98,7 +98,7 @@ vector<Double_t> ObsPartonShower::getValues( NtupleReader* ntr,
       }
     }
     if( tfj.ymerge( 3 )/tfj.ymerge( 2 ) > y34y23cut ) {
-      jets= tfj.exclusive_jets( 2 );
+      jets= tfj.exclusive_eejets( 2 );
       values[3]= TMath::Min( jets[1].M2(), jets[0].M2() ) /
 	TMath::Max( jets[1].M2(), jets[0].M2() ); // MR
     }

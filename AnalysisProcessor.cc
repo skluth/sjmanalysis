@@ -11,6 +11,10 @@
 #include "NtupleReader.hh"
 #include "LEP1NtupleReader.hh"
 #include "LEP2NtupleReader.hh"
+#include "VectorHelpers.hh"
+
+#include "DataStructure.hh"
+
 using std::vector;
 using std::string;
 #include <sstream>
@@ -19,7 +23,6 @@ using std::ostringstream;
 using std::cout;
 using std::endl;
 #include <stdexcept>
-using std::logic_error;
 
 
 AnalysisProcessor::AnalysisProcessor( const SjmConfigParser& sjmcp ) :
@@ -46,7 +49,7 @@ AnalysisProcessor::createNtupleReader( const string& filename ) {
   return result;
 }
 
-void
+Int_t
 AnalysisProcessor::processAnalyses( const vector<Analysis>& analyses,
 				    const vector<Observable*>& vobs,
 				    const string& filename ) {
@@ -59,11 +62,12 @@ AnalysisProcessor::processAnalyses( const vector<Analysis>& analyses,
   if( nevnt > maxevt ) cout << "processAnalyses: process " 
 			    << maxevt << " events" << endl;
   string ecms= sjmConfigs.getItem<string>( "General.energy" );
-  for( Int_t ievnt= 0; ievnt < TMath::Min( nevnt, maxevt ); ievnt++ ) {
+  Int_t ievnt= 0;
+  for( ; ievnt < TMath::Min( nevnt, maxevt ); ievnt++ ) {
     if( ntr->GetEvent( ievnt ) == 0 ) {
       ostringstream txt;
       txt << "processAnalyses: event not found: " << ievnt;
-      throw logic_error( txt.str() );
+      throw std::runtime_error( txt.str() );
     }
     const map<string,Bool_t> selections= ntr->getSelections( ecms );
     bool MCnonrad= ntr->MCNonRad();
@@ -89,7 +93,7 @@ AnalysisProcessor::processAnalyses( const vector<Analysis>& analyses,
     }
   }
   delete ntr;
-  return;
+  return ievnt;
 }
 
 void
@@ -193,49 +197,138 @@ void AnalysisProcessor::LEP1Analysis() {
   }
 
   // Fill from data and mc (PYTHIA and HERWIG) ntuples:
+  std::map<std::string,Double_t> eventCounts;
   cout << "AnalysisProcessor::LEP1Analysis: fill from ntuples" << endl;
   try {
+    eventCounts["Data"]= 0.0;
     for( const string& datafilename : sjmConfigs.getFilepath( "Data.files" ) ) {
-      processAnalyses( measuredAnalyses, vobs, datafilename );
+      eventCounts["Data"]+= processAnalyses( measuredAnalyses, vobs, datafilename );
     }
+    eventCounts["Signal"]= 0.0;
     for( const string& pyfilename : sjmConfigs.getFilepath( "Signal.files" ) ) {
-      processAnalyses( pyAnalyses, vobs, pyfilename );
+      eventCounts["Signal"]+= processAnalyses( pyAnalyses, vobs, pyfilename );
     }
+    eventCounts["AltSignal"]= 0.0;
     for( const string& hwfilename : sjmConfigs.getFilepath( "AltSignal.files" ) ) {
-      processAnalyses( hwAnalyses, vobs, hwfilename );
+      eventCounts["AltSignal"]+= processAnalyses( hwAnalyses, vobs, hwfilename );
     }
-
     // And from background if present:
     if( bkgllqqAnalyses.size() > 0 and
 	bkgqqqqAnalyses.size() > 0 and
 	bkgeeqqAnalyses.size() > 0 ) {
+      eventCounts["BkgWWllqq"]= 0.0;	  
       for( const string& bkgfilename : sjmConfigs.getFilepath( "BkgWWllqq.files" ) ) {
-	processAnalyses( bkgllqqAnalyses, vobs, bkgfilename );
+	eventCounts["BkgWWllqq"]+= processAnalyses( bkgllqqAnalyses, vobs, bkgfilename );
       }
+      eventCounts["BkgWWqqqq"]= 0.0;	  
       for( const string& bkgfilename : sjmConfigs.getFilepath( "BkgWWqqqq.files" ) ) {
-	processAnalyses( bkgqqqqAnalyses, vobs, bkgfilename );
+	eventCounts["BkgWWqqqq"]+= processAnalyses( bkgqqqqAnalyses, vobs, bkgfilename );
       }
+      eventCounts["BkgWWeeqq"]= 0.0;	  
       for( const string& bkgfilename : sjmConfigs.getFilepath( "BkgWWeeqq.files" ) ) {
-	processAnalyses( bkgeeqqAnalyses, vobs, bkgfilename );
+	eventCounts["BkgWWeeqq"]+= processAnalyses( bkgeeqqAnalyses, vobs, bkgfilename );
       }
     }
-
   }
   catch( const std::exception& e ) {
     cout << "AnalysisProcessor::LEP1Analysis: filling cought exception: " << e.what() << endl;
     return;
   }
-
+  cout << "AnalysisProcessor::LEP1Analysis: Event counts:" << endl;
+  for( const auto & keyValue : eventCounts ) {
+    cout << keyValue.first << ": " << keyValue.second << endl;
+  }
+  
   // Get FilledObservables for further processing:
   vector<FilledObservable*> vfobs= getFilled( vobs );
 
+  // Background subtraction:
+  vector<Analysis> subtractedMeasuredAnalyses;
+  if( bkgllqqAnalyses.size() > 0 and
+      bkgqqqqAnalyses.size() > 0 and
+      bkgeeqqAnalyses.size() > 0 ) {
+
+    // Calculate weights for bkg subtraction:
+    Double_t lumi= sjmConfigs.getItem<float>( "Data.lumi" );
+    Double_t llqqxsec= sjmConfigs.getItem<float>( "BkgWWllqq.xsec" );
+    Double_t qqqqxsec= sjmConfigs.getItem<float>( "BkgWWqqqq.xsec" );
+    Double_t eeqqxsec= sjmConfigs.getItem<float>( "BkgWWeeqq.xsec" );
+    Double_t llqqweight= lumi*llqqxsec/eventCounts["BkgWWllqq"];
+    Double_t qqqqweight= lumi*qqqqxsec/eventCounts["BkgWWqqqq"];
+    Double_t eeqqweight= lumi*eeqqxsec/eventCounts["BkgWWeeqq"];
+
+    // For all data analyses find bkg MC analyses and subtract
+    for( const Analysis& analysis : measuredAnalyses ) {
+      Analysis llqqAnalysis( analysis );
+      llqqAnalysis.setSource( "llqq" );
+      Analysis qqqqAnalysis( analysis );
+      llqqAnalysis.setSource( "qqqq" );
+      Analysis eeqqAnalysis( analysis );
+      llqqAnalysis.setSource( "eeqq" );
+      Analysis subtractedDataAnalysis( analysis );
+      subtractedDataAnalysis.setBkgStatus( "llqq:qqqq:eeqq" );
+      subtractedMeasuredAnalyses.push_back( subtractedDataAnalysis );
+      for( FilledObservable* obs : vfobs ) {
+	if( not obs->containsAnalysis( analysis ) ) {
+	  throw std::runtime_error( "Bkg subtraction: measured analysis not found: " +
+				    analysis.getTag() );
+	}
+  	DataStructure* data= obs->getDataStructure( analysis );
+  	DataStructure* llqq= obs->getDataStructure( llqqAnalysis );
+  	DataStructure* qqqq= obs->getDataStructure( qqqqAnalysis );
+  	DataStructure* eeqq= obs->getDataStructure( eeqqAnalysis );
+  	vector<Double_t> valuesdata= data->getValues();
+  	vector<Double_t> valuesllqq= llqq->getValues();
+  	vector<Double_t> valuesqqqq= qqqq->getValues();
+  	vector<Double_t> valueseeqq= eeqq->getValues();
+	vector<Double_t> subtractedData= ( valuesdata -
+					   valuesllqq*llqqweight -
+					   valuesqqqq*qqqqweight -
+					   valueseeqq*eeqqweight );
+  	vector<Double_t> errorsdata= data->getErrors();
+  	vector<Double_t> errorsllqq= llqq->getErrors()*llqqweight;
+  	vector<Double_t> errorsqqqq= qqqq->getErrors()*qqqqweight;
+  	vector<Double_t> errorseeqq= eeqq->getErrors()*eeqqweight;
+	vector<Double_t> errors= sqrt( square( errorsdata ) +
+				       square( errorsllqq ) +
+				       square( errorsqqqq ) +
+				       square( errorseeqq ) );
+	Double_t neventsdata= data->getNEvents();
+	Double_t neventsllqq= llqq->getNEvents();
+	Double_t neventsqqqq= qqqq->getNEvents();
+	Double_t neventseeqq= eeqq->getNEvents();
+	Double_t subtractedNevents= ( neventsdata -
+				      neventsllqq*llqqweight -
+				      neventsqqqq*qqqqweight -
+				      neventseeqq*eeqqweight );
+	DataStructure* subtractedDds= data->clone();
+	subtractedDds->setValues( subtractedData );
+	subtractedDds->setErrors( errors );
+	subtractedDds->setNEvents( subtractedNevents );
+	obs->setDataStructure( subtractedDds, subtractedDataAnalysis );
+      }
+    }
+  }
+  else {
+    subtractedMeasuredAnalyses= measuredAnalyses;
+  }
+  
   // Unfolding bin-by-bin:
   try {
     // PYHTHIA based:
-    processUnfolding( measuredAnalyses, "py", vfobs );
+    //    processUnfolding( measuredAnalyses, "py", vfobs );
+    processUnfolding( subtractedMeasuredAnalyses, "py", vfobs );
+
     // HERWIG based for systematic:
     vector<Analysis> measuredAnalysesHw;
-    measuredAnalysesHw.push_back( Analysis( "data", "mt", "stand" ) );    
+    //measuredAnalysesHw.push_back( Analysis( "data", "mt", "stand" ) );    
+    for( const Analysis& analysis : subtractedMeasuredAnalyses ) {
+      if( analysis.getTag().find( "data mt stand" ) != std::string::npos ) {
+	measuredAnalysesHw.push_back( analysis );
+	break;
+      }
+    }
+
     processUnfolding( measuredAnalysesHw, "hw", vfobs );
     // MC detector level with MC as cross check for PYTHIA and HERWIG:
     vector<Analysis> measuredPyAnalyses;

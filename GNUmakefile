@@ -40,11 +40,12 @@ YcutCalculator.cc AnalysisProcessor.cc SjmConfigParser.cc \
 LEP1NtupleReader.cc LEP2NtupleReader.cc
 
 LIB = libNtupleReader.so
-DEPS = $(SRCS:.cc=.d)
 
 DICT = AnalysisDict.cc
 DICTLIB = lib$(DICT:.cc=.so)
 DICTSRCS = Analysis.cc TH1DAnalysisObject.cc TGEAnalysisObject.cc
+
+DEPS = $(SRCS:.cc=.d) $(filter-out $(SRCS:.cc=.d), $(DICTSRCS:.cc=.d) )
 
 all: testsjmanalysis runjob
 
@@ -62,7 +63,6 @@ testsjmanalysis: testsjmanalysis.cc $(LIB)
 runjob: runjob.cc $(LIB)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) -lboost_program_options
 
-
 $(DICT): $(DICTSRCS:.cc=.hh) $(DICT:Dict.cc=LinkDef.h)
 	$(RC) -f $@ -c $^
 
@@ -71,5 +71,5 @@ $(DICTLIB): $(DICT:.cc=.o) $(DICTSRCS:.cc=.o)
 
 
 clean:
-	rm -f $(SRCS:.cc=.o) $(LIB) $(DEPS) testsjmanalysis testsjmanalysis.o runjob
+	rm -f $(SRCS:.cc=.o) $(LIB) $(DEPS) testsjmanalysis testsjmanalysis.o runjob $(DICT) $(DICTLIB) $(DICTSRCS:.cc=.o)
 

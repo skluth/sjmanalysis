@@ -6,6 +6,8 @@
 #include "JetrateDataStructure.hh"
 #include "DifferentialDataStructure.hh"
 #include "MatrixDataStructure.hh"
+#include "Normalisation.hh"
+
 #include "TFile.h"
 #include "TGraphErrors.h"
 #include "TH1D.h"
@@ -50,6 +52,7 @@ OutputWriter::writeJetrate( const JetrateDataStructure* jrds,
   tge.SetTitle( txt.c_str() );
   tge.SetMarkerStyle( 20 );
   tge.SetMarkerSize( 1.0 );
+  SetIsNormalised( tge, jrds->getNormalised() );
   cout << "OutputWriter::writeJetrate: writing TGraphErrors " << txt << endl;
   tge.Write( txt.c_str() );
   return;
@@ -65,6 +68,7 @@ OutputWriter::writeDifferentialDistribution( const DifferentialDataStructure* dd
   hist.SetContent( &(values[0]) );
   hist.SetError( &(errors[0]) );
   hist.SetEntries( dds->getNEvents() );
+  SetIsNormalised( hist, dds->getNormalised() );
   cout << "OutputWriter::writeDifferentialDistribution: writing TH1D " << txt << endl;
   hist.Write();
   return;

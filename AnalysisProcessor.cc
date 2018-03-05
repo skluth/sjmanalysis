@@ -106,7 +106,8 @@ AnalysisProcessor::processUnfolding( const vector<Analysis>& measuredAnalyses,
   for( const Analysis& measured : measuredAnalyses ) {
     Analysis measuredMC( measured );
     measuredMC.setSource( unfoldsource );
-    cout << measured.getTag() << ", " << measuredMC.getTag() << endl;
+    measuredMC.setBkgStatus( "none" );
+    cout << "Data, MC signal: " << measured.getTag() << ", " << measuredMC.getTag() << endl;
     Unfolder unfolder( measured, measuredMC, hadronlevel );
     for( FilledObservable* fobs : vfobs ) {
       unfolder.unfold( fobs );
@@ -269,9 +270,12 @@ void AnalysisProcessor::LEP1Analysis() {
       subtractedDataAnalysis.setBkgStatus( "llqq:qqqq:eeqq" );
       subtractedMeasuredAnalyses.push_back( subtractedDataAnalysis );
       for( FilledObservable* obs : vfobs ) {
-	if( not obs->containsAnalysis( analysis ) ) {
-	  throw std::runtime_error( "Bkg subtraction: measured analysis not found: " +
-				    analysis.getTag() );
+	for( const Analysis& analysisInObs : vector<Analysis> { analysis,
+	      llqqAnalysis, qqqqAnalysis, eeqqAnalysis } ) {
+	  if( not obs->containsAnalysis( analysisInObs ) ) {
+	    throw std::runtime_error( "Bkg subtraction: analysis not found: " +
+				      analysisInObs.getTag() );
+	  }
 	}
   	DataStructure* data= obs->getDataStructure( analysis );
   	DataStructure* llqq= obs->getDataStructure( llqqAnalysis );

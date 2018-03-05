@@ -28,7 +28,7 @@ void Unfolder::unfold( FilledObservable* obs ) const {
 			      measuredAnalysis.getTag() );
   }
   if( not obs->containsAnalysis( measuredMCAnalysis ) ) {
-    throw std::runtime_error( "Unfolder::unfold: measuredMC analysis not found: " +
+    throw std::runtime_error( "Unfolder::unfold: measured MC analysis not found: " +
 			      measuredMCAnalysis.getTag() );
   }
 

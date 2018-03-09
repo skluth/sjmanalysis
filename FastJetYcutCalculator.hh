@@ -6,17 +6,15 @@
 class NtupleReader;
 #include <string>
 #include <vector>
-using std::string;
-using std::vector;
 
 class FastJetYcutCalculator: public JetrateCalculator {
-  string algorithm;
+  std::string algorithm;
 public:
-  FastJetYcutCalculator( const string& );
+  FastJetYcutCalculator( const std::string & );
   ~FastJetYcutCalculator() {}
-  vector<Double_t> getValues( NtupleReader*, 
-			      const vector<Double_t>&,
-			      const string& ) const;
+  std::vector<Double_t> getValues( NtupleReader*, 
+				   const std::vector<Double_t> &,
+				   const std::string & ) const;
   void print() const;
 };
 

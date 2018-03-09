@@ -3,7 +3,7 @@
 
 #include "TObject.h"
 
-// Helpers to set and get TObject bit to store normalisation status
+// Helpers to set and get TObject user bit to store normalisation status
 inline void SetIsNormalised( TObject & obj, bool value ) {
   obj.SetBit( 1<<14, value );
 }

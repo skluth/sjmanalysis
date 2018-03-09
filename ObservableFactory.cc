@@ -1,7 +1,7 @@
 
 #include "ObservableFactory.hh"
-#include "Observable.hh"
 
+#include "Observable.hh"
 #include "ObsDifferential.hh"
 #include "ObsEEC.hh"
 #include "ThrustCalculator.hh"
@@ -30,18 +30,21 @@ using std::stringstream;
 #include <cctype>
 #include <stdexcept>
 
-ObservableFactory::ObservableFactory( const SjmConfigParser& sjmcp ) :
+using std::string;
+using std::vector;
+
+ObservableFactory::ObservableFactory( const SjmConfigParser & sjmcp ) :
   sjmConfigs( sjmcp) {}
 
-bool ObservableFactory::nameIs( const string& str, 
-				const string& name ) {
+bool ObservableFactory::nameIs( const string & str, 
+				const string & name ) {
   return str.find( name ) != string::npos;
 }
 
 // Handle all known observable names:
 vector<Observable*>
-ObservableFactory::createObservables( const vector<string>& obsnames,
-				      const vector<Analysis>& analyses ) {
+ObservableFactory::createObservables( const vector<string> & obsnames,
+				      const vector<Analysis> & analyses ) {
   vector<Observable*> vobs;
   for( const string & name : obsnames ) {
     Observable* obsp= 0;

@@ -1,10 +1,14 @@
 
 #include "YcutCalculator.hh"
+
 #include "NtupleReader.hh"
 #include "TMath.h"
 #include <iostream>
 
-YcutCalculator::YcutCalculator( const string& algo ) : 
+using std::string;
+using std::vector;
+
+YcutCalculator::YcutCalculator( const string & algo ) : 
   algorithm(algo) {}
 
 void YcutCalculator::print() const {
@@ -13,8 +17,8 @@ void YcutCalculator::print() const {
 
 vector<Double_t> 
 YcutCalculator::getValues( NtupleReader* ntr, 
-			   const vector<Double_t>& Ycutpoints,
-			   const string& reco ) const {
+			   const vector<Double_t> & Ycutpoints,
+			   const string & reco ) const {
   size_t n= Ycutpoints.size();
   vector<Double_t> NJets( n );
   for( size_t i= 0; i < n; i++ ) {

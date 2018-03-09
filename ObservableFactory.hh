@@ -5,9 +5,7 @@
 #include "Analysis.hh"
 #include "SjmConfigParser.hh"
 #include <vector>
-using std::vector;
 #include <string>
-using std::string;
 
 class Observable;
 
@@ -15,15 +13,16 @@ class ObservableFactory {
 
   SjmConfigParser sjmConfigs;
 
-  bool nameIs( const string&, const string& );
+  bool nameIs( const std::string &, const std::string & );
 
 public:
 
-  ObservableFactory( const SjmConfigParser& ); 
+  ObservableFactory( const SjmConfigParser & ); 
   ~ObservableFactory() {}
   
-  vector<Observable*> createObservables( const vector<string>& obsnames,
-					 const vector<Analysis>& analyses );
+  std::vector<Observable*>
+  createObservables( const std::vector<std::string> & obsnames,
+		     const std::vector<Analysis> & analyses );
 
 };
 

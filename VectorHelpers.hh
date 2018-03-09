@@ -8,9 +8,6 @@
 
 template <typename T>
 std::vector<T> multiplyVectors( std::vector<T> lhs, const std::vector<T>& rhs ) {
-  // std::transform( lhs.begin(), lhs.end(), rhs.begin(), result.begin(),
-  // 		  std::multiplies<T>() );
-  // return result;
   return lhs*rhs;
 }
 
@@ -29,8 +26,8 @@ public:
   }
 };
 template <typename T>
-vector<T> divideChecked( vector<T> lhs, const vector<T>& rhs,
-			 bool lthrow=false ) {
+std::vector<T> divideChecked( std::vector<T> lhs, const std::vector<T>& rhs,
+			      bool lthrow=false ) {
   DivisorChecked<T> divisor( lthrow );
   std::transform( lhs.begin(), lhs.end(), rhs.begin(), lhs.begin(),
 		  divisor );

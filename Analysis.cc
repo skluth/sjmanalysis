@@ -1,28 +1,35 @@
 
 #include "Analysis.hh"
 
+using std::string;
+#include <vector>
+using std::vector;
 #include <iostream>
 using std::cout;
 using std::endl;
-#include <boost/algorithm/string.hpp>
 #include <exception>
+using std::runtime_error;
 
-Analysis::Analysis( const string& src, const string& r, const string& c, 
-		    const string& mcc,  const string& r2,
-		    const string& bkgsts,
-		    const string& unfsrc, const string& unfm ) :
-  source(src), reco(r), cuts(c), mccuts(mcc), reco2(r2),
-  bkgstatus(bkgsts),
-  unfoldsource(unfsrc), unfoldmethod(unfm) {}
+#include <boost/algorithm/string.hpp>
 
-Analysis::Analysis( const string& options ) : 
+Analysis::Analysis( const string & src,
+		    const string & rec,
+		    const string & cts, 
+		    const string & mcc,
+		    const string & r2,
+		    const string & bkgsts,
+		    const string & unfsrc,
+		    const string & unfm ) :
+  source(src), reco(rec), cuts(cts), mccuts(mcc), reco2(r2),
+  bkgstatus(bkgsts), unfoldsource(unfsrc), unfoldmethod(unfm) {}
+
+Analysis::Analysis( const string & options ) : 
   source(), reco(), cuts(), mccuts( "none" ), reco2( "none" ),
-  bkgstatus( "none" ),
-  unfoldsource( "none" ), unfoldmethod( "none" ) {
-  std::vector<std::string> tokens;
+  bkgstatus( "none" ), unfoldsource( "none" ), unfoldmethod( "none" ) {
+  vector<string> tokens;
   boost::split( tokens, options, boost::is_any_of( " " ), boost::token_compress_on );
   size_t ntoken= tokens.size();
-  if( ntoken < 3 ) throw std::runtime_error( "Analysis::Analysis: options wrong" );
+  if( ntoken < 3 ) throw runtime_error( "Analysis::Analysis: options wrong" );
   source= tokens[0];
   reco= tokens[1];
   cuts= tokens[2];
@@ -32,7 +39,6 @@ Analysis::Analysis( const string& options ) :
   if( ntoken > 6 ) unfoldsource= tokens[6];
   if( ntoken > 7 ) unfoldmethod= tokens[7];
 }
-
 
 Analysis::Analysis() {}
 
@@ -47,14 +53,14 @@ string Analysis::getBkgStatus() const { return bkgstatus; }
 string Analysis::getUnfoldSource() const { return unfoldsource; }
 string Analysis::getUnfoldMethod() const { return unfoldmethod; }
 
-void Analysis::setSource( const string& src ) { source=src; }
-void Analysis::setReco( const string& r ) { reco=r; }
-void Analysis::setCuts( const string& c ) { cuts=c; }
-void Analysis::setMccuts( const string& mcc ) { mccuts=mcc; }
-void Analysis::setReco2( const string& r2 ) { reco2=r2; }
-void Analysis::setBkgStatus( const string& bkgsts ) { bkgstatus=bkgsts; }
-void Analysis::setUnfoldSource( const string& unfsrc ) { unfoldsource=unfsrc; }
-void Analysis::setUnfoldMethod( const string& unfm ) { unfoldmethod=unfm; }
+void Analysis::setSource( const string & src ) { source= src; }
+void Analysis::setReco( const string & rec ) { reco= rec; }
+void Analysis::setCuts( const string & cts ) { cuts= cts; }
+void Analysis::setMccuts( const string & mcc ) { mccuts= mcc; }
+void Analysis::setReco2( const string & r2 ) { reco2= r2; }
+void Analysis::setBkgStatus( const string & bkgsts ) { bkgstatus= bkgsts; }
+void Analysis::setUnfoldSource( const string & unfsrc ) { unfoldsource= unfsrc; }
+void Analysis::setUnfoldMethod( const string & unfm ) { unfoldmethod= unfm; }
 
 string Analysis::getTag() const { 
   string result= source + " " + reco + " " + cuts;
@@ -81,7 +87,7 @@ string Analysis::getTag() const {
   return result;
 }
 
-void Analysis::print() const {
+void Analysis::Print() const {
   cout << source << " " << reco << " " << cuts << " " << mccuts << " " 
        << reco2 << " " << bkgstatus << " "
        << unfoldsource << " " << unfoldmethod << endl;

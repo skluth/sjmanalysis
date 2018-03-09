@@ -1,5 +1,7 @@
 
 #include "JetrateDataStructure.hh"
+#include "MatrixDataStructure.hh"
+
 #include "TMath.h"
 #include <iostream>
 using std::cout;
@@ -8,6 +10,8 @@ using std::endl;
 using std::ostringstream;
 #include <stdexcept>
 using std::logic_error;
+
+using std::vector;
 
 JetrateDataStructure::JetrateDataStructure( const vector<Double_t>& p, 
 					    Int_t njet ) :
@@ -23,8 +27,15 @@ JetrateDataStructure::JetrateDataStructure( const vector<Double_t>& p,
   }
 }
 
-DataStructure* JetrateDataStructure::clone() {
+DataStructure* JetrateDataStructure::clone() const {
   return new JetrateDataStructure( points, Jetrate );
+}
+
+// Set error matrix for tag with bins for point numbers:
+void JetrateDataStructure::setErrorMatrix() {
+  vector<Double_t> bins;
+  for( size_t i= 0; i <= points.size(); i++ ) bins.push_back( i+0.5 );
+  errorMatrix= new MatrixDataStructure( bins );
 }
 
 void JetrateDataStructure::fill( const vector<Double_t>& NJets ) {
@@ -53,7 +64,7 @@ void JetrateDataStructure::normalise() {
   setNormalisedTrue();
 }
 
-void JetrateDataStructure::print() {
+void JetrateDataStructure::Print() const {
   size_t n= points.size();
   for( size_t i= 0; i < n; i++ ) {
     cout << points[i] << " " << values[i] << " " << errors[i] << endl;

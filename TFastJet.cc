@@ -21,7 +21,10 @@ using std::string;
 using std::cout;
 using std::endl;
 #include <stdexcept>
+using std::runtime_error;
 using std::logic_error;
+
+using std::vector;
 
 // Declare Recombiner class for E0 scheme e+e- algorithms:
 class EEE0Recombiner: public fastjet::JetDefinition::Recombiner {
@@ -34,8 +37,8 @@ public:
 			  fastjet::PseudoJet& pab ) const;
 };
 
-
-TFastJet::TFastJet( const vector<TLorentzVector>& vtl, 
+// Wrapper/adapter to fastjet classes:
+TFastJet::TFastJet( const vector<TLorentzVector> & vtl, 
 		    const char* jetalg, 
 		    const double R,
 		    const double Emin ) : clusseq(0) {
@@ -56,7 +59,7 @@ TFastJet::TFastJet( const vector<TLorentzVector>& vtl,
   string jetalgString( jetalg );
   if( jamap.find( jetalgString ) == jamap.end() ) {
     string txt= "TFastJet::TFastJet: wrong algorithm: " + jetalgString;
-    throw logic_error( txt );
+    throw runtime_error( txt );
   }
 
   // Setup fastjet components:
@@ -157,11 +160,11 @@ TFastJet::exclusive_eejets( vector< vector<int> > & vindx,
 
 // Internal helper:
 const vector<TLorentzVector>
-TFastJet::copyPseudoJetsToLorentzVectors( const vector<fastjet::PseudoJet>& pjets,
+TFastJet::copyPseudoJetsToLorentzVectors( const vector<fastjet::PseudoJet> & pjets,
 					  const double Emin ) {
   vector<TLorentzVector> jetstlv;
   jetstlv.reserve( pjets.size() );
-  for( const fastjet::PseudoJet& pj : pjets ) {
+  for( const fastjet::PseudoJet & pj : pjets ) {
     if( pj.E() > Emin ) {
       TLorentzVector tlv( pj.px(), pj.py(), pj.pz(), pj.E() );
       jetstlv.push_back( tlv );
@@ -209,9 +212,9 @@ string EEE0Recombiner::description() const {
   return "E0 scheme for EE"; 
 }
 
-void EEE0Recombiner::recombine( const fastjet::PseudoJet& pa,
-				const fastjet::PseudoJet& pb, 
-				fastjet::PseudoJet& pab ) const {
+void EEE0Recombiner::recombine( const fastjet::PseudoJet & pa,
+				const fastjet::PseudoJet & pb, 
+				fastjet::PseudoJet & pab ) const {
   pab.reset( pa.px() + pb.px(), pa.py() + pb.py(),
 	     pa.pz() + pb.pz(), pa.E() + pb.E() );
   // double rescale= pab.E()/TMath::Sqrt( pab.perp2() + pab.pz()*pab.pz() );

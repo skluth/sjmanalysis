@@ -1,12 +1,16 @@
 
 #include "Observable.hh"
+
 #include "FilledObservable.hh"
-#include "DataStructure.hh"
-#include "MatrixDataStructure.hh"
+//#include "DataStructure.hh"
+//#include "MatrixDataStructure.hh"
 #include <iostream>
 using std::cout;
 using std::endl;
 #include<algorithm>
+
+using std::string;
+using std::vector;
 
 Observable::Observable( const string& namein ) : name( namein ) {}
 

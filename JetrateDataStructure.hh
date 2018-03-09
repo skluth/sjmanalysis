@@ -5,22 +5,24 @@
 #include "DataStructure.hh"
 
 #include <vector>
-using std::vector;
+#include <string>
+
 
 class JetrateDataStructure : public DataStructure {
 
 public:
 
-  JetrateDataStructure( const vector<Double_t>&, Int_t );
+  JetrateDataStructure( const std::vector<Double_t>&, Int_t );
   JetrateDataStructure() {}
   virtual ~JetrateDataStructure() {}
 
-  void fill( const vector<Double_t>& NJets );
+  void fill( const std::vector<Double_t>& NJets );
   void normalise();
 
-  const vector<Double_t>& getPoints() const { return points; }
-  void print();
-  DataStructure* clone();
+  const std::vector<Double_t>& getPoints() const { return points; }
+  void Print() const;
+  DataStructure* clone() const;
+  virtual void setErrorMatrix();
 
 private:
 

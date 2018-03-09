@@ -1,5 +1,6 @@
 
 #include "ObsDifferential.hh"
+
 #include "NtupleReader.hh"
 #include "DataStructure.hh"
 #include "DifferentialDataStructure.hh"
@@ -10,6 +11,9 @@
 #include <iostream>
 using std::cout;
 using std::endl;
+
+using std::string;
+using std::vector;
 
 ObsDifferential::ObsDifferential( const string& name,
 				  const vector<Double_t>& bins,

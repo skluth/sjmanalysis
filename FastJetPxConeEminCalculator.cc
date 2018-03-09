@@ -1,9 +1,15 @@
 
 #include "FastJetPxConeEminCalculator.hh"
+
 #include "NtupleReader.hh"
 #include "TFastJet.hh"
+
 #include "TLorentzVector.h"
+
 #include <iostream>
+
+using std::string;
+using std::vector;
 
 FastJetPxConeEminCalculator::FastJetPxConeEminCalculator( const Double_t R ) :
   RValue(R) {}

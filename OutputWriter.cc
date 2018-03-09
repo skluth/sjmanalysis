@@ -12,6 +12,7 @@
 #include "TGraphErrors.h"
 #include "TH1D.h"
 #include "TH2D.h"
+
 #include <map>
 using std::map;
 #include <iostream>
@@ -19,13 +20,17 @@ using std::cout;
 using std::endl;
 #include <stdexcept>
 using std::logic_error;
+using std::runtime_error;
 
-OutputWriter::OutputWriter( const string& filename ) {
+using std::string;
+using std::vector;
+
+OutputWriter::OutputWriter( const string & filename ) {
   cout << "OutputWriter::OutputWriter: opening for writing: " << filename << endl;
   outputfile= new TFile( filename.c_str(), "RECREATE" );
   if( not outputfile->IsOpen() ) {
     string txt= "OutputWriter::OutputWriter: file not open: " + filename;
-    throw std::logic_error( txt );
+    throw std::runtime_error( txt );
   }
 }
 
@@ -37,7 +42,7 @@ OutputWriter::~OutputWriter() {
 
 void
 OutputWriter::writeJetrate( const JetrateDataStructure* jrds,
-			    const string& txt ) {
+			    const string & txt ) {
   vector<Double_t> points= jrds->getPoints();
   vector<Double_t> values= jrds->getValues();
   vector<Double_t> errors= jrds->getErrors();
@@ -60,7 +65,7 @@ OutputWriter::writeJetrate( const JetrateDataStructure* jrds,
 
 void
 OutputWriter::writeDifferentialDistribution( const DifferentialDataStructure* dds, 
-					     const string& txt ) {
+					     const string & txt ) {
   vector<Double_t> binedges= dds->getBinedges();
   vector<Double_t> values= dds->getValues();
   vector<Double_t> errors= dds->getErrors();
@@ -90,27 +95,32 @@ void OutputWriter::writeMatrix( MatrixDataStructure* mds,
   return;
 }
 
-void OutputWriter::write( const vector<FilledObservable*>& vobs ) {
-  for( size_t iobs= 0; iobs < vobs.size(); iobs++ ) {
-    map<string,DataStructure*> data= vobs[iobs]->getData();
-    for( map<string,DataStructure*>::iterator iter= data.begin();
-	 iter != data.end(); iter++ ) {
-      string txt= vobs[iobs]->getName() + " " + iter->first;
-      DataStructure* ds= iter->second;
+void OutputWriter::write( const vector<FilledObservable*> & vobs ) {
+  for( const FilledObservable* obs : vobs ) {
+    map<string,DataStructure*> data= obs->getData();
+    for( const auto & keyValue : data ) {
+      string txt= obs->getName() + " " + keyValue.first;
+      DataStructure* ds= keyValue.second;
       JetrateDataStructure* jrds= dynamic_cast<JetrateDataStructure*>( ds );
       DifferentialDataStructure* dds= dynamic_cast<DifferentialDataStructure*>( ds );
       if( jrds ) writeJetrate( jrds, txt );
       else if( dds ) writeDifferentialDistribution( dds, txt );
       else throw logic_error( "OutputWriter::write: wrong class" );
     }
-    map<string,MatrixDataStructure*> matrices= vobs[iobs]->getMatrices();
-    for( map<string,MatrixDataStructure*>::iterator iter= matrices.begin();
-	 iter != matrices.end(); iter++ ) {
-      MatrixDataStructure* mds= iter->second;
-      string txt= vobs[iobs]->getName() + " " + iter->first;
+    map<string,MatrixDataStructure*> migrationMatrices= obs->getMigrationMatrices();
+    for( const auto & keyValue : migrationMatrices ) {
+      MatrixDataStructure* mds= keyValue.second;
+      string txt= obs->getName() + " " + keyValue.first;
       writeMatrix( mds, txt );
+    }
+    map<string,MatrixDataStructure*> errorMatrices= obs->getErrorMatrices();
+    for( const auto & keyValue : errorMatrices ) {
+      MatrixDataStructure* mds= keyValue.second;
+      if( mds != 0 ) {
+	string txt= obs->getName() + " " + keyValue.first;
+	writeMatrix( mds, txt );
+      }
     }
   }
   return;
 }
-

@@ -4,20 +4,21 @@
 #include "Rtypes.h"
 
 #include <vector>
-using std::vector;
+
+class MatrixDataStructure;
 
 class DataStructure {
 
 public:
 
-  DataStructure() : Ntotal(0.0), normalised(false) {}
+  DataStructure() : Ntotal(0.0), errorMatrix(0), normalised(false) {}
   virtual ~DataStructure() {}
 
-  virtual const vector<Double_t>& getPoints() const { return points; }
-  virtual const vector<Double_t>& getValues() const { return values; }
-  virtual const vector<Double_t>& getErrors() const { return errors; }
-  virtual void setValues( const vector<Double_t>& v ) { values=v; }
-  virtual void setErrors( const vector<Double_t>& e ) { errors=e; }
+  virtual const std::vector<Double_t>& getPoints() const { return points; }
+  virtual const std::vector<Double_t>& getValues() const { return values; }
+  virtual const std::vector<Double_t>& getErrors() const { return errors; }
+  virtual void setValues( const std::vector<Double_t>& v ) { values=v; }
+  virtual void setErrors( const std::vector<Double_t>& e ) { errors=e; }
   void setNEvents( Double_t nevents ) { Ntotal= nevents; }
   Double_t getNEvents() const { return Ntotal; }
   void checkNormalised();
@@ -25,45 +26,24 @@ public:
   bool getNormalised() const { return normalised; }
   void checkNtotalGTZero();
   virtual void normalise() = 0;
-  virtual void print() = 0;
-  virtual DataStructure* clone() = 0;
-
+  virtual void Print() const = 0;
+  virtual DataStructure* clone() const = 0;
+  virtual void setErrorMatrix() = 0;
+  MatrixDataStructure* getErrorMatrix() const;
+  
 protected:
 
   Double_t Ntotal;
-  vector<Double_t> points;
-  vector<Double_t> values;
-  vector<Double_t> errors;
+  std::vector<Double_t> points;
+  std::vector<Double_t> values;
+  std::vector<Double_t> errors;
+  MatrixDataStructure* errorMatrix;
 
+  
 private:
 
   bool normalised;
 
 };
-
-// template <typename T>
-// vector<T> divideVectors( const vector<T>& lhs, const vector<T>& rhs ) { 
-//   size_t n= lhs.size();
-//   vector<T> result( n );
-//   for( size_t i= 0; i < n; i++ ) {
-//     if( rhs[i] != 0.0 ) result[i]= lhs[i]/rhs[i];
-//     else result[i]= 0.0;
-//   }
-//   return result;
-// }
-// template <typename T>
-// vector<T> multiplyVectors( const vector<T>& lhs, const vector<T>& rhs ) {
-//   size_t n= lhs.size();
-//   vector<T> result( n );
-//   for( size_t i= 0; i < n; i++ ) result[i]= lhs[i]*rhs[i];
-//   return result;
-// }
-// template <typename T>
-// vector<T> subtractVectors( const vector<T>& lhs, const vector<T>& rhs ) {
-//   size_t n= lhs.size();
-//   vector<T> result( n );
-//   for( size_t i= 0; i < n; i++ ) result[i]= lhs[i]-rhs[i];
-//   return result;
-// }
 
 #endif

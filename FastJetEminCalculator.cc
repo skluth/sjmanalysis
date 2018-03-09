@@ -1,9 +1,14 @@
 
 #include "FastJetEminCalculator.hh"
+
 #include "NtupleReader.hh"
 #include "TFastJet.hh"
 #include "TLorentzVector.h"
+
 #include <iostream>
+
+using std::string;
+using std::vector;
 
 FastJetEminCalculator::FastJetEminCalculator( const string& algo, 
 					      Double_t R ) : 

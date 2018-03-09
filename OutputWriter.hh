@@ -2,11 +2,9 @@
 #define OUTPUTWRITER_HH
 
 #include <vector>
-using std::vector;
 #include <string>
-using std::string;
-class TFile;
 
+class TFile;
 class FilledObservable;
 class JetrateDataStructure;
 class DifferentialDataStructure;
@@ -16,18 +14,18 @@ class OutputWriter {
 
 public:
 
-  OutputWriter( const string& filename );
+  OutputWriter( const std::string & filename );
   ~OutputWriter();
 
-  void write( const vector<FilledObservable*>& );
+  void write( const std::vector<FilledObservable*> & );
 
 private:
 
   void writeJetrate( const JetrateDataStructure*,
-		     const string& );
+		     const std::string & );
   void writeDifferentialDistribution( const DifferentialDataStructure*,
-				      const string& );
-  void writeMatrix( MatrixDataStructure*, const string& );
+				      const std::string & );
+  void writeMatrix( MatrixDataStructure*, const std::string & );
 
   TFile* outputfile;
 

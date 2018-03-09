@@ -2,44 +2,47 @@
 #define ANALYSIS_HH
 
 #include <string>
-using std::string;
 
 class Analysis {
 public:
-  Analysis( const string&, const string&, const string&, 
-	    const string& mcc="none", const string& r2="none",
-	    const string& bkgsts="none",
-	    const string& unfsrc="none", const string& unfm="none" );
-  Analysis( const string& );
+  Analysis( const std::string & src,
+	    const std::string & rec,
+	    const std::string & cts,
+	    const std::string & mcc="none",
+	    const std::string & r2="none",
+	    const std::string & bkgsts="none",
+	    const std::string & unfsrc="none",
+	    const std::string & unfm="none" );
+  Analysis( const std::string & );
   Analysis();
   ~Analysis();
-  string getSource() const;
-  string getReco() const;
-  string getCuts() const;
-  string getMccuts() const;
-  string getReco2() const;
-  string getBkgStatus() const;
-  string getUnfoldSource() const;
-  string getUnfoldMethod() const;
-  string getTag() const;
-  void print() const;
-  void setSource( const string& );
-  void setReco( const string& );
-  void setCuts( const string& );
-  void setMccuts( const string& );
-  void setReco2( const string& );
-  void setBkgStatus( const string& );
-  void setUnfoldSource( const string& );
-  void setUnfoldMethod( const string& );
+  std::string getSource() const;
+  std::string getReco() const;
+  std::string getCuts() const;
+  std::string getMccuts() const;
+  std::string getReco2() const;
+  std::string getBkgStatus() const;
+  std::string getUnfoldSource() const;
+  std::string getUnfoldMethod() const;
+  std::string getTag() const;
+  void Print() const;
+  void setSource( const std::string & );
+  void setReco( const std::string & );
+  void setCuts( const std::string & );
+  void setMccuts( const std::string & );
+  void setReco2( const std::string & );
+  void setBkgStatus( const std::string & );
+  void setUnfoldSource( const std::string & );
+  void setUnfoldMethod( const std::string & );
 private:
-  string source;
-  string reco;
-  string cuts;
-  string mccuts;
-  string reco2;
-  string bkgstatus;
-  string unfoldsource;
-  string unfoldmethod;
+  std::string source;
+  std::string reco;
+  std::string cuts;
+  std::string mccuts;
+  std::string reco2;
+  std::string bkgstatus;
+  std::string unfoldsource;
+  std::string unfoldmethod;
 };
 
 #endif

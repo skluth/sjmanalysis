@@ -4,10 +4,13 @@
 #include "Normalisation.hh"
 
 #include "TH1D.h"
+#include "TH2D.h"
 #include "TMath.h"
 
-TH1DAnalysisObject::TH1DAnalysisObject( TH1D* h ) :
-  AnalysisObject( h->GetNbinsX()+1 ), hist(h) {
+#include <iostream>
+
+TH1DAnalysisObject::TH1DAnalysisObject( TH1D* h, TH2D* h2d ) :
+  AnalysisObject( h->GetNbinsX()+1 ), hist(h), hist2d(h2d) {
   Double_t integral= 0.0;
   Double_t integralError= 0.0;
   Int_t nbin= hist->GetNbinsX();
@@ -29,6 +32,18 @@ TH1DAnalysisObject::TH1DAnalysisObject( TH1D* h ) :
   values[nbin]= integral;
   errors[nbin]= TMath::Sqrt( integralError );
   points[nbin]= hist->GetBinLowEdge( nbin+1 );
+
+  if( hist2d != 0 ) {
+    std::cout << "error matrix exists" << std::endl;
+    UInt_t ndim= hist2d->GetNbinsX();
+    errorMatrix.ResizeTo( ndim, ndim );
+    for( UInt_t i= 0; i < ndim; i++ ) {
+      for( UInt_t j= 0; j < ndim; j++ ) {
+	errorMatrix[i][j]= hist2d->GetBinContent( i+1, j+1 );
+      }
+    }
+  }
+
 }
 
 TString TH1DAnalysisObject::getPointStr( Int_t i ) {

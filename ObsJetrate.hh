@@ -6,11 +6,8 @@
 #include "Rtypes.h"
 #include "Analysis.hh"
 #include <vector>
-using std::vector;
 #include <string>
-using std::string;
 #include <map>
-using std::map;
 
 class NtupleReader;
 class JetrateDataStructure;
@@ -21,28 +18,28 @@ class ObsJetrate : public Observable {
 
 public:
 
-  ObsJetrate( string, 
-	      const vector<Double_t>&,
-	      const vector<Analysis>& variations,
+  ObsJetrate( std::string name, 
+	      const std::vector<Double_t> & pts,
+	      const std::vector<Analysis> & variations,
 	      const JetrateCalculator* calc,
 	      const bool lprint=true );
   ObsJetrate();
   virtual ~ObsJetrate();
-  virtual void fill( NtupleReader* ntr, const Analysis& variation );
-  virtual vector<FilledObservable*> getFilledObservables() const;
+  virtual void fill( NtupleReader* ntr, const Analysis & variation );
+  virtual std::vector<FilledObservable*> getFilledObservables() const;
   virtual void print() const;
 
 private:
 
-  virtual void addAnalysis( const Analysis& );
-  void printDatastructures( const map<string,JetrateDataStructure*>& ) const;
+  virtual void addAnalysis( const Analysis & );
+  void printDatastructures( const std::map<std::string,JetrateDataStructure*> & ) const;
 
-  vector<Double_t> points;
-  map<string,JetrateDataStructure*> jetrates2;
-  map<string,JetrateDataStructure*> jetrates3;
-  map<string,JetrateDataStructure*> jetrates4;
-  map<string,JetrateDataStructure*> jetrates5;
-  map<string,JetrateDataStructure*> jetrates6;
+  std::vector<Double_t> points;
+  std::map<std::string,JetrateDataStructure*> jetrates2;
+  std::map<std::string,JetrateDataStructure*> jetrates3;
+  std::map<std::string,JetrateDataStructure*> jetrates4;
+  std::map<std::string,JetrateDataStructure*> jetrates5;
+  std::map<std::string,JetrateDataStructure*> jetrates6;
   const JetrateCalculator* calculator;
 
 };

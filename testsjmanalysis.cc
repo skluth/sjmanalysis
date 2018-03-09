@@ -31,6 +31,10 @@ using std::stringstream;
 #include <string>
 using std::string;
 #include <algorithm>
+#include <map>
+using std::map;
+#include <vector>
+using std::vector;
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -68,10 +72,10 @@ namespace sjmtests {
 
   // getElement exceptions:
   TEST_F( MatrixDataStructureTest, testgetElementExceptions ) {
-    EXPECT_THROW( mds.getElement( -1, 1 ), std::logic_error );
-    EXPECT_THROW( mds.getElement( 1, -1 ), std::logic_error );
-    EXPECT_THROW( mds.getElement( 11, 1 ), std::logic_error );
-    EXPECT_THROW( mds.getElement( 1, 11 ), std::logic_error );
+    EXPECT_THROW( mds.getElement( -1, 1 ), std::runtime_error );
+    EXPECT_THROW( mds.getElement( 1, -1 ), std::runtime_error );
+    EXPECT_THROW( mds.getElement( 11, 1 ), std::runtime_error );
+    EXPECT_THROW( mds.getElement( 1, 11 ), std::runtime_error );
   }
 
   // fill:
@@ -109,6 +113,16 @@ namespace sjmtests {
     EXPECT_FLOAT_EQ( errors[2], TMath::Sqrt( 2.0 ) );
   }
 
+  // Error matrix:
+  TEST_F( JetrateDataStructureTest, testgetErrorMatrix ) {
+    jrds.setErrorMatrix();
+    MatrixDataStructure* errorMatrix= jrds.getErrorMatrix();
+    vector<Double_t> bins= errorMatrix->getBinedges();
+    vector<Double_t> binedges;
+    for( size_t i= 0; i <= points.size(); i++ ) binedges.push_back( i+0.5 );
+    EXPECT_EQ( binedges, bins );
+  }
+
   // normalise:
   TEST_F( JetrateDataStructureTest, testnormalise ) {
     jrds.normalise();
@@ -121,9 +135,9 @@ namespace sjmtests {
   // normalise exceptions:
   TEST_F( JetrateDataStructureTest, testnormaliseExceptions ) {
     jrds.normalise();
-    EXPECT_THROW( jrds.normalise(), std::logic_error );  
+    EXPECT_THROW( jrds.normalise(), std::runtime_error );  
     JetrateDataStructure localJrds;
-    EXPECT_THROW( localJrds.normalise(), std::logic_error ); 
+    EXPECT_THROW( localJrds.normalise(), std::runtime_error ); 
   }
   
   // fill exceptions:
@@ -175,6 +189,14 @@ namespace sjmtests {
     EXPECT_FLOAT_EQ( errors[3], TMath::Sqrt( 2.0 ) );
   }
 
+  // Error matrix:
+  TEST_F( DifferentialDataStructureTest, testgetErrorMatrix ) {
+    dds.setErrorMatrix();
+    MatrixDataStructure* errorMatrix= dds.getErrorMatrix();
+    vector<Double_t> bins= errorMatrix->getBinedges();
+    EXPECT_EQ( binedges, bins );
+  }
+
   // normalise:
   TEST_F( DifferentialDataStructureTest, testnormalise ) {
     dds.normalise();
@@ -189,9 +211,9 @@ namespace sjmtests {
   // normalise exceptions:
   TEST_F( DifferentialDataStructureTest, testnormaliseExceptions ) {
     dds.normalise();
-    EXPECT_THROW( dds.normalise(), std::logic_error );  
+    EXPECT_THROW( dds.normalise(), std::runtime_error );  
     DifferentialDataStructure localDds;
-    EXPECT_THROW( localDds.normalise(), std::logic_error ); 
+    EXPECT_THROW( localDds.normalise(), std::runtime_error ); 
   }
   
   // Differential observables:

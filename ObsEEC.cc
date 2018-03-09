@@ -1,9 +1,10 @@
 
 #include "ObsEEC.hh"
+
 #include "NtupleReader.hh"
-#include "DataStructure.hh"
 #include "DifferentialDataStructure.hh"
 #include "FilledObservable.hh"
+
 #include "TLorentzVector.h"
 #include "TVector3.h"
 
@@ -11,9 +12,12 @@
 using std::cout;
 using std::endl;
 
-ObsEEC::ObsEEC( const string& name,
-		const vector<Double_t>& bins,
-		const vector<Analysis>& variations,
+using std::string;
+using std::vector;
+
+ObsEEC::ObsEEC( const string & name,
+		const vector<Double_t> & bins,
+		const vector<Analysis> & variations,
 		const bool scOpt,
 		const bool lprint ) :
   Observable( name ), binedges( bins ), selfCorrelation(scOpt) {
@@ -29,18 +33,18 @@ ObsEEC::ObsEEC( const string& name,
 
 ObsEEC::~ObsEEC() {}
 
-void ObsEEC::addAnalysis( const Analysis& analysis ) {
+void ObsEEC::addAnalysis( const Analysis & analysis ) {
   string tag= analysis.getTag();
   data[tag]= new DifferentialDataStructure( binedges );
 }
 
 // Calculuate EEC as 1/sigma*dEEC/dchi with chi in radian
 // incl. self-correlation or not
-void ObsEEC::fill( NtupleReader* ntr, const Analysis& variation ) {
-  string tag= variation.getTag();  
+void ObsEEC::fill( NtupleReader* ntr, const Analysis & variation ) {
   const vector<TLorentzVector>& vtlv= ntr->GetLorentzVectors( variation.getReco() );
   Double_t evis= ntr->Evis( vtlv );
   Double_t evis2= evis*evis;
+  string tag= variation.getTag();
   DifferentialDataStructure* dds= data.at( tag );
   Double_t nevents= dds->getNEvents();
   for( const TLorentzVector& tlv1 : vtlv ) {

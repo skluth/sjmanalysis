@@ -1,12 +1,15 @@
 
 #include "ObsPartonShower.hh"
+
 #include "NtupleReader.hh"
 #include "TFastJet.hh"
 #include "DifferentialDataStructure.hh"
 #include "MatrixDataStructure.hh"
 #include "FilledObservable.hh"
 #include "TLorentzVector.h"
+
 #include "TMath.h"
+
 #include <sstream>
 using std::ostringstream;
 #include <iostream>
@@ -14,6 +17,9 @@ using std::cout;
 using std::endl;
 #include <stdexcept>
 using std::logic_error;
+
+using std::string;
+using std::vector;
 
 ObsPartonShower::ObsPartonShower( const vector<Double_t>& a14bins,
 				  const vector<Double_t>& c202bins,

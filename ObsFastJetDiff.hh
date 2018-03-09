@@ -6,38 +6,35 @@
 #include "Analysis.hh"
 
 #include <vector>
-using std::string;
 #include <string>
-using std::vector;
 #include <map>
-using std::map;
 
 class NtupleReader;
 class FilledObservable;
-class DataStructure;
+class DifferentialDataStructure;
 
 class ObsFastJetDiff : public Observable {
 
 public:
 
-  ObsFastJetDiff( const string& name, const string& algo,
-		  const vector<Double_t>& ynmbins, 
-		  const vector<Analysis>& variations,
+  ObsFastJetDiff( const std::string & name, const std::string & algo,
+		  const std::vector<Double_t> & ynmbins, 
+		  const std::vector<Analysis> & variations,
 		  const bool lprint=true );
   ~ObsFastJetDiff();
-  virtual void fill( NtupleReader* ntr, const Analysis& variation );
-  virtual vector<FilledObservable*> getFilledObservables() const;
+  virtual void fill( NtupleReader* ntr, const Analysis & variation );
+  virtual std::vector<FilledObservable*> getFilledObservables() const;
 
 private:
 
-  virtual void addAnalysis( const Analysis& );
+  virtual void addAnalysis( const Analysis & );
 
-  string Algorithm;
-  vector<Double_t> binedges;
-  map<string,DifferentialDataStructure*> ymerge23;
-  map<string,DifferentialDataStructure*> ymerge34;
-  map<string,DifferentialDataStructure*> ymerge45;
-  map<string,DifferentialDataStructure*> ymerge56;
+  std::string Algorithm;
+  std::vector<Double_t> binedges;
+  std::map<std::string,DifferentialDataStructure*> ymerge23;
+  std::map<std::string,DifferentialDataStructure*> ymerge34;
+  std::map<std::string,DifferentialDataStructure*> ymerge45;
+  std::map<std::string,DifferentialDataStructure*> ymerge56;
 
 };
 

@@ -1,6 +1,7 @@
 
 #include "ObsJetrate.hh"
-#include "DataStructure.hh"
+
+//#include "DataStructure.hh"
 #include "JetrateDataStructure.hh"
 #include "FilledObservable.hh"
 #include "JetrateCalculator.hh"
@@ -9,9 +10,13 @@
 using std::cout;
 using std::endl;
 
+using std::string;
+using std::vector;
+using std::map;
+
 ObsJetrate::ObsJetrate( string name, 
-			const vector<Double_t>& pts,
-			const vector<Analysis>& variations, 
+			const vector<Double_t> & pts,
+			const vector<Analysis> & variations, 
 			const JetrateCalculator* calc,
 			const bool lprint ) :
   Observable( name ), points( pts ), calculator( calc ) {
@@ -34,16 +39,16 @@ void ObsJetrate::addAnalysis( const Analysis& analysis ) {
   jetrates6[tag]= new JetrateDataStructure( points, 6 );
 }
 
-void ObsJetrate::fill( NtupleReader* ntr, const Analysis& variation ) {
+void ObsJetrate::fill( NtupleReader* ntr, const Analysis & variation ) {
   vector<Double_t> NJets= calculator->getValues( ntr,
 						 points,
 						 variation.getReco() );
   string tag= variation.getTag();
-  jetrates2.at(tag)->fill( NJets );
-  jetrates3.at(tag)->fill( NJets );
-  jetrates4.at(tag)->fill( NJets );
-  jetrates5.at(tag)->fill( NJets );
-  jetrates6.at(tag)->fill( NJets );
+  jetrates2.at( tag )->fill( NJets );
+  jetrates3.at( tag )->fill( NJets );
+  jetrates4.at( tag )->fill( NJets );
+  jetrates5.at( tag )->fill( NJets );
+  jetrates6.at( tag )->fill( NJets );
   return;
 }
 
@@ -75,7 +80,7 @@ void ObsJetrate::printDatastructures( const map<string,JetrateDataStructure*>& j
   for( map<string,JetrateDataStructure*>::const_iterator iter= jrds.begin();
        iter != jrds.end(); iter++ ) {
     cout << name << " " << iter->first << " events " << (iter->second)->getNEvents() << endl;
-    (iter->second)->print();
+    (iter->second)->Print();
   }
 }
 

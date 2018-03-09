@@ -1,5 +1,6 @@
 
 #include "FastJetYcutCalculator.hh"
+
 #include "NtupleReader.hh"
 #include "TFastJet.hh"
 
@@ -8,6 +9,8 @@
 
 #include <iostream>
 
+using std::string;
+using std::vector;
 
 FastJetYcutCalculator::FastJetYcutCalculator( const string& algo ) : 
   algorithm(algo) {}

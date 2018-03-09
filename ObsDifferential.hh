@@ -9,37 +9,36 @@
 #include <vector>
 #include <string>
 #include <map>
-using std::vector;
-using std::string;
-using std::map;
 
 class NtupleReader;
+class FilledObservable;
 class DataStructure;
 class DifferentialDataStructure;
+class MatrixDataStructure;
 class DifferentialCalculator;
 
 class ObsDifferential : public Observable {
 
 public:
 
-  ObsDifferential( const string& name,
-		   const vector<Double_t>& bins,
-		   const vector<Analysis>& variations,
+  ObsDifferential( const std::string& name,
+		   const std::vector<Double_t>& bins,
+		   const std::vector<Analysis>& variations,
 		   const DifferentialCalculator* calc,
 		   const bool lprint=true );
   virtual ~ObsDifferential();
-  virtual vector<FilledObservable*> getFilledObservables() const;
+  virtual std::vector<FilledObservable*> getFilledObservables() const;
   virtual void fill( NtupleReader* ntr, const Analysis& variation );
 
 private:  
 
   virtual void addAnalysis( const Analysis& );
 
-  vector<Double_t> binedges;
-  map<string,DifferentialDataStructure*> data;
-  map<string,DifferentialDataStructure*> weighted1;
-  map<string,DifferentialDataStructure*> weighted2;
-  map<string,MatrixDataStructure*> matrices;
+  std::vector<Double_t> binedges;
+  std::map<std::string,DifferentialDataStructure*> data;
+  std::map<std::string,DifferentialDataStructure*> weighted1;
+  std::map<std::string,DifferentialDataStructure*> weighted2;
+  std::map<std::string,MatrixDataStructure*> matrices;
   const DifferentialCalculator* calculator;
 
 };

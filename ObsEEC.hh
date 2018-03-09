@@ -9,34 +9,31 @@
 #include <vector>
 #include <string>
 #include <map>
-using std::vector;
-using std::string;
-using std::map;
 
 class NtupleReader;
-class DataStructure;
+//class DataStructure;
 class DifferentialDataStructure;
 
 class ObsEEC : public Observable {
 
 public:
 
-  ObsEEC( const string& name,
-	  const vector<Double_t>& bins,
-	  const vector<Analysis>& variations,
+  ObsEEC( const std::string & name,
+	  const std::vector<Double_t> & bins,
+	  const std::vector<Analysis> & variations,
 	  const bool scOpt=true,
 	  const bool lprint=true );
   virtual ~ObsEEC();
-  virtual vector<FilledObservable*> getFilledObservables() const;
-  virtual void fill( NtupleReader* ntr, const Analysis& variation );
+  virtual std::vector<FilledObservable*> getFilledObservables() const;
+  virtual void fill( NtupleReader* ntr, const Analysis & variation );
 
 private:  
 
-  virtual void addAnalysis( const Analysis& );
+  virtual void addAnalysis( const Analysis & );
 
-  vector<Double_t> binedges;
+  std::vector<Double_t> binedges;
   bool selfCorrelation;
-  map<string,DifferentialDataStructure*> data;
+  std::map<std::string,DifferentialDataStructure*> data;
 
 };
 

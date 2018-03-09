@@ -5,27 +5,30 @@
 #include "DataStructure.hh"
 
 #include <vector>
-using std::vector;
+#include <string>
+
 
 class DifferentialDataStructure : public DataStructure {
 
 public:
 
-  DifferentialDataStructure( const vector<Double_t>& p );
+  DifferentialDataStructure( const std::vector<Double_t>& p );
   DifferentialDataStructure() {}
   virtual ~DifferentialDataStructure() {}
 
   void fill( Double_t value, Double_t weight=1.0 );
   void normalise();
 
-  const vector<Double_t>& getBinedges() const { return binedges; }
-  void print();
+  std::vector<Double_t> getBinedges() const { return binedges; }
+  void Print() const;
   void printBinedges();
-  DataStructure* clone();
+  DataStructure* clone() const;
+  virtual void setErrorMatrix();
+
 
 private:
 
-  vector<Double_t> binedges;
+  std::vector<Double_t> binedges;
 
 };
 

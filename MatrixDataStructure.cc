@@ -1,6 +1,8 @@
 
 #include "MatrixDataStructure.hh"
 
+using std::vector;
+
 #include <iostream>
 using std::cout;
 using std::endl;
@@ -8,7 +10,6 @@ using std::endl;
 using std::ostringstream;
 
 #include <stdexcept>
-using std::logic_error;
 
 // Ctor:
 MatrixDataStructure::MatrixDataStructure( const vector<Double_t>& bins ) : 
@@ -20,6 +21,10 @@ MatrixDataStructure::MatrixDataStructure( const vector<Double_t>& bins ) :
       array[j*ndim+i]= 0.0;
     }
   }
+}
+
+MatrixDataStructure* MatrixDataStructure::clone() const {
+  return new MatrixDataStructure( binedges );
 }
 
 // Underflows go in value[0], overflow goes in values[n] with n # of binedges:
@@ -35,16 +40,25 @@ void MatrixDataStructure::fill( Double_t xvalue, Double_t yvalue ) {
 }
 
 Double_t MatrixDataStructure::getElement( size_t irow, size_t icol ) const {
+  checkIndices( irow, icol );
+  return array[icol*ndim+irow];
+}
+void MatrixDataStructure::setElement( size_t irow, size_t icol,
+				      Double_t value ) {
+  checkIndices( irow, icol );
+  array[icol*ndim+irow]= value;
+}
+
+void MatrixDataStructure::checkIndices( size_t irow, size_t icol ) const {
   if( irow >= ndim or irow < 0 or icol >= ndim or icol < 0 ) {
     ostringstream txt;
     txt << "Bad irow, icol or ndim: " << irow << " " << icol << " " << ndim;
-    throw logic_error( txt.str() );
+    throw std::runtime_error( txt.str() );
   }
-  return array[icol*ndim+irow];
 }
 
-void MatrixDataStructure::print() const {
-  cout << "MatrixDataStructure::print: " << Ntotal << " events, " 
+void MatrixDataStructure::Print() const {
+  cout << "MatrixDataStructure::Print: " << Ntotal << " events, " 
        << ndim-1 << " binedges:" << endl;
   for( size_t i= 0; i < ndim-1; i++ ) cout << binedges[i] << " ";
   cout << endl;

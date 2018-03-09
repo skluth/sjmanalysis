@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include "Rtypes.h"
 
 class Observable;
@@ -23,21 +24,23 @@ class AnalysisProcessor {
 
   void processUnfolding( const std::vector<Analysis>& measuredAnalyses, 
 			 const std::string& unfoldsource,
-			 const std::vector<FilledObservable*>& vobs );
+			 const std::vector<FilledObservable*>& vfobs );
 
   std::vector<FilledObservable*> getFilled( const std::vector<Observable*>& vobs );
 
   std::vector<Analysis> fillAnalyses( const std::string& tag );
 
-  NtupleReader* createNtupleReader( const string& filename );
+  NtupleReader* createNtupleReader( const std::string& filename );
+
+  std::vector<Analysis>
+  subtractBackground( const std::vector<FilledObservable*> & vfobs,
+		      const std::vector<Analysis> & measuredAnalyses, 
+		      const std::map<std::string,Double_t> & eventCounts );
 
 public:
 
-  // AnalysisProcessor() : datafilename( "da91_96_200.root" ),
-  // 			pyfilename( "mc5025_1_200.root" ), 
-  //                       hwfilename( "mc12406_1_200.root" ),
-  // 		        maxevt( 1000 ) {}
   AnalysisProcessor( const SjmConfigParser& sjmcp );
+
   ~AnalysisProcessor() {}
 
   void LEP1Analysis();

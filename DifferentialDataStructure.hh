@@ -12,7 +12,7 @@ class DifferentialDataStructure : public DataStructure {
 
 public:
 
-  DifferentialDataStructure( const std::vector<Double_t>& p );
+  DifferentialDataStructure( const std::vector<Double_t> & p );
   DifferentialDataStructure() {}
   virtual ~DifferentialDataStructure() {}
 
@@ -27,6 +27,8 @@ public:
 
 
 private:
+
+  void calculateErrorMatrixWeighted();
 
   std::vector<Double_t> binedges;
 

@@ -22,16 +22,16 @@ public:
 
 private:
 
-  void calculateErrorMatrix( MatrixDataStructure* errorMatrix,
-			     const std::vector<Double_t> & valuesMeasured,
-			     const std::vector<Double_t> & correctedValues,
-			     const std::vector<Double_t> & correctionFactors,
-			     Double_t neventsCorrected ) const;
+  // void calculateErrorMatrix( MatrixDataStructure* errorMatrix,
+  // 			     const std::vector<Double_t> & valuesMeasured,
+  // 			     const std::vector<Double_t> & correctedValues,
+  // 			     const std::vector<Double_t> & correctionFactors,
+  // 			     Double_t neventsCorrected ) const;
 
-  void calculateErrorMatrix2( MatrixDataStructure* errorMatrix,
-			      const std::vector<Double_t> & correctedValues,
-			      const std::vector<Double_t> & correctedErrors,
-			      Double_t neventsCorrected ) const;
+  // void calculateErrorMatrix2( MatrixDataStructure* errorMatrix,
+  // 			      const std::vector<Double_t> & correctedValues,
+  // 			      const std::vector<Double_t> & correctedErrors,
+  // 			      Double_t neventsCorrected ) const;
   
   Analysis measuredAnalysis;
   Analysis measuredMCAnalysis;

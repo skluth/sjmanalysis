@@ -34,11 +34,6 @@ void FilledObservable::finalise() {
 }
 
 void FilledObservable::Print() const {
-  // for( map<string,DataStructure*>::const_iterator iter= datastructures.begin();
-  //      iter != datastructures.end(); iter++ ) {
-  //   cout << name << " " << iter->first << " events " << (iter->second)->getNEvents() << endl;
-  //   (iter->second)->print();
-  // }
   for( const auto & keyValue : datastructures ) {
     cout << name << " " << keyValue.first << " events " << (keyValue.second)->getNEvents()
 	 << endl;
@@ -48,10 +43,15 @@ void FilledObservable::Print() const {
     cout << "No migration matrices" << endl;
   }
   else {
-    for( map<string,MatrixDataStructure*>::const_iterator iter= migrationMatrices.begin();
-	 iter != migrationMatrices.end(); iter++ ) {
-      cout << name << " " << iter->first << " events " << (iter->second)->getNEvents() << endl;
-      (iter->second)->Print();
+    // for( map<string,MatrixDataStructure*>::const_iterator iter= migrationMatrices.begin();
+    // 	 iter != migrationMatrices.end(); iter++ ) {
+    //   cout << name << " " << iter->first << " events " << (iter->second)->getNEvents() << endl;
+    //   (iter->second)->Print();
+    // }
+    for( const auto & keyValue : migrationMatrices ) {
+      cout << name << " " << keyValue.first << " events "
+	   << (keyValue.second)->getNEvents() << endl;
+      (keyValue.second)->Print();
     }
   }
 }
@@ -66,7 +66,7 @@ map<string,MatrixDataStructure*> FilledObservable::getErrorMatrices() const {
   map<string,MatrixDataStructure*> errorMatrices;
   for( const auto & keyValue : datastructures ) {
     if( keyValue.second != 0 ) {
-      errorMatrices[keyValue.first]= keyValue.second->getErrorMatrix();
+      errorMatrices[keyValue.first]= (keyValue.second)->getErrorMatrix();
     }
   }
   return errorMatrices;

@@ -331,15 +331,15 @@ void AnalysisProcessor::LEP1Analysis() {
     cout << "AnalysisProcessor::LEP1Analysis: no background subtraction" << endl;
   }
 
-  // Request error matrices:
-  for( FilledObservable* obs : vfobs ) {
-    if( obs->getName().find( "thrust" ) != std::string::npos or
-	obs->getName() == "EEC" ) {
-      obs->requestErrorMatrices();
-      cout << "AnalysisProcessor::LEP1Analysis: request error matrices for "
-	   << obs->getName() << endl;
-    }
-  }
+  // // Request error matrices:
+  // for( FilledObservable* obs : vfobs ) {
+  //   if( obs->getName().find( "thrust" ) != std::string::npos or
+  // 	obs->getName() == "EEC" ) {
+  //     obs->requestErrorMatrices();
+  //     cout << "AnalysisProcessor::LEP1Analysis: request error matrices for "
+  // 	   << obs->getName() << endl;
+  //   }
+  // }
 
   // Unfolding bin-by-bin:
   try {

@@ -15,7 +15,7 @@ using std::logic_error;
 
 using std::vector;
 
-DifferentialDataStructure::DifferentialDataStructure( const vector<Double_t>& bins ) : 
+DifferentialDataStructure::DifferentialDataStructure( const vector<Double_t> & bins ) : 
   DataStructure(), binedges(bins) {
   size_t n= binedges.size();
   points.resize( n-1 );
@@ -34,7 +34,7 @@ DataStructure* DifferentialDataStructure::clone() const {
   return new DifferentialDataStructure( binedges );
 }
 
-// Underflow goes in value[0], overflow goes in values[n+1]:
+// Underflow goes in values[0], overflow goes in values[n+1]:
 void DifferentialDataStructure::fill( Double_t value, Double_t weight ) {
   Ntotal++;
   vector<double>::iterator iter= upper_bound( binedges.begin(),
@@ -55,6 +55,15 @@ void DifferentialDataStructure::setErrorMatrix() {
 void DifferentialDataStructure::normalise() {
   checkNormalised();
   checkNtotalGTZero();
+  if( errorMatrix == 0 ) {
+    setErrorMatrix();
+    calculateErrorMatrixWeighted();
+  }
+  else {
+    // Some unfolder already created an error matrix, use Jacobean method
+    cout << "DifferentialDataStructure::normalise: Jacobean method not implemented"
+	 << endl;
+  }    
   for( size_t i= 0; i < points.size(); i++ ) {
     Double_t binw= binedges[i+1]-binedges[i];
     values[i+1]/= (Ntotal*binw);
@@ -78,5 +87,34 @@ void DifferentialDataStructure::Print() const {
     cout << "Error matrix:" << endl;
     errorMatrix->Print();
   }
+}
+
+// Generalised OPAL PR 404 method for diagonal errors of bin-by-bin corrected
+// distribution from calculation of the Jacobean after normalisation.
+// This also works for weighted distributions, e.g. y*dsigma/dy or EEC
+void DifferentialDataStructure::calculateErrorMatrixWeighted() { 
+  size_t nbin= values.size()-2;
+  Double_t sumw= 0.0;
+  for( size_t ibin= 1; ibin <= nbin; ibin++ ) sumw+= values[ibin];
+  for( size_t ibin= 1; ibin <= nbin; ibin++ ) {
+    Double_t binwi= binedges[ibin]-binedges[ibin-1];
+    for( size_t jbin= 1; jbin <= nbin; jbin++ ) {
+      Double_t cov= 0.0;
+      for( size_t kbin= 1; kbin <= nbin; kbin++ ) {
+        Double_t deltaik= 0.0;
+        if( ibin == kbin ) deltaik= 1.0;
+        Double_t deltajk= 0.0;
+        if( jbin == kbin ) deltajk= 1.0;
+        cov+= pow( errors[kbin], 2 )*
+          ( sumw*deltaik - values[ibin] )*
+          ( sumw*deltajk - values[jbin] );
+      }
+      cov/= pow( Ntotal*sumw, 2 );
+      Double_t binwj= binedges[jbin]-binedges[jbin-1];
+      cov/= (binwi*binwj);
+      errorMatrix->setElement( ibin, jbin, cov );
+    }
+  }
+  return;
 }
 

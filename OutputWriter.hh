@@ -25,7 +25,7 @@ private:
 		     const std::string & );
   void writeDifferentialDistribution( const DifferentialDataStructure*,
 				      const std::string & );
-  void writeMatrix( MatrixDataStructure*, const std::string & );
+  void writeMatrix( MatrixDataStructure*, const std::string &, const std::string & );
 
   TFile* outputfile;
 

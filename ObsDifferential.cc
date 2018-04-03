@@ -45,14 +45,14 @@ void ObsDifferential::addAnalysis( const Analysis& analysis ) {
 void ObsDifferential::fill( NtupleReader* ntr, const Analysis& variation ) {
   string tag= variation.getTag();  
   Double_t value= calculator->getValue( ntr, variation.getReco() );
-  data.at(tag)->fill( value );
+  data.at( tag )->fill( value );
   if( value >= 0.0 ) {
-    weighted1.at(tag)->fill( value, value );
-    weighted2.at(tag)->fill( value, TMath::Power( value, 2 ) );
+    weighted1.at( tag )->fill( value, value );
+    weighted2.at( tag )->fill( value, TMath::Power( value, 2 ) );
   }
   if( variation.getReco2() != "none" and ntr->isMC() ) {
     Double_t MCvalue= calculator->getValue( ntr, variation.getReco2() );
-    matrices.at(tag)->fill( MCvalue, value );
+    matrices.at( tag )->fill( value, MCvalue );
   }
 }
 

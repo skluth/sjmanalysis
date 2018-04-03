@@ -32,10 +32,14 @@ DataStructure* JetrateDataStructure::clone() const {
 }
 
 // Set error matrix for tag with bins for point numbers:
-void JetrateDataStructure::setErrorMatrix() {
-  vector<Double_t> bins;
-  for( size_t i= 0; i <= points.size(); i++ ) bins.push_back( i+0.5 );
-  errorMatrix= new MatrixDataStructure( bins );
+void JetrateDataStructure::setErrorMatrix( MatrixDataStructure* errm ) {
+  // vector<Double_t> bins;
+  // for( size_t i= 0; i <= points.size(); i++ ) bins.push_back( i+0.5 );
+  // errorMatrix= new MatrixDataStructure( bins );
+  if( errm->getNdim() != points.size()+2 ) {
+    throw std::runtime_error( "matrix dimensions don't match" );
+  }
+  errorMatrix= errm;
 }
 
 void JetrateDataStructure::fill( const vector<Double_t>& NJets ) {

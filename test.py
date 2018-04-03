@@ -18,13 +18,11 @@ from array import array
 def getAnalysisObjectFromFile( tfile, obs, analysis ):
     obj= tfile.Get( obs+" "+analysis.getTag()+";1" )
     if obj.ClassName() == "TH1D":
-        # Root oddness: obj deleted after reading 2nd cycle, so take copy
-        h= TH1D( obj )
-        errobj= tfile.Get( obs+" "+analysis.getTag()+";2" )
+        errobj= tfile.Get( "errm "+obs+" "+analysis.getTag() )
         if errobj:
-            ao= TH1DAnalysisObject( h, errobj )
+            ao= TH1DAnalysisObject( obj, errobj )
         else:
-            ao= TH1DAnalysisObject( h )
+            ao= TH1DAnalysisObject( obj )
     elif obj.ClassName() == "TGraphErrors":
         ao= TGEAnalysisObject( obj )
     return ao
@@ -239,4 +237,60 @@ def compareEECs( filename="sjm91_96.root" ):
     canv.SaveAs( "compareEECs.pdf" )
     return
 
+def testMigrationMatrix( obs="thrust", filename="sjm91_96_test.root" ):
+    hdetstr= obs+" py mt stand"
+    hhstr= obs+" py hadron stand"
+    hhnrstr= obs+" py hadron none nonrad"
+    mstr= "migr "+obs+" py mt stand hadron"
+    f= TFile( filename )
+    hdet= f.Get( hdetstr )
+    hdet.Print()
+    m= f.Get( mstr )
+    m.Print()
+    hh= f.Get( hhstr )
+    hh.Print()
+    hhnr= f.Get( hhnrstr )
+    hhnr.Print()
+    nbin= hdet.GetNbinsX()    
+    import numpy as np
+    valuesd= np.array( nbin*[0.0] )
+    valuesh= np.array( nbin*[0.0] )
+    valueshnr= np.array( nbin*[0.0] )
+    cacc= np.array( nbin*[0.0] )
+    R= np.array( np.zeros( (nbin,nbin) ) )
+    for i in range( nbin ):
+        valuesd[i]= hdet.GetBinContent( i+1 )*hdet.GetEntries()*hdet.GetBinWidth( i+1 )
+        valuesh[i]= hh.GetBinContent( i+1 )*hh.GetEntries()*hh.GetBinWidth( i+1 )
+        valueshnr[i]= hhnr.GetBinContent( i+1 )*hhnr.GetEntries()*hhnr.GetBinWidth( i+1 )
+        if valuesh[i] != 0.0:
+            cacc[i]= valueshnr[i]/valuesh[i]
+        else:
+            cacc[i]= 0.0
+        for j in range( nbin ):
+            R[j,i]= m.GetBinContent( i+1, j+1 )
+
+    width, precision= 7, 3
+    fmt= "{:"+str(width)+"."+str(precision)+"f}"
+    for i in range( nbin ):
+        print fmt.format( valueshnr[i] ),
+        print fmt.format( valuesh[i] ),
+        for j in range( nbin ):
+            print fmt.format( R[i,j] ),
+        print
+    print "               ",
+    for i in range( nbin ):
+        print fmt.format( valuesd[i] ),
+    print
+
+    for i in range( nbin ):
+        sumcol= sum( R[:,i] )
+        if sumcol != 0.0:
+            R[:,i]/= sumcol
+    C= np.diag( cacc )
+    CR= np.dot( C, R )
+    valuesc= np.dot( CR, valuesd )
+    print valueshnr
+    print valuesc
+
+    return
 

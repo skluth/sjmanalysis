@@ -32,16 +32,14 @@ public:
   const std::map<std::string,MatrixDataStructure*> & getMigrationMatrices() const;
   std::map<std::string,MatrixDataStructure*> getErrorMatrices() const;
   DataStructure* getDataStructure( const Analysis & ) const;
+  MatrixDataStructure* getMigrationMatrix( const Analysis & ) const;
   void setDataStructure( DataStructure*, const Analysis &  );
   std::string getName() const { return name; }
   bool containsAnalysis( const Analysis & ) const;
-  void requestErrorMatrices() { lerrorMatrices= true; }
-  bool makeErrorMatrices() const { return lerrorMatrices; }
   
 private:
 
   std::string name;
-  bool lerrorMatrices;
   std::map<std::string,DataStructure*> datastructures;
   std::map<std::string,MatrixDataStructure*> migrationMatrices;
 

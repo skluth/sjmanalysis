@@ -47,12 +47,23 @@ namespace sjmtests {
   class MatrixDataStructureTest : public ::testing::Test {
   public:
     MatrixDataStructureTest() : 
-      bins{ 0., 2., 4., 6., 8., 10. }, mds( bins ) {}
+      bins { 0., 2., 4., 6., 8., 10. }, mds( bins ),
+      binedges { 0.0, 1.0, 2.0 }, mds22( binedges ) {
+	mds22.setElement( 1, 1, 1.0 );
+	mds22.setElement( 2, 1, 2.0 );
+	mds22.setElement( 1, 2, 3.0 );
+	mds22.setElement( 2, 2, 4.0 );
+      }
     virtual ~MatrixDataStructureTest() {}
     vector<double> bins;
     MatrixDataStructure mds;
+    vector<Double_t> binedges;
+    MatrixDataStructure mds22;
   };
 
+    vector<Double_t> binedges { 0.0, 1.0, 2.0 };
+    MatrixDataStructure m( binedges );
+  
   // getBinedges:
   TEST_F( MatrixDataStructureTest, testgetBinedges ) {
     vector<Double_t> mybins= mds.getBinedges();
@@ -87,6 +98,49 @@ namespace sjmtests {
     EXPECT_EQ( mds.getElement( 1, 5 ), 2.0 );
   }
 
+  TEST_F( MatrixDataStructureTest, testNormaliseColumns ) {
+    mds.fill( 2.5, 2.5 );
+    mds.fill( 2.5, 4.5 );
+    mds.fill( 0.5, 9.5 );
+    mds.fill( 4.5, 9.5 );
+    mds.normaliseColumns();
+    EXPECT_EQ( mds.getElement( 2, 2 ), 0.5 );
+    EXPECT_EQ( mds.getElement( 2, 3 ), 0.5 );
+    EXPECT_EQ( mds.getElement( 1, 5 ), 1.0 );
+    EXPECT_EQ( mds.getElement( 3, 5 ), 1.0 );
+  }
+  
+  TEST_F( MatrixDataStructureTest, testMultiply ) {
+    vector<Double_t> v { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0 };
+    size_t ndim= v.size();
+    for( size_t irow= 0; irow < ndim; irow++ ) {
+      for( size_t icol= 0; icol < ndim; icol++ ) {
+	mds.setElement( icol, irow, ndim*irow+icol+1 );
+      }
+    }
+    vector<Double_t> result= multiply( mds, v );
+    vector<Double_t> expected { 140.0, 336.0, 532.0, 728.0, 924.0, 1120.0, 1316.0 };
+    EXPECT_EQ( expected, result );
+  }
+
+  TEST_F( MatrixDataStructureTest, testSimilarityVector ) {
+    vector<Double_t> v { 0.0, 1.0, 2.0, 0.0 };
+    MatrixDataStructure* mvmt= similarityVector( mds22, v );
+    EXPECT_EQ( 17.0, mvmt->getElement( 1, 1 ) );
+    EXPECT_EQ( 35.0, mvmt->getElement( 2, 1 ) );
+    EXPECT_EQ( 35.0, mvmt->getElement( 1, 2 ) );
+    EXPECT_EQ( 73.0, mvmt->getElement( 2, 2 ) );
+  }
+
+  TEST_F( MatrixDataStructureTest, testApplyEfficiency ) {
+    vector<Double_t> veff { 0.0, 2.0, 3.0, 0.0 };
+    MatrixDataStructure veffmds22= *(applyEfficiency( mds22, veff ));
+    EXPECT_EQ( 2.0, veffmds22.getElement( 1, 1 ) );
+    EXPECT_EQ( 4.0, veffmds22.getElement( 2, 1 ) );
+    EXPECT_EQ( 9.0, veffmds22.getElement( 1, 2 ) );
+    EXPECT_EQ( 12.0, veffmds22.getElement( 2, 2 ) );    
+  }
+
   // JetrateDataStructure for 3-jet rate:
   class JetrateDataStructureTest : public ::testing::Test {
   public:
@@ -113,15 +167,15 @@ namespace sjmtests {
     EXPECT_FLOAT_EQ( errors[2], TMath::Sqrt( 2.0 ) );
   }
 
-  // Error matrix:
-  TEST_F( JetrateDataStructureTest, testgetErrorMatrix ) {
-    jrds.setErrorMatrix();
-    MatrixDataStructure* errorMatrix= jrds.getErrorMatrix();
-    vector<Double_t> bins= errorMatrix->getBinedges();
-    vector<Double_t> binedges;
-    for( size_t i= 0; i <= points.size(); i++ ) binedges.push_back( i+0.5 );
-    EXPECT_EQ( binedges, bins );
-  }
+  // // Error matrix:
+  // TEST_F( JetrateDataStructureTest, testgetErrorMatrix ) {
+  //   jrds.setErrorMatrix();
+  //   MatrixDataStructure* errorMatrix= jrds.getErrorMatrix();
+  //   vector<Double_t> bins= errorMatrix->getBinedges();
+  //   vector<Double_t> binedges;
+  //   for( size_t i= 0; i <= points.size(); i++ ) binedges.push_back( i+0.5 );
+  //   EXPECT_EQ( binedges, bins );
+  // }
 
   // normalise:
   TEST_F( JetrateDataStructureTest, testnormalise ) {
@@ -189,13 +243,13 @@ namespace sjmtests {
     EXPECT_FLOAT_EQ( errors[3], TMath::Sqrt( 2.0 ) );
   }
 
-  // Error matrix:
-  TEST_F( DifferentialDataStructureTest, testgetErrorMatrix ) {
-    dds.setErrorMatrix();
-    MatrixDataStructure* errorMatrix= dds.getErrorMatrix();
-    vector<Double_t> bins= errorMatrix->getBinedges();
-    EXPECT_EQ( binedges, bins );
-  }
+  // // Error matrix:
+  // TEST_F( DifferentialDataStructureTest, testgetErrorMatrix ) {
+  //   dds.setErrorMatrix();
+  //   MatrixDataStructure* errorMatrix= dds.getErrorMatrix();
+  //   vector<Double_t> bins= errorMatrix->getBinedges();
+  //   EXPECT_EQ( binedges, bins );
+  // }
 
   // normalise:
   TEST_F( DifferentialDataStructureTest, testnormalise ) {

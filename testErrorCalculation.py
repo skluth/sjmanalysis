@@ -764,7 +764,9 @@ def normaliseColumns( matrix ):
     shape= matrix.shape
     result= np.array( np.zeros( shape ) )
     for i in range( shape[1] ):
-        result[:,i]= matrix[:,i]/sum( matrix[:,i] )
+        sumcol= sum( matrix[:,i] )
+        if sumcol != 0.0:
+            result[:,i]= matrix[:,i]/sumcol
     return result
 
 # Normalise histogram to unit area

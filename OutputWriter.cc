@@ -80,17 +80,19 @@ OutputWriter::writeDifferentialDistribution( const DifferentialDataStructure* dd
 }
 
 void OutputWriter::writeMatrix( MatrixDataStructure* mds, 
-				const string& txt ) {
+				const string & txt,
+				const string & prefix ) {
   vector<Double_t> binedges= mds->getBinedges();
   Int_t nbin= binedges.size()-1;
-  TH2D hist( txt.c_str(), txt.c_str(), nbin, &(binedges[0]), nbin, &(binedges[0]) );
+  string keytxt= prefix+" "+txt;
+  TH2D hist( keytxt.c_str(), txt.c_str(), nbin, &(binedges[0]), nbin, &(binedges[0]) );
   for( Int_t ibin= 0; ibin < nbin+2; ibin++ ) {
     for( Int_t jbin= 0; jbin < nbin+2; jbin++ ) {
       hist.SetBinContent( jbin, ibin, mds->getElement( jbin, ibin ) );
     }
   }
   hist.SetEntries( mds->getNEvents() );
-  cout << "OutputWriter::writeMatrix: writing TH2D " << txt << endl;
+  cout << "OutputWriter::writeMatrix: writing TH2D " << keytxt << endl;
   hist.Write();
   return;
 }
@@ -111,14 +113,14 @@ void OutputWriter::write( const vector<FilledObservable*> & vobs ) {
     for( const auto & keyValue : migrationMatrices ) {
       MatrixDataStructure* mds= keyValue.second;
       string txt= obs->getName() + " " + keyValue.first;
-      writeMatrix( mds, txt );
+      writeMatrix( mds, txt, "migr" );
     }
     map<string,MatrixDataStructure*> errorMatrices= obs->getErrorMatrices();
     for( const auto & keyValue : errorMatrices ) {
       MatrixDataStructure* mds= keyValue.second;
       if( mds != 0 ) {
 	string txt= obs->getName() + " " + keyValue.first;
-	writeMatrix( mds, txt );
+	writeMatrix( mds, txt, "errm" );
       }
     }
   }

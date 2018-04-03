@@ -46,9 +46,13 @@ void DifferentialDataStructure::fill( Double_t value, Double_t weight ) {
 			      TMath::Power( weight, 2 ) );
 }
 
-// Create an error matrix for given tag:
-void DifferentialDataStructure::setErrorMatrix() {
-  errorMatrix= new MatrixDataStructure( binedges );
+// Error matrix created externally:
+void DifferentialDataStructure::setErrorMatrix( MatrixDataStructure* errm ) {
+  //errorMatrix= new MatrixDataStructure( binedges );
+  if( errm->getBinedges() != binedges ) {
+    throw std::runtime_error( "matrix dimension does not match" );
+  }
+  errorMatrix= errm;
 }
 
 // Normalise only bins, not under- or underflow, because binwidth is not defined:
@@ -56,7 +60,8 @@ void DifferentialDataStructure::normalise() {
   checkNormalised();
   checkNtotalGTZero();
   if( errorMatrix == 0 ) {
-    setErrorMatrix();
+    //setErrorMatrix();
+    errorMatrix= new MatrixDataStructure( binedges );
     calculateErrorMatrixWeighted();
   }
   else {

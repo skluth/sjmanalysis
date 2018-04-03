@@ -22,7 +22,7 @@ public:
   const std::vector<Double_t>& getPoints() const { return points; }
   void Print() const;
   DataStructure* clone() const;
-  virtual void setErrorMatrix();
+  virtual void setErrorMatrix( MatrixDataStructure* );
 
 private:
 

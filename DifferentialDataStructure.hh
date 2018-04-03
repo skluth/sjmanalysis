@@ -23,7 +23,7 @@ public:
   void Print() const;
   void printBinedges();
   DataStructure* clone() const;
-  virtual void setErrorMatrix();
+  virtual void setErrorMatrix( MatrixDataStructure* );
 
 
 private:

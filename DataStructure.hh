@@ -28,7 +28,7 @@ public:
   virtual void normalise() = 0;
   virtual void Print() const = 0;
   virtual DataStructure* clone() const = 0;
-  virtual void setErrorMatrix() = 0;
+  virtual void setErrorMatrix( MatrixDataStructure* ) = 0;
   MatrixDataStructure* getErrorMatrix() const;
   
 protected:

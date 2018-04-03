@@ -18,7 +18,9 @@ public:
   void Print() const;
   Double_t getNEvents() const { return Ntotal; }
   std::vector<Double_t> getBinedges() const { return binedges; } 
-
+  void normaliseColumns();
+  size_t getNdim() const { return ndim; }
+  
 private:
 
   void checkIndices( size_t irow, size_t icol ) const;
@@ -29,5 +31,16 @@ private:
   Double_t* array;
 
 };
+
+std::vector<Double_t> multiply( const MatrixDataStructure & m,
+				const std::vector<Double_t> & v );
+
+MatrixDataStructure* applyEfficiency( const MatrixDataStructure & m,
+				      const std::vector<Double_t> & v );
+
+MatrixDataStructure* similarityVector( const MatrixDataStructure & m,
+				       const std::vector<Double_t> & v );
+
+
 
 #endif

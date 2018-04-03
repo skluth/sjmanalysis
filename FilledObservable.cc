@@ -13,24 +13,23 @@ using std::endl;
 using std::map;
 using std::string;
 
-FilledObservable::FilledObservable( const string& obsname,
-				    const map<string,DifferentialDataStructure*>& ddss,
-				    const map<string,MatrixDataStructure*>& mdss ) : 
-  name(obsname), lerrorMatrices(false), migrationMatrices(mdss) {
+#include <exception>
+
+FilledObservable::FilledObservable( const string & obsname,
+				    const map<string,DifferentialDataStructure*> & ddss,
+				    const map<string,MatrixDataStructure*> & mdss ) : 
+  name(obsname), migrationMatrices(mdss) {
   for( const auto & keyValue : ddss ) datastructures[keyValue.first]= keyValue.second;
 }
 
-FilledObservable::FilledObservable( const string& obsname,
-				    const map<string,JetrateDataStructure*>& jrdss ) :
-  name(obsname), lerrorMatrices(false) {
+FilledObservable::FilledObservable( const string & obsname,
+				    const map<string,JetrateDataStructure*> & jrdss ) :
+  name(obsname) {
   for( const auto & keyValue : jrdss ) datastructures[keyValue.first]= keyValue.second;
 }
 
 void FilledObservable::finalise() {
-  for( map<string,DataStructure*>::iterator iter= datastructures.begin();
-       iter != datastructures.end(); iter++ ) {
-    (iter->second)->normalise();
-  }
+  for( auto & keyValue : datastructures ) (keyValue.second)->normalise();
 }
 
 void FilledObservable::Print() const {
@@ -43,12 +42,8 @@ void FilledObservable::Print() const {
     cout << "No migration matrices" << endl;
   }
   else {
-    // for( map<string,MatrixDataStructure*>::const_iterator iter= migrationMatrices.begin();
-    // 	 iter != migrationMatrices.end(); iter++ ) {
-    //   cout << name << " " << iter->first << " events " << (iter->second)->getNEvents() << endl;
-    //   (iter->second)->Print();
-    // }
     for( const auto & keyValue : migrationMatrices ) {
+      cout << "Migration matrix:" << endl;
       cout << name << " " << keyValue.first << " events "
 	   << (keyValue.second)->getNEvents() << endl;
       (keyValue.second)->Print();
@@ -72,16 +67,36 @@ map<string,MatrixDataStructure*> FilledObservable::getErrorMatrices() const {
   return errorMatrices;
 }
 
-DataStructure* FilledObservable::getDataStructure( const Analysis& anal ) const {
+DataStructure* FilledObservable::getDataStructure( const Analysis & anal ) const {
   string tag= anal.getTag();
   map<string,DataStructure*>::const_iterator iter= datastructures.find( tag );
   DataStructure* ds= 0;
-  if( iter != datastructures.end() ) ds= iter->second;
-  else cout << "FilledObservable::getDataStructure: " << tag << " not found" << endl;
+  if( iter != datastructures.end() ) {
+    ds= iter->second;
+  }
+  else {
+    cout << "FilledObservable::getDataStructure: " << tag << " not found" << endl;
+    throw std::runtime_error( "Tag for datastructrue not found" );
+  }
   return ds;
 }
 
-void FilledObservable::setDataStructure( DataStructure* dsp, const Analysis& anal ) {
+MatrixDataStructure*
+FilledObservable::getMigrationMatrix( const Analysis & anal ) const {
+  string tag= anal.getTag();
+  map<string,MatrixDataStructure*>::const_iterator iter= migrationMatrices.find( tag );
+  MatrixDataStructure* mds= 0;
+  if( iter != migrationMatrices.end() ) {
+    mds= iter->second;
+  }
+  else {
+    cout << "FilledObservable::getMigrationMatrix: " << tag << " not found" << endl;
+    throw std::runtime_error( "Tag for MatrixDataStructure not found" );
+  }
+  return mds;
+}
+
+void FilledObservable::setDataStructure( DataStructure* dsp, const Analysis & anal ) {
   string tag= anal.getTag();
   datastructures[tag]= dsp;
 }

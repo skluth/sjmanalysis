@@ -6,7 +6,8 @@
 #include "Observable.hh"
 #include "FilledObservable.hh"
 #include "ObservableFactory.hh"
-#include "Unfolder.hh"
+#include "BbbUnfolder.hh"
+#include "MtxUnfolder.hh"
 #include "OutputWriter.hh"
 #include "NtupleReader.hh"
 #include "LEP1NtupleReader.hh"
@@ -101,7 +102,7 @@ void
 AnalysisProcessor::processUnfolding( const vector<Analysis>& measuredAnalyses, 
 				     const string& unfoldsource,
 				     const vector<FilledObservable*>& vfobs ) {
-  cout << "processUnfolding: bin-by-bin unfolding for analyses:" << endl;
+  cout << "processUnfolding: unfolding for analyses:" << endl;
   Analysis hadronlevel( unfoldsource, "hadron", "none", "nonrad" );
   cout << "Hadron level: " << hadronlevel.getTag() << endl;
   for( const Analysis& measured : measuredAnalyses ) {
@@ -109,12 +110,19 @@ AnalysisProcessor::processUnfolding( const vector<Analysis>& measuredAnalyses,
     measuredMC.setSource( unfoldsource );
     measuredMC.setBkgStatus( "none" );
     cout << "Data, MC signal: " << measured.getTag() << ", " << measuredMC.getTag() << endl;
-    Unfolder unfolder( measured, measuredMC, hadronlevel );
+    BbbUnfolder bbbunfolder( measured, measuredMC, hadronlevel );
+    MtxUnfolder mtxunfolder( measured, measuredMC, hadronlevel );
     for( FilledObservable* fobs : vfobs ) {
-      unfolder.unfold( fobs );
+      if( fobs->getName() == "thrust" ) {
+      	mtxunfolder.unfold( fobs );
+      }
+      else {
+      	bbbunfolder.unfold( fobs );
+      }
+      //bbbunfolder.unfold( fobs );
     }
+    return;
   }
-  return;
 }
 
 vector<FilledObservable*> 
@@ -255,12 +263,18 @@ void AnalysisProcessor::LEP1Analysis() {
 
   // Add extra analyses to observables for migration matrices where needed:
   vector<Analysis> pyMatrixExtras;
-  pyMatrixExtras.push_back( Analysis( "py", "hadron", "stand", "nonrad" ) );
-  pyMatrixExtras.push_back( Analysis( "py", "mt", "stand", "nonrad", "hadron" ) );
+  pyMatrixExtras.push_back( Analysis( "py", "hadron", "stand" ) );
+  pyMatrixExtras.push_back( Analysis( "py", "mt", "stand", "none", "hadron" ) );
+  pyMatrixExtras.push_back( Analysis( "py", "mt", "costt07", "none", "hadron" ) );
+  pyMatrixExtras.push_back( Analysis( "py", "mt", "nch7", "none", "hadron" ) );
+  pyMatrixExtras.push_back( Analysis( "py", "tc", "stand", "none", "hadron" ) );
   pyAnalyses.insert( pyAnalyses.end(), pyMatrixExtras.begin(), pyMatrixExtras.end() );
   vector<Analysis> hwMatrixExtras;
-  hwMatrixExtras.push_back( Analysis( "hw", "hadron", "stand", "nonrad" ) );
-  hwMatrixExtras.push_back( Analysis( "hw", "mt", "stand", "nonrad", "hadron" ) );
+  hwMatrixExtras.push_back( Analysis( "hw", "hadron", "stand" ) );
+  hwMatrixExtras.push_back( Analysis( "hw", "mt", "stand", "none", "hadron" ) );
+  hwMatrixExtras.push_back( Analysis( "hw", "mt", "costt07", "none", "hadron" ) );
+  hwMatrixExtras.push_back( Analysis( "hw", "mt", "nch7", "none", "hadron" ) );
+  hwMatrixExtras.push_back( Analysis( "hw", "tc", "stand", "none", "hadron" ) );
   hwAnalyses.insert( hwAnalyses.end(), hwMatrixExtras.begin(), hwMatrixExtras.end() );
   for( Observable* obs : vobs ) {
     if( obs->getName() == "thrust" or
@@ -330,16 +344,6 @@ void AnalysisProcessor::LEP1Analysis() {
   else {
     cout << "AnalysisProcessor::LEP1Analysis: no background subtraction" << endl;
   }
-
-  // // Request error matrices:
-  // for( FilledObservable* obs : vfobs ) {
-  //   if( obs->getName().find( "thrust" ) != std::string::npos or
-  // 	obs->getName() == "EEC" ) {
-  //     obs->requestErrorMatrices();
-  //     cout << "AnalysisProcessor::LEP1Analysis: request error matrices for "
-  // 	   << obs->getName() << endl;
-  //   }
-  // }
 
   // Unfolding bin-by-bin:
   try {

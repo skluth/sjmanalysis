@@ -9,7 +9,9 @@ class MatrixDataStructure {
 public:
 
   MatrixDataStructure( const std::vector<Double_t> & bins );
-  ~MatrixDataStructure() {}
+  MatrixDataStructure( const MatrixDataStructure & m );
+  virtual ~MatrixDataStructure();
+  MatrixDataStructure & operator= ( const MatrixDataStructure & other );
 
   MatrixDataStructure* clone() const;
   void fill( Double_t, Double_t );
@@ -20,7 +22,7 @@ public:
   std::vector<Double_t> getBinedges() const { return binedges; } 
   void normaliseColumns();
   size_t getNdim() const { return ndim; }
-  
+
 private:
 
   void checkIndices( size_t irow, size_t icol ) const;
@@ -34,6 +36,8 @@ private:
 
 std::vector<Double_t> multiply( const MatrixDataStructure & m,
 				const std::vector<Double_t> & v );
+MatrixDataStructure multiply( const MatrixDataStructure & mlhs,
+			      const MatrixDataStructure & mrhs );
 
 MatrixDataStructure* applyEfficiency( const MatrixDataStructure & m,
 				      const std::vector<Double_t> & v );

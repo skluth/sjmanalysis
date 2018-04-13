@@ -48,7 +48,6 @@ void DifferentialDataStructure::fill( Double_t value, Double_t weight ) {
 
 // Error matrix created externally:
 void DifferentialDataStructure::setErrorMatrix( MatrixDataStructure* errm ) {
-  //errorMatrix= new MatrixDataStructure( binedges );
   if( errm->getBinedges() != binedges ) {
     throw std::runtime_error( "matrix dimension does not match" );
   }
@@ -60,14 +59,14 @@ void DifferentialDataStructure::normalise() {
   checkNormalised();
   checkNtotalGTZero();
   if( errorMatrix == 0 ) {
-    //setErrorMatrix();
     errorMatrix= new MatrixDataStructure( binedges );
     calculateErrorMatrixWeighted();
   }
   else {
     // Some unfolder already created an error matrix, use Jacobean method
-    cout << "DifferentialDataStructure::normalise: Jacobean method not implemented"
-	 << endl;
+    calculateErrorMatrixJacobean();
+    //   cout << "DifferentialDataStructure::normalise: Jacobean method not implemented"
+    //	 << endl;
   }    
   for( size_t i= 0; i < points.size(); i++ ) {
     Double_t binw= binedges[i+1]-binedges[i];
@@ -118,6 +117,30 @@ void DifferentialDataStructure::calculateErrorMatrixWeighted() {
       Double_t binwj= binedges[jbin]-binedges[jbin-1];
       cov/= (binwi*binwj);
       errorMatrix->setElement( ibin, jbin, cov );
+    }
+  }
+  return;
+}
+
+void DifferentialDataStructure::calculateErrorMatrixJacobean() {
+  size_t nbin= values.size()-2;
+  Double_t sumw= 0.0;
+  for( size_t ibin= 1; ibin <= nbin; ibin++ ) sumw+= values[ibin];
+  MatrixDataStructure Jacobean( binedges );
+  for( size_t ibin= 1; ibin <= nbin; ibin++ ) {
+    for( size_t jbin= 1; jbin <= nbin; jbin++ ) {
+      Double_t deltaij= 0.0;
+      if( ibin == jbin ) deltaij= 1.0;
+      Jacobean.setElement( ibin, jbin, ( sumw*deltaij - values[ibin] )/(Ntotal*sumw) );
+    }
+  }
+  *errorMatrix= multiply( Jacobean, multiply( *errorMatrix, Jacobean ) );
+  for( size_t ibin= 1; ibin <= nbin; ibin++ ) {
+    Double_t binwi= binedges[ibin]-binedges[ibin-1];
+    for( size_t jbin= 1; jbin <= nbin; jbin++ ) {
+      Double_t binwj= binedges[jbin]-binedges[jbin-1];
+      Double_t element= errorMatrix->getElement( ibin, jbin );
+      errorMatrix->setElement( ibin, jbin, element/(binwi*binwj) );
     }
   }
   return;

@@ -29,7 +29,8 @@ public:
 private:
 
   void calculateErrorMatrixWeighted();
-
+  void calculateErrorMatrixJacobean();
+  
   std::vector<Double_t> binedges;
 
 };

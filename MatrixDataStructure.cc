@@ -15,9 +15,8 @@ using std::ostringstream;
 #include <stdexcept>
 
 // Ctor:
-MatrixDataStructure::MatrixDataStructure( const vector<Double_t>& bins ) : 
-  binedges(bins), Ntotal(0) {
-  ndim= binedges.size()+1;
+MatrixDataStructure::MatrixDataStructure( const vector<Double_t> & bins ) : 
+  binedges(bins), Ntotal(0), ndim(binedges.size()+1) {
   array= new Double_t[ndim*ndim];
   for( size_t i= 0; i < ndim; i++ ) {
     for( size_t j= 0; j < ndim; j++ ) {
@@ -26,8 +25,40 @@ MatrixDataStructure::MatrixDataStructure( const vector<Double_t>& bins ) :
   }
 }
 
+MatrixDataStructure::MatrixDataStructure( const MatrixDataStructure & m ) : 
+  binedges(m.getBinedges()), Ntotal(m.getNEvents()), ndim(m.getNdim()) {
+  array= new Double_t[ndim*ndim];
+  for( size_t icol= 0; icol < ndim; icol++ ) {
+    for( size_t irow= 0; irow < ndim; irow++ ) {
+      array[icol*ndim+irow]= m.getElement( icol, irow );
+    }
+  }
+}
+
+// Dtor:
+MatrixDataStructure::~MatrixDataStructure() {
+  delete array;
+}
+
+// Clone:
 MatrixDataStructure* MatrixDataStructure::clone() const {
   return new MatrixDataStructure( binedges );
+}
+
+MatrixDataStructure & MatrixDataStructure::operator= ( const MatrixDataStructure & other ) {
+  if( this != &other ) {
+    if( ndim == other.ndim ) {
+      for( size_t icol= 0; icol < ndim; icol++ ) {
+	for( size_t irow= 0; irow < ndim; irow++ ) {
+	  array[icol*ndim+irow]= other.array[icol*ndim+irow];
+	} 
+      }
+    }
+    else {
+      throw std::logic_error( "matrix dimensions don't match" );
+    }
+  }
+  return *this;
 }
 
 // Underflows go in value[0], overflow goes in values[n] with n # of binedges:
@@ -114,6 +145,26 @@ vector<Double_t> multiply( const MatrixDataStructure & m,
       sumrow+= m.getElement( icol, irow )*v[icol];
     }
     result[irow]= sumrow;
+  }
+  return result;
+}
+
+MatrixDataStructure multiply( const MatrixDataStructure & mlhs,
+			      const MatrixDataStructure & mrhs ) {
+  size_t mlhsndim= mlhs.getNdim();
+  size_t mrhsndim= mrhs.getNdim();
+  if( mlhsndim != mrhsndim ) {
+    throw std::logic_error( "Matrix dimensions don't match" );
+  }
+  MatrixDataStructure result( mlhs.getBinedges() );
+  for( size_t irow= 0; irow < mlhsndim; irow++ ) {
+    for( size_t icol= 0; icol < mlhsndim; icol++ ) {
+      Double_t sumk= 0.0;
+      for( size_t k= 0; k < mlhsndim; k++ ) {
+	sumk+= mlhs.getElement( k, irow )*mrhs.getElement( icol, k );
+      }
+      result.setElement( icol, irow, sumk );
+    }
   }
   return result;
 }

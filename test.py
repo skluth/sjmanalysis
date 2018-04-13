@@ -91,13 +91,13 @@ class AnalysisObservable:
 # LEP1 Analysis
 class LEP1AnalysisObservable( AnalysisObservable ):
 
-    def __init__( self, obs, tfile ):
+    def __init__( self, obs, tfile, unf="bbb" ):
         AnalysisObservable.__init__( self, obs )
-        standardAnalysis= Analysis( "data mt stand none none none py bbb" )
-        tcAnalysis= Analysis( "data tc stand none none none py bbb" )
-        costt07Analysis= Analysis( "data mt costt07 none none none py bbb" )
-        nch7Analysis= Analysis( "data mt nch7 none none none py bbb" )
-        hwAnalysis= Analysis( "data mt stand none none none hw bbb" )
+        standardAnalysis= Analysis( "data mt stand none none none py " + unf )
+        tcAnalysis= Analysis( "data tc stand none none none py " + unf )
+        costt07Analysis= Analysis( "data mt costt07 none none none py " + unf )
+        nch7Analysis= Analysis( "data mt nch7 none none none py " + unf )
+        hwAnalysis= Analysis( "data mt stand none none none hw " + unf )
         self.aostand= getAnalysisObjectFromFile( tfile, obs, standardAnalysis )
         self.points= array( "d", self.aostand.getPoints() )
         self.values= array( "d", self.aostand.getValues() )

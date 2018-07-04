@@ -76,21 +76,32 @@ AnalysisProcessor::processAnalyses( const vector<Analysis>& analyses,
     for( const Analysis& analysis : analyses ) {
       string cuts= analysis.getCuts();
       string mccuts= analysis.getMccuts();
-      if( ( cuts == "none" or selections.at( cuts ) ) and
-	  ( mccuts == "none" or MCnonrad ) ) {
-	for( Observable* obs : vobs ) {
-	  // Not all observables have all analysis variants
-	  // due to filling of transfer matrices:
-	  if( obs->containsAnalysis( analysis ) ) {
-	    try {
-	      obs->fill( ntr, analysis );
-	    }
-	    catch( const std::out_of_range& oor ) {
-	      cout << oor.what() << " " << obs->getName() << " " 
-		   << analysis.getTag() << endl;
+      try {
+	if( ( cuts == "none" or selections.at( cuts ) ) and
+	    ( mccuts == "none" or MCnonrad ) ) {
+	  for( Observable* obs : vobs ) {
+	    // Not all observables have all analysis variants
+	    // due to filling of transfer matrices:
+	    if( obs->containsAnalysis( analysis ) ) {
+	      try {
+		obs->fill( ntr, analysis );
+	      }
+	      catch( const std::out_of_range& oor ) {
+		cout << oor.what() << " " << obs->getName() << " " 
+		     << analysis.getTag() << endl;
+	      }
 	    }
 	  }
 	}
+      }
+      catch( const std::exception& e ) {
+	cout << "AnalysisProcessor::processAnalysis: filling cought exception: "
+	     << e.what() << endl;
+	cout << ievnt << " " << analysis.getTag() << endl;
+	for( const auto & keyValue : selections ) {
+	  cout << keyValue.first << " (" << keyValue.second << ")";
+	}
+	cout << "\ncuts: " << cuts << endl;
       }
     }
   }
@@ -262,20 +273,20 @@ void AnalysisProcessor::LEP1Analysis() {
 
   // Add extra analyses to observables for migration matrices where needed:
   vector<Analysis> pyMatrixExtras;
-  pyMatrixExtras.push_back( Analysis( "py", "hadron", "stand" ) );
-  pyMatrixExtras.push_back( Analysis( "py", "hadron", "costt07" ) );
-  pyMatrixExtras.push_back( Analysis( "py", "hadron", "nch7" ) );
-  pyMatrixExtras.push_back( Analysis( "py", "mt", "stand", "none", "hadron" ) );
-  pyMatrixExtras.push_back( Analysis( "py", "mt", "costt07", "none", "hadron" ) );
-  pyMatrixExtras.push_back( Analysis( "py", "mt", "nch7", "none", "hadron" ) );
-  pyMatrixExtras.push_back( Analysis( "py", "tc", "stand", "none", "hadron" ) );
+  for( const Analysis& analysis : measuredAnalyses ) {
+    if( analysis.getReco() == "mt" ) {
+      pyMatrixExtras.push_back( Analysis( "py", "hadron", analysis.getCuts() ) );
+    }
+    pyMatrixExtras.push_back( Analysis( "py",
+					analysis.getReco(),
+					analysis.getCuts(),
+					"none",
+					"hadron" ) );
+  }
   pyAnalyses.insert( pyAnalyses.end(), pyMatrixExtras.begin(), pyMatrixExtras.end() );
   vector<Analysis> hwMatrixExtras;
   hwMatrixExtras.push_back( Analysis( "hw", "hadron", "stand" ) );
   hwMatrixExtras.push_back( Analysis( "hw", "mt", "stand", "none", "hadron" ) );
-  //hwMatrixExtras.push_back( Analysis( "hw", "mt", "costt07", "none", "hadron" ) );
-  //hwMatrixExtras.push_back( Analysis( "hw", "mt", "nch7", "none", "hadron" ) );
-  //hwMatrixExtras.push_back( Analysis( "hw", "tc", "stand", "none", "hadron" ) );
   hwAnalyses.insert( hwAnalyses.end(), hwMatrixExtras.begin(), hwMatrixExtras.end() );
   for( Observable* obs : vobs ) {
     if( obs->getName() == "thrust" or
@@ -322,7 +333,8 @@ void AnalysisProcessor::LEP1Analysis() {
     }
   }
   catch( const std::exception& e ) {
-    cout << "AnalysisProcessor::LEP1Analysis: filling cought exception: " << e.what() << endl;
+    cout << "AnalysisProcessor::LEP1Analysis: filling cought exception: "
+	 << e.what() << endl;
     return;
   }
   cout << "AnalysisProcessor::LEP1Analysis: Event counts:" << endl;

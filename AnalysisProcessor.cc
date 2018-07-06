@@ -169,19 +169,27 @@ AnalysisProcessor::subtractBackground( const vector<FilledObservable*> & vfobs,
   Double_t qqqqweight= lumi*qqqqxsec/eventCounts.at( "BkgWWqqqq" );
   Double_t eeqqweight= lumi*eeqqxsec/eventCounts.at( "BkgWWeeqq" );
 
-  // For all data analyses find bkg MC analyses and subtract:
+  // For all data analyses in measuredAnalyses find bkg MC analyses and subtract:
   vector<Analysis> subtractedMeasuredAnalyses;
+
+  // All analyses
   for( const Analysis & analysis : measuredAnalyses ) {
+      
+    // Analysis tags for bkgs and subtracted analysis:
     Analysis llqqAnalysis( analysis );
     llqqAnalysis.setSource( "llqq" );
     Analysis qqqqAnalysis( analysis );
-    llqqAnalysis.setSource( "qqqq" );
+    qqqqAnalysis.setSource( "qqqq" );
     Analysis eeqqAnalysis( analysis );
-    llqqAnalysis.setSource( "eeqq" );
-    Analysis subtractedDataAnalysis( analysis );
-    subtractedDataAnalysis.setBkgStatus( "llqq:qqqq:eeqq" );
-    subtractedMeasuredAnalyses.push_back( subtractedDataAnalysis );
+    eeqqAnalysis.setSource( "eeqq" );
+    Analysis subtractedAnalysis( analysis );
+    subtractedAnalysis.setBkgStatus( "llqq:qqqq:eeqq" );
+    subtractedMeasuredAnalyses.push_back( subtractedAnalysis );
+ 
+    // All observables:
     for( FilledObservable* obs : vfobs ) {
+    
+      // Check bkgs are there:
       for( const Analysis & analysisInObs : vector<Analysis> { analysis,
 	    llqqAnalysis, qqqqAnalysis, eeqqAnalysis } ) {
 	if( not obs->containsAnalysis( analysisInObs ) ) {
@@ -189,6 +197,8 @@ AnalysisProcessor::subtractBackground( const vector<FilledObservable*> & vfobs,
 				    analysisInObs.getTag() );
 	}
       }
+    
+      // Get data:
       DataStructure* data= obs->getDataStructure( analysis );
       DataStructure* llqq= obs->getDataStructure( llqqAnalysis );
       DataStructure* qqqq= obs->getDataStructure( qqqqAnalysis );
@@ -197,31 +207,53 @@ AnalysisProcessor::subtractBackground( const vector<FilledObservable*> & vfobs,
       vector<Double_t> valuesllqq= llqq->getValues();
       vector<Double_t> valuesqqqq= qqqq->getValues();
       vector<Double_t> valueseeqq= eeqq->getValues();
-      vector<Double_t> subtractedData= ( valuesdata -
-					 valuesllqq*llqqweight -
-					 valuesqqqq*qqqqweight -
-					 valueseeqq*eeqqweight );
       vector<Double_t> errorsdata= data->getErrors();
-      vector<Double_t> errorsllqq= llqq->getErrors()*llqqweight;
-      vector<Double_t> errorsqqqq= qqqq->getErrors()*qqqqweight;
-      vector<Double_t> errorseeqq= eeqq->getErrors()*eeqqweight;
-      vector<Double_t> errors= sqrt( square( errorsdata ) +
-				     square( errorsllqq ) +
-				     square( errorsqqqq ) +
-				     square( errorseeqq ) );
       Double_t neventsdata= data->getNEvents();
       Double_t neventsllqq= llqq->getNEvents();
       Double_t neventsqqqq= qqqq->getNEvents();
       Double_t neventseeqq= eeqq->getNEvents();
-      Double_t subtractedNevents= ( neventsdata -
-				    neventsllqq*llqqweight -
-				    neventsqqqq*qqqqweight -
-				    neventseeqq*eeqqweight );
-      DataStructure* subtractedDds= data->clone();
-      subtractedDds->setValues( subtractedData );
-      subtractedDds->setErrors( errors );
-      subtractedDds->setNEvents( subtractedNevents );
-      obs->setDataStructure( subtractedDds, subtractedDataAnalysis );
+
+      // Subtract with scaling factor variation for default "mt stand" analysis,
+      // otherwise subtract once unscaled:
+      auto subtractScaled= [&]( Double_t scaleFactor,
+				const Analysis & subtracted ) {
+	Double_t llqqweightSf= llqqweight*scaleFactor;
+	Double_t qqqqweightSf= qqqqweight*scaleFactor;
+	Double_t eeqqweightSf= eeqqweight*scaleFactor;
+	vector<Double_t> subtractedData= ( valuesdata -
+					   valuesllqq*llqqweightSf -
+					   valuesqqqq*qqqqweightSf -
+					   valueseeqq*eeqqweightSf );
+	vector<Double_t> errorsllqq= llqq->getErrors()*llqqweightSf;
+	vector<Double_t> errorsqqqq= qqqq->getErrors()*qqqqweightSf;
+	vector<Double_t> errorseeqq= eeqq->getErrors()*eeqqweightSf;
+	vector<Double_t> errors= sqrt( square( errorsdata ) +
+				       square( errorsllqq ) +
+				       square( errorsqqqq ) +
+				       square( errorseeqq ) );
+	Double_t subtractedNevents= ( neventsdata -
+				      neventsllqq*llqqweightSf -
+				      neventsqqqq*qqqqweightSf -
+				      neventseeqq*eeqqweightSf );
+	DataStructure* subtractedDds= data->clone();
+	subtractedDds->setValues( subtractedData );
+	subtractedDds->setErrors( errors );
+	subtractedDds->setNEvents( subtractedNevents );
+	obs->setDataStructure( subtractedDds, subtracted );
+	return;
+      };
+      subtractScaled( 1.0, subtractedAnalysis );
+      if( analysis.getTag().find( "data mt stand" ) != std::string::npos ) {
+	Analysis subtractedAnalysisHi( analysis );
+	subtractedAnalysisHi.setBkgStatus( "llqq:qqqq:eeqq:hi" );
+	subtractedMeasuredAnalyses.push_back( subtractedAnalysisHi );
+	Analysis subtractedAnalysisLo( analysis );
+	subtractedAnalysisLo.setBkgStatus( "llqq:qqqq:eeqq:lo" );
+	subtractedMeasuredAnalyses.push_back( subtractedAnalysisLo );
+    	subtractScaled( 1.05, subtractedAnalysisHi );
+	subtractScaled( 0.95, subtractedAnalysisLo );
+      }
+	
     }
   }
   return subtractedMeasuredAnalyses;
@@ -273,7 +305,7 @@ void AnalysisProcessor::LEP1Analysis() {
 
   // Add extra analyses to observables for migration matrices where needed:
   vector<Analysis> pyMatrixExtras;
-  for( const Analysis& analysis : measuredAnalyses ) {
+  for( const Analysis & analysis : measuredAnalyses ) {
     if( analysis.getReco() == "mt" ) {
       pyMatrixExtras.push_back( Analysis( "py", "hadron", analysis.getCuts() ) );
     }
@@ -298,7 +330,7 @@ void AnalysisProcessor::LEP1Analysis() {
     }
   }
 
-  // Fill from data and mc (PYTHIA and HERWIG) ntuples:
+  // Fill from data and MC (PYTHIA and HERWIG) ntuples:
   std::map<string,Double_t> eventCounts;
   cout << "AnalysisProcessor::LEP1Analysis: fill from ntuples" << endl;
   try {
@@ -388,7 +420,7 @@ void AnalysisProcessor::LEP1Analysis() {
     return;
   }
 
-  // Normalise and calculate stat errors, print
+  // Normalise and calculate stat errors with full jacobean calculation
   for( FilledObservable* fobs : vfobs ) {
     if( sjmConfigs.getItem<bool>( "General.normalise" ) ) fobs->finalise();
     fobs->Print();

@@ -87,31 +87,35 @@ class AnalysisObservable:
         gPad.SetLogy()
         tgest.Draw( "same"+drawas )
         return tgest, tgesy
+    
+    def maxAbsErrorSq( self, error1, error2 ):
+        from numpy import square, maximum, absolute
+        return square( maximum( absolute( error1 ), absolute( error2 ) ) )
 
+    
 # LEP1 Analysis
 class LEP1AnalysisObservable( AnalysisObservable ):
 
     def __init__( self, obs, tfile, unf="bbb" ):
         AnalysisObservable.__init__( self, obs )
         standardAnalysis= Analysis( "data mt stand none none none py " + unf )
-        tcAnalysis= Analysis( "data tc stand none none none py " + unf )
-        costt07Analysis= Analysis( "data mt costt07 none none none py " + unf )
-        nch7Analysis= Analysis( "data mt nch7 none none none py " + unf )
-        hwAnalysis= Analysis( "data mt stand none none none hw " + unf )
+        analysisVariations= {
+            "tc": Analysis( "data tc stand none none none py " + unf ),
+            "costt07": Analysis( "data mt costt07 none none none py " + unf ),
+            "nch7": Analysis( "data mt nch7 none none none py " + unf ),
+            "hw": Analysis( "data mt stand none none none hw " + unf ) }
         self.aostand= getAnalysisObjectFromFile( tfile, obs, standardAnalysis )
         self.points= array( "d", self.aostand.getPoints() )
         self.values= array( "d", self.aostand.getValues() )
         self.sterrs= array( "d", self.aostand.getErrors() )
-        tctvd= array( "d", getAnalysisObjectFromFile( tfile, obs, tcAnalysis ).getValues() )
-        costt07tvd= array( "d", getAnalysisObjectFromFile( tfile, obs, costt07Analysis ).getValues() )
-        nch7tvd= array( "d", getAnalysisObjectFromFile( tfile, obs, nch7Analysis ).getValues() )
-        hwtvd= array( "d", getAnalysisObjectFromFile( tfile, obs, hwAnalysis ).getValues() )
         from numpy import square, sqrt, subtract
-        tcdelta= subtract( tctvd, self.values )
-        costt07delta= subtract( costt07tvd, self.values )
-        nch7delta= subtract( nch7tvd, self.values )
-        hwdelta= subtract( hwtvd, self.values )
-        self.syerrs= square(tcdelta)+square(costt07delta)+square(nch7delta)+square(hwdelta)
+        variationsDelta= dict()
+        for key in analysisVariations.keys():
+            variationData= array( "d", getAnalysisObjectFromFile( tfile, obs, analysisVariations[key] ).getValues() )
+            variationsDelta[key]= subtract( variationData, self.values )
+        self.syerrs= 0.0
+        for key in analysisVariations.keys():
+            self.syerrs+= square( variationsDelta[key] )
         self.syerrs= sqrt(self.syerrs)
         return
 
@@ -123,60 +127,84 @@ class LEP1AnalysisObservable( AnalysisObservable ):
             binw= self.points[i+1]-self.points[i]
             diagError= sqrt( errorMatrix(i,i) )/binw
             print fmt.format( self.sterrs[i] ), fmt.format( diagError )
-        return
-            
-    
+        return            
+
 # LEP2 Analysis
 class LEP2AnalysisObservable( AnalysisObservable ):
 
-    def __init__( self, obs, tfile ):
+    def __init__( self, obs, tfile, unf="bbb" ):
         AnalysisObservable.__init__( self, obs )
-        standardAnalysis= Analysis( "data mt stand none none llqq:qqqq:eeqq py bbb" )
-        tcAnalysis= Analysis( "data tc stand none none llqq:qqqq:eeqq py bbb" )
-        costt07Analysis= Analysis( "data mt costt07 none none llqq:qqqq:eeqq py bbb" )
-
-        hwAnalysis= Analysis( "data mt stand none none llqq:qqqq:eeqq hw bbb" )
+        standardAnalysis= Analysis( "data mt stand none none llqq:qqqq:eeqq py " + unf )
+        analysisVariations= {
+            "tc": Analysis( "data tc stand none none llqq:qqqq:eeqq py " + unf  ),
+            "costt07": Analysis( "data mt costt07 none none llqq:qqqq:eeqq py " + unf  ), 
+            "sprold": Analysis( "data mt sprold none none llqq:qqqq:eeqq py " + unf  ),
+            "hw": Analysis( "data mt stand none none llqq:qqqq:eeqq hw " + unf  ),
+            "wqqlnhi": Analysis( "data mt wqqlnhi none none llqq:qqqq:eeqq py " + unf  ),
+            "wqqlnlo": Analysis( "data mt wqqlnlo none none llqq:qqqq:eeqq py " + unf  ),
+            "wqqqqhi": Analysis( "data mt wqqqqhi none none llqq:qqqq:eeqq py " + unf  ),
+            "wqqqqlo": Analysis( "data mt wqqqqlo none none llqq:qqqq:eeqq py " + unf  ),
+            "bkghi": Analysis( "data mt stand none none llqq:qqqq:eeqq:hi py " + unf  ), 
+            "bkglo": Analysis( "data mt stand none none llqq:qqqq:eeqq:lo py " + unf  ) }
         self.aostand= getAnalysisObjectFromFile( tfile, obs, standardAnalysis )
         self.points= array( "d", self.aostand.getPoints() )
         self.values= array( "d", self.aostand.getValues() )
-        self.sterrs= array( "d", self.aostand.getErrors() )
-        tctvd= array( "d", getAnalysisObjectFromFile( tfile, obs, tcAnalysis ).getValues() )
-        costt07tvd= array( "d", getAnalysisObjectFromFile( tfile, obs, costt07Analysis ).getValues() )
-
-        hwtvd= array( "d", getAnalysisObjectFromFile( tfile, obs, hwAnalysis ).getValues() )
+        self.sterrs= array( "d", self.aostand.getErrors() )        
         from numpy import square, sqrt, subtract
-        tcdelta= subtract( tctvd, self.values )
-        costt07delta= subtract( costt07tvd, self.values )
-
-        hwdelta= subtract( hwtvd, self.values )
-        self.syerrs= square(tcdelta)+square(costt07delta)+square(hwdelta)
-        self.syerrs= sqrt(self.syerrs)
+        variationsDelta= dict()
+        for key in analysisVariations.keys():
+            variationData= array( "d", getAnalysisObjectFromFile( tfile, obs, analysisVariations[key] ).getValues() )
+            variationsDelta[key]= subtract( variationData, self.values )
+        self.syerrs= 0.0
+        for key in [ "tc", "costt07", "hw", "sprold" ]:
+            self.syerrs+= square( variationsDelta[key] )
+        self.syerrs+= self.maxAbsErrorSq( variationsDelta["wqqlnhi"], variationsDelta["wqqlnlo"] )
+        self.syerrs+= self.maxAbsErrorSq( variationsDelta["wqqqqhi"], variationsDelta["wqqqqlo"] )
+        self.syerrs+= self.maxAbsErrorSq( variationsDelta["bkghi"], variationsDelta["bkglo"] )
+        self.syerrs= sqrt( self.syerrs )
         return
 
 
+
+    
+# Factory method to create AnalysisObservable objects:
+def createAnalysisObservable( tfile, obs="thrust", unf="bbb" ):
+    filename= tfile.GetName()
+    ao= None
+    print "createAnalysisObservable: create for", obs, "from", filename,
+    if "sjm91" in filename:
+        print "LEP1AnalysisObservable"
+        ao= LEP1AnalysisObservable( obs, tfile, unf )
+    elif( "sjm189" in filename or
+          "sjm161" in filename ):
+        print "LEP2AnalysisObservable"
+        ao= LEP2AnalysisObservable( obs, tfile, unf )
+    else:
+        print "no matching AnalysisObservable"
+    return ao
 
 # Compare antikt, siscone and PXCONE jets in same plot        
 def compareConeRjets( filename="sjm91_96_test.root" ):
     f= TFile( filename )
-    ao= LEP1AnalysisObservable( "antiktRR3", f )
+    ao= createAnalysisObservable( f, "antiktRR3" )
     plotoptions= { "xmin": 0.0, "xmax": 1.5, "ymin":0.0, "ymax":0.5, "markerStyle": 20, "markerSize": 0.75 }
     ao.plot( plotoptions )
-    ao= LEP1AnalysisObservable( "sisconeRR3", f )
+    ao= createAnalysisObservable( f, "sisconeRR3" )
     plotoptions["markerStyle"]= 21
     ao.plot( plotoptions, "s" )
-    ao= LEP1AnalysisObservable( "pxconeR2R3", f )
+    ao= createAnalysisObservable( f, "pxconeR2R3" )
     plotoptions["markerStyle"]= 22
     ao.plot( plotoptions, "s" )    
     return
 def compareConeEminjets( filename="sjm91_96_test.root" ):
     f= TFile( filename )
-    ao= LEP1AnalysisObservable( "antikteminR3", f )
+    ao= createAnalysisObservable( f, "antikteminR3" )
     plotoptions= { "xmin": 0.0, "xmax": 0.2, "ymin":0.0, "ymax":0.5, "markerStyle": 20, "markerSize": 0.75 }
     ao.plot( plotoptions )
-    ao= LEP1AnalysisObservable( "sisconeeminR3", f )
+    ao= createAnalysisObservable( f, "sisconeeminR3" )
     plotoptions["markerStyle"]= 21
     ao.plot( plotoptions, "s" )
-    ao= LEP1AnalysisObservable( "pxconeemin2R3", f )
+    ao= createAnalysisObservable( f, "pxconeemin2R3" )
     plotoptions["markerStyle"]= 22
     ao.plot( plotoptions, "s" )    
     return
@@ -185,7 +213,7 @@ def compareConeEminjets( filename="sjm91_96_test.root" ):
 def compareEEC( filename="sjm91_96.root", datafilename="../EECMC/share/OPAL/data.dat" ):
 
     f= TFile( filename )
-    ao= LEP1AnalysisObservable( "EEC", f )
+    ao= createAnalysisObservable( f, "EEC" )
     tokens= datafilename.split( "/" )
     exp= tokens[3]
     plotoptions= { "xmin": 0.0, "xmax": 3.14159, "ymin": 0.05, "ymax": 5.0, "markerStyle": 20, "markerSize": 0.5, "drawas": "3", "fillcolor": 6, "title": "EEC "+exp, "xlabel": "\chi\ [rad.]", "ylabel": "1/\sigma d\Sigma/d\chi" }

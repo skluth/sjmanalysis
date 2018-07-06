@@ -32,9 +32,8 @@ TH1DAnalysisObject::TH1DAnalysisObject( TH1D* h, TH2D* h2d ) :
   values[nbin]= integral;
   errors[nbin]= TMath::Sqrt( integralError );
   points[nbin]= hist->GetBinLowEdge( nbin+1 );
-
   if( hist2d != 0 ) {
-    std::cout << "error matrix exists" << std::endl;
+    // std::cout << "error matrix exists" << std::endl;
     UInt_t ndim= hist2d->GetNbinsX();
     errorMatrix.ResizeTo( ndim, ndim );
     for( UInt_t i= 0; i < ndim; i++ ) {
@@ -43,7 +42,6 @@ TH1DAnalysisObject::TH1DAnalysisObject( TH1D* h, TH2D* h2d ) :
       }
     }
   }
-
 }
 
 TString TH1DAnalysisObject::getPointStr( Int_t i ) {

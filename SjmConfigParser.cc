@@ -55,6 +55,7 @@ SjmConfigParser::SjmConfigParser( int argc, const char* argv[] ) {
   specialOptsDescriptionMap["General.maxevt"]= "Max. number of events";
   specialOptsDescriptionMap["General.outfile"]= "Output file name";
   specialOptsDescriptionMap["General.sjmGeneralOptions"]= "Observable configuration file";
+  specialOptsDescriptionMap["General.analyses"]= "Analyses list for LEP1, LEP15 or LEP2";
   specialOptsDescriptionMap["Data.lumi"]= "Data Lumi";
   specialOptsDescriptionMap["Data.files"]= "Data file names";
   specialOptsDescriptionMap["Signal.xsec"]= "Signal MC xsec";
@@ -76,15 +77,6 @@ SjmConfigParser::SjmConfigParser( int argc, const char* argv[] ) {
   specialOptsDescriptionMap["BkgWWeeqq.name"]= "Bkg WW->eeqq MC name";
   specialOptsDescriptionMap["BkgWWeeqq.files"]= "Bkg WW->eeqq MC file names";      
   
-  specialOptsDescriptionMap["Analyses.data"]= "Data analyses";
-  specialOptsDescriptionMap["Analyses.signal"]= "Signal MC analyses";
-  specialOptsDescriptionMap["Analyses.altsignal"]= "Alt. signal MC analyses";
-  
-  specialOptsDescriptionMap["Analyses.bkgllqq"]= "Bkg WW->llqq MC analyses";
-  specialOptsDescriptionMap["Analyses.bkgqqqq"]= "Bkg WW->qqqq MC analyses";
-  specialOptsDescriptionMap["Analyses.bkgeeqq"]= "Bkg WW->eeqq MC analyses";
-  
-
   valuesMap["General.test"]= VS { "bla" };
   valuesMap["General.maxevt"]= VS { "999999" };
   valuesMap["General.sjmGeneralOptions"]= VS { "sjmGeneralOptions.cfg" };
@@ -120,7 +112,22 @@ SjmConfigParser::SjmConfigParser( int argc, const char* argv[] ) {
   generalOptsDescriptionMap["Points.RPoints"]= "R points";
   generalOptsDescriptionMap["Points.eminFractionValue"]= "Emin fraction value";
   generalOptsDescriptionMap["Points.RValue"]= "R value";
-    
+  
+  generalOptsDescriptionMap["LEP1Analyses.data"]= "LEP1 Data analyses";
+  generalOptsDescriptionMap["LEP1Analyses.signal"]= "LEP1 Signal MC analyses";
+  generalOptsDescriptionMap["LEP1Analyses.altsignal"]= "LEP1 Alt. signal MC analyses";
+
+  generalOptsDescriptionMap["LEP15Analyses.data"]= "LEP15 Data analyses";
+  generalOptsDescriptionMap["LEP15Analyses.signal"]= "LEP15 Signal MC analyses";
+  generalOptsDescriptionMap["LEP15Analyses.altsignal"]= "LEP15 Alt. signal MC analyses";
+
+  generalOptsDescriptionMap["LEP2Analyses.data"]= "LEP2 Data analyses";
+  generalOptsDescriptionMap["LEP2Analyses.signal"]= "LEP2 Signal MC analyses";
+  generalOptsDescriptionMap["LEP2Analyses.altsignal"]= "LEP2 Alt. signal MC analyses";
+  generalOptsDescriptionMap["LEP2Analyses.bkgllqq"]= "LEP2 Bkg WW->llqq MC analyses";
+  generalOptsDescriptionMap["LEP2Analyses.bkgqqqq"]= "LEP2 Bkg WW->qqqq MC analyses";
+  generalOptsDescriptionMap["LEP2Analyses.bkgeeqq"]= "LEP2 Bkg WW->eeqq MC analyses";
+
   valuesMap["General.url"]= VS { "" };
   valuesMap["General.normalise"]= VS {"1" };
   valuesMap["General.path"]= VS { "." };

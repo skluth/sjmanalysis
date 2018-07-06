@@ -265,9 +265,11 @@ void AnalysisProcessor::LEP1Analysis() {
   cout << "AnalysisProcessor::LEP1Analysis: Welcome" << endl;
 
   // Get analysis variations from configuration:
-  vector<Analysis> measuredAnalyses= fillAnalyses( "Analyses.data" );
-  vector<Analysis> pyAnalyses= fillAnalyses( "Analyses.signal" );
-  vector<Analysis> hwAnalyses= fillAnalyses( "Analyses.altsignal" );
+  string LEPAnalyses= sjmConfigs.getItem<string>( "General.analyses" );
+  vector<Analysis> measuredAnalyses= fillAnalyses( LEPAnalyses+".data" );
+  vector<Analysis> pyAnalyses= fillAnalyses( LEPAnalyses+".signal" );
+  vector<Analysis> hwAnalyses= fillAnalyses( LEPAnalyses+".altsignal" );
+
   vector<Analysis> allAnalyses( measuredAnalyses );
   allAnalyses.insert( allAnalyses.end(), pyAnalyses.begin(), pyAnalyses.end() );
   allAnalyses.insert( allAnalyses.end(), hwAnalyses.begin(), hwAnalyses.end() );
@@ -277,9 +279,9 @@ void AnalysisProcessor::LEP1Analysis() {
   vector<Analysis> bkgqqqqAnalyses;
   vector<Analysis> bkgeeqqAnalyses;
   try {
-    bkgllqqAnalyses= fillAnalyses( "Analyses.bkgllqq" );
-    bkgqqqqAnalyses= fillAnalyses( "Analyses.bkgqqqq" );
-    bkgeeqqAnalyses= fillAnalyses( "Analyses.bkgeeqq" );
+    bkgllqqAnalyses= fillAnalyses( LEPAnalyses+".bkgllqq" );
+    bkgqqqqAnalyses= fillAnalyses( LEPAnalyses+".bkgqqqq" );
+    bkgeeqqAnalyses= fillAnalyses( LEPAnalyses+".bkgeeqq" );
     allAnalyses.insert( allAnalyses.end(), bkgllqqAnalyses.begin(), bkgllqqAnalyses.end() );
     allAnalyses.insert( allAnalyses.end(), bkgqqqqAnalyses.begin(), bkgqqqqAnalyses.end() );
     allAnalyses.insert( allAnalyses.end(), bkgeeqqAnalyses.begin(), bkgeeqqAnalyses.end() );

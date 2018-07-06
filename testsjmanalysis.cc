@@ -694,7 +694,9 @@ namespace sjmtests {
   TEST_F( SjmConfigParserTest, testgetItemTokens ) {
     vector<string> obs= sjmcp.getItem<vector<string>>( "Observables.observable" );
     EXPECT_EQ( obs[0], "thrust" );
-    vector<string> da= sjmcp.getItem<vector<string>>( "Analyses.data" );
+    string LEPAnalyses= sjmcp.getItem<string>( "General.analyses" );
+    EXPECT_EQ( LEPAnalyses, "LEP1Analyses" );
+    vector<string> da= sjmcp.getItem<vector<string>>( LEPAnalyses+".data" );
     vector<string> daexp= { "data mt stand",
 			    "data mt costt07",
 			    "data mt nch7",

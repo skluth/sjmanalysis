@@ -34,3 +34,7 @@ TString TGEAnalysisObject::getPointStr( Int_t i ) {
 TVectorD TGEAnalysisObject::getPointsCenter() {
   return points;
 }
+
+TString TGEAnalysisObject::getPointLabel() {
+  return Form( "%-5s", "point" );
+}

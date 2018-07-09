@@ -60,3 +60,7 @@ TVectorD TH1DAnalysisObject::getPointsCenter() {
 }
 
 
+TString TH1DAnalysisObject::getPointLabel() {
+  return Form( "%-4s %-4s", "lo", "hi" );
+}
+

@@ -14,6 +14,7 @@ public:
   virtual TVectorD getErrors() { return errors; }
   virtual TMatrixD getErrorMatrix() { return errorMatrix; }
   virtual TString getPointStr( Int_t ) = 0;
+  virtual TString getPointLabel() = 0;
   virtual TVectorD getPointsCenter() = 0;
 protected:
   TVectorD points;

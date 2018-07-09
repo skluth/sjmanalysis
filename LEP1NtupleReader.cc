@@ -21,7 +21,8 @@ bool LEP1NtupleReader::Preselection( const std::string& ecms ) {
 bool LEP1NtupleReader::Selection( const std::string& ecms ) {
   bool result= true;
   if( ! Preselection( ecms ) ) result= false;
-  if( nt_Ntkd02 < 5 ) result= false;
+  // if( nt_Ntkd02 < 5 ) result= false;
+  if( nt_Ntkd02 < 7 ) result= false;
   if( abscostt() > 0.9 ) result= false;
   return result;
 }
@@ -31,11 +32,11 @@ LEP1NtupleReader::getSelections( const std::string& ecms ) {
   std::map<std::string,bool> selections;
   selections["stand"]= false;
   selections["costt07"]= false;
-  selections["nch7"]= false;
+  // selections["nch7"]= false;
   bool standardSelection= Selection( ecms );
   if( standardSelection ) {
     selections["stand"]= true;
-    if( nt_Ntkd02 >= 7 ) selections["nch7"]= true;
+    // if( nt_Ntkd02 >= 7 ) selections["nch7"]= true;
     if( abscostt() < 0.7 ) selections["costt07"]= true;
   }
   return selections;

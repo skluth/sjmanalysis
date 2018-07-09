@@ -37,10 +37,19 @@ class AnalysisObservable:
         self.values=None
         self.sterrs=None
         self.syerrs=None
+        self.variationsDelta=None
         return
         
-    def printResults( self, width=6, precision=3 ):
+    def printResults( self, width=7, precision=3, opt=None ):
         print "Results for", self.obs
+        print self.aostand.getPointLabel(),
+        fmt= "{:>"+str(width)+"}"
+        for key in [ "val", "stat", "sys" ]:
+            print fmt.format( key ),
+        if opt == "d":
+            for key in sorted( self.variationsDelta.keys() ):
+                print fmt.format( key ),
+        print
         fmt="{:"+str(width)+"."+str(precision)+"f}"
         for i in range(len(self.values)):
             if( self.obs.find( "EEC" ) >= 0 and not
@@ -53,7 +62,11 @@ class AnalysisObservable:
                 print self.aostand.getPointStr(i),
             print fmt.format( self.values[i] ),
             print fmt.format( self.sterrs[i] ),
-            print fmt.format( self.syerrs[i] )
+            print fmt.format( self.syerrs[i] ),
+            if opt == "d":
+                for key in sorted( self.variationsDelta.keys() ):
+                    print fmt.format( self.variationsDelta[key][i] ),
+            print
         return
 
     def plot( self, plotoptions, opt="?" ):
@@ -102,20 +115,20 @@ class LEP1AnalysisObservable( AnalysisObservable ):
         analysisVariations= {
             "tc": Analysis( "data tc stand none none none py " + unf ),
             "costt07": Analysis( "data mt costt07 none none none py " + unf ),
-            "nch7": Analysis( "data mt nch7 none none none py " + unf ),
+            # "nch7": Analysis( "data mt nch7 none none none py " + unf ),
             "hw": Analysis( "data mt stand none none none hw " + unf ) }
         self.aostand= getAnalysisObjectFromFile( tfile, obs, standardAnalysis )
         self.points= array( "d", self.aostand.getPoints() )
         self.values= array( "d", self.aostand.getValues() )
         self.sterrs= array( "d", self.aostand.getErrors() )
         from numpy import square, sqrt, subtract
-        variationsDelta= dict()
+        self.variationsDelta= dict()
         for key in analysisVariations.keys():
             variationData= array( "d", getAnalysisObjectFromFile( tfile, obs, analysisVariations[key] ).getValues() )
-            variationsDelta[key]= subtract( variationData, self.values )
+            self.variationsDelta[key]= subtract( variationData, self.values )
         self.syerrs= 0.0
         for key in analysisVariations.keys():
-            self.syerrs+= square( variationsDelta[key] )
+            self.syerrs+= square( self.variationsDelta[key] )
         self.syerrs= sqrt(self.syerrs)
         return
 
@@ -151,16 +164,16 @@ class LEP2AnalysisObservable( AnalysisObservable ):
         self.values= array( "d", self.aostand.getValues() )
         self.sterrs= array( "d", self.aostand.getErrors() )        
         from numpy import square, sqrt, subtract
-        variationsDelta= dict()
+        self.variationsDelta= dict()
         for key in analysisVariations.keys():
             variationData= array( "d", getAnalysisObjectFromFile( tfile, obs, analysisVariations[key] ).getValues() )
-            variationsDelta[key]= subtract( variationData, self.values )
+            self.variationsDelta[key]= subtract( variationData, self.values )
         self.syerrs= 0.0
         for key in [ "tc", "costt07", "hw", "sprold" ]:
-            self.syerrs+= square( variationsDelta[key] )
-        self.syerrs+= self.maxAbsErrorSq( variationsDelta["wqqlnhi"], variationsDelta["wqqlnlo"] )
-        self.syerrs+= self.maxAbsErrorSq( variationsDelta["wqqqqhi"], variationsDelta["wqqqqlo"] )
-        self.syerrs+= self.maxAbsErrorSq( variationsDelta["bkghi"], variationsDelta["bkglo"] )
+            self.syerrs+= square( self.variationsDelta[key] )
+        self.syerrs+= self.maxAbsErrorSq( self.variationsDelta["wqqlnhi"], self.variationsDelta["wqqlnlo"] )
+        self.syerrs+= self.maxAbsErrorSq( self.variationsDelta["wqqqqhi"], self.variationsDelta["wqqqqlo"] )
+        self.syerrs+= self.maxAbsErrorSq( self.variationsDelta["bkghi"], self.variationsDelta["bkglo"] )
         self.syerrs= sqrt( self.syerrs )
         return
 

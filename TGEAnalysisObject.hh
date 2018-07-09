@@ -11,7 +11,8 @@ class TGEAnalysisObject: public AnalysisObject {
 public:
   TGEAnalysisObject( TGraphErrors* t );
   virtual ~TGEAnalysisObject() {}
-  TString getPointStr( Int_t i );
+  virtual TString getPointStr( Int_t i );
+  virtual TString getPointLabel();
   virtual TVectorD getPointsCenter();
 private:
   TGraphErrors* tge;

@@ -14,6 +14,7 @@ public:
   TH1DAnalysisObject( TH1D* h, TH2D* h2d=0 );
   virtual ~TH1DAnalysisObject() {}
   virtual TString getPointStr( Int_t i );
+  virtual TString getPointLabel();
   virtual TVectorD getPointsCenter();
 private:
   TH1D* hist;

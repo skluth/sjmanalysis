@@ -125,7 +125,8 @@ AnalysisProcessor::processUnfolding( const vector<Analysis>& measuredAnalyses,
     MtxUnfolder mtxunfolder( measured, measuredMC, hadronlevel );
     for( FilledObservable* fobs : vfobs ) {
       if( fobs->getName() == "thrust" ) {
-      	mtxunfolder.unfold( fobs );
+      	// mtxunfolder.unfold( fobs );
+      	bbbunfolder.unfold( fobs );
       }
       else {
       	bbbunfolder.unfold( fobs );
@@ -392,7 +393,7 @@ void AnalysisProcessor::LEP1Analysis() {
     cout << "AnalysisProcessor::LEP1Analysis: no background subtraction" << endl;
   }
 
-  // Unfolding bin-by-bin:
+  // Unfolding bin-by-bin (or Matrix):
   try {
     // PYTHIA based:
     processUnfolding( subtractedMeasuredAnalyses, "py", vfobs );
@@ -409,7 +410,6 @@ void AnalysisProcessor::LEP1Analysis() {
     vector<Analysis> measuredPyAnalyses;
     measuredPyAnalyses.push_back( Analysis( "py", "mt", "stand" ) );
     measuredPyAnalyses.push_back( Analysis( "py", "mt", "costt07" ) );
-    // measuredPyAnalyses.push_back( Analysis( "py", "mt", "nch7" ) );
     measuredPyAnalyses.push_back( Analysis( "py", "tc", "stand" ) );
     processUnfolding( measuredPyAnalyses, "py", vfobs );
     vector<Analysis> measuredHwAnalyses;

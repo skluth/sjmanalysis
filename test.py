@@ -40,16 +40,20 @@ class AnalysisObservable:
         self.variationsDelta=None
         return
         
-    def printResults( self, width=7, precision=3, opt=None ):
+    def printResults( self, width=7, precision=3, opt="" ):
         print "Results for", self.obs
         print self.aostand.getPointLabel(),
         fmt= "{:>"+str(width)+"}"
         for key in [ "val", "stat", "sys" ]:
             print fmt.format( key ),
-        if opt == "d":
+        if "d" in opt:
             for key in sorted( self.variationsDelta.keys() ):
                 print fmt.format( key ),
         print
+        if "m" in opt:
+            sterrs= self.aostand.getErrors( "m" )
+        else:
+            sterrs= self.sterrs            
         fmt="{:"+str(width)+"."+str(precision)+"f}"
         for i in range(len(self.values)):
             if( self.obs.find( "EEC" ) >= 0 and not
@@ -61,9 +65,9 @@ class AnalysisObservable:
             else:
                 print self.aostand.getPointStr(i),
             print fmt.format( self.values[i] ),
-            print fmt.format( self.sterrs[i] ),
+            print fmt.format( sterrs[i] ),
             print fmt.format( self.syerrs[i] ),
-            if opt == "d":
+            if "d" in opt:
                 for key in sorted( self.variationsDelta.keys() ):
                     print fmt.format( self.variationsDelta[key][i] ),
             print

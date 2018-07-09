@@ -13,8 +13,8 @@ TH1DAnalysisObject::TH1DAnalysisObject( TH1D* h, TH2D* h2d ) :
   AnalysisObject( h->GetNbinsX()+1 ), hist(h), hist2d(h2d) {
   Double_t integral= 0.0;
   Double_t integralError= 0.0;
-  Int_t nbin= hist->GetNbinsX();
-  for( Int_t i= 0; i < nbin; i++ ) {
+  UInt_t nbin= hist->GetNbinsX();
+  for( UInt_t i= 0; i < nbin; i++ ) {
     points[i]= hist->GetBinLowEdge( i+1 );
     Double_t binw= hist->GetBinWidth( i+1 );
     if( IsNormalised( *hist ) ) {
@@ -59,8 +59,21 @@ TVectorD TH1DAnalysisObject::getPointsCenter() {
   return bincenters;
 }
 
-
 TString TH1DAnalysisObject::getPointLabel() {
   return Form( "%-4s %-4s", "lo", "hi" );
 }
 
+TVectorD TH1DAnalysisObject::getErrors( const TString & opt ) {
+  TVectorD result= AnalysisObject::getErrors( opt );
+  // With full stat. error matrix error on integral is 0, since the
+  // integral is contrained by the normalisation
+  if( opt.Index( "m" ) >= 0 ) {
+    if( errorMatrix.GetNoElements() > 0 ) {
+      result[result.GetNrows()-1]= 0.0;
+    }
+    else {
+      std::cout << "TH1DAnalysisObject::getErrors: error matrix empty" << std::endl;
+    }
+  }
+  return result;
+}

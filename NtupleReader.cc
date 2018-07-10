@@ -38,16 +38,21 @@ void NtupleReader::OpenFileAndLoadNtuple( const char* filename,
 	 << filename << endl;
   }
   nt_file= TFile::Open( filename );
+  if( not nt_file ) {
+    string txt= "NtupleReader::OpenFileAndLoadNtuple: file not found: ";
+    txt+= filename;
+    throw std::runtime_error( txt );
+  }  
   if( not nt_file->IsOpen() ) {
     string txt= "NtupleReader::OpenFileAndLoadNtuple: file not open: ";
     txt+= filename;
-    throw std::logic_error( txt );
+    throw std::runtime_error( txt );
   }
   nt_tree= (TTree*) nt_file->Get( ntid );
   if( nt_tree == 0 ) {
     string txt= "NtupleReader::OpenFileAndLoadNtuple: tree not found: ";
     txt+= ntid;
-    throw std::logic_error( txt );
+    throw std::runtime_error( txt );
   }
   if( lprint ) {
     cout << "NtupleReader::OpenFileAndLoadNtuple: " 

@@ -166,7 +166,7 @@ ObservableFactory::createObservables( const vector<string> & obsnames,
       obsp= new ObsJetrate( name, 
 			    sjmConfigs.getPoints( "PxEminPoints" ),
 			    analyses,
-			    new FastJetPxConeEminCalculator( sjmConfigs.getItem<float>( "Points.RValue" ) ) );
+			    new FastJetPxConeEminCalculator( sjmConfigs.getItem<float>( "Points.PxConeR" ) ) );
     }
     else if( nameIs( name, "pxconeR" ) ) {
       obsp= new ObsJetrate( name, 

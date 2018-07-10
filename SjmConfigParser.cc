@@ -89,7 +89,9 @@ SjmConfigParser::SjmConfigParser( int argc, const char* argv[] ) {
   generalOptsDescriptionMap["General.url"]= "Data URL";
   generalOptsDescriptionMap["General.normalise"]= "Normalise";
   generalOptsDescriptionMap["General.path"]= "Data path";
+  
   generalOptsDescriptionMap["Observables.observable"]= "Observable names";
+  generalOptsDescriptionMap["Observables.mtxunfold"]= "Mtx unfolding observables";
   
   generalOptsDescriptionMap["Points.thrust"]= "Thrust bin edges";      
   generalOptsDescriptionMap["Points.EEC"]= "EEC bin edges";
@@ -131,6 +133,7 @@ SjmConfigParser::SjmConfigParser( int argc, const char* argv[] ) {
   valuesMap["General.url"]= VS { "" };
   valuesMap["General.normalise"]= VS {"1" };
   valuesMap["General.path"]= VS { "." };
+  valuesMap["Observables.mtxunfold"]= VS { "none" };
   valuesMap["Points.y34cut"]= VS { "0.0045" };
   valuesMap["Points.y34y23cut"]= VS { "0.5" };
   valuesMap["Points.PxConeEmin"]= VS { "0.07" };

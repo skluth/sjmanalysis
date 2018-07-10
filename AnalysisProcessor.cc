@@ -116,6 +116,15 @@ AnalysisProcessor::processUnfolding( const vector<Analysis>& measuredAnalyses,
   cout << "processUnfolding: unfolding for analyses:" << endl;
   Analysis hadronlevel( unfoldsource, "hadron", "none", "nonrad" );
   cout << "Hadron level: " << hadronlevel.getTag() << endl;
+  vector<string> mtxObservables=
+    sjmConfigs.getItem<vector<string>>( "Observables.mtxunfold" );
+  if( mtxObservables.size() > 0 ) {
+    cout << "Mtx unfolding for:";
+    for( const string & obsname : mtxObservables ) {
+      cout << " " << obsname;
+    }
+    cout << endl;
+  }
   for( const Analysis& measured : measuredAnalyses ) {
     Analysis measuredMC( measured );
     measuredMC.setSource( unfoldsource );
@@ -124,9 +133,9 @@ AnalysisProcessor::processUnfolding( const vector<Analysis>& measuredAnalyses,
     BbbUnfolder bbbunfolder( measured, measuredMC, hadronlevel );
     MtxUnfolder mtxunfolder( measured, measuredMC, hadronlevel );
     for( FilledObservable* fobs : vfobs ) {
-      if( fobs->getName() == "thrust" ) {
-      	// mtxunfolder.unfold( fobs );
-      	bbbunfolder.unfold( fobs );
+      if( std::find( mtxObservables.begin(), mtxObservables.end(),
+		     fobs->getName() ) != mtxObservables.end() ) {
+      	mtxunfolder.unfold( fobs );
       }
       else {
       	bbbunfolder.unfold( fobs );

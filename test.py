@@ -16,7 +16,12 @@ from array import array
 
 # Factory method to create AnalysisObject instances
 def getAnalysisObjectFromFile( tfile, obs, analysis ):
-    obj= tfile.Get( obs+" "+analysis.getTag()+";1" )
+    ao= None
+    key= obs+" "+analysis.getTag()+";1"
+    obj= tfile.Get( key )
+    if not obj:
+        # print "AnalysisObject with key", key, "not in file", tfile.GetName()
+        raise RuntimeError( "getAnalysisObjectFromFile: AnalysisObject with key "+key+" not in file "+tfile.GetName() )
     if obj.ClassName() == "TH1D":
         errobj= tfile.Get( "errm "+obs+" "+analysis.getTag() )
         if errobj:
@@ -25,6 +30,8 @@ def getAnalysisObjectFromFile( tfile, obs, analysis ):
             ao= TH1DAnalysisObject( obj )
     elif obj.ClassName() == "TGraphErrors":
         ao= TGEAnalysisObject( obj )
+    else:
+        raise RuntimeError( "getAnalysisObjectFromFile: can't handle class name"+obj.ClassName() )
     return ao
 
 # Interface for analyses

@@ -38,7 +38,8 @@ ObservableFactory::ObservableFactory( const SjmConfigParser & sjmcp ) :
 
 bool ObservableFactory::nameIs( const string & str, 
 				const string & name ) {
-  return str.find( name ) != string::npos;
+  // return str.find( name ) != string::npos;
+  return str == name;
 }
 
 // Handle all known observable names:
@@ -98,25 +99,29 @@ ObservableFactory::createObservables( const vector<string> & obsnames,
     }
     else if( nameIs( name, "durhamycutfj" ) ) {
       obsp= new ObsJetrate( name, 
-			    sjmConfigs.getPoints( "Donkersycutd" ),
+			    // sjmConfigs.getPoints( "Donkersycutd" ),
+			    sjmConfigs.getPoints( "yNMPoints" ),
 			    analyses,
 			    new FastJetYcutCalculator( "eekt" ) );
     }
     else if( nameIs( name, "jadeycutfj" ) ) {
       obsp= new ObsJetrate( name, 
-			    sjmConfigs.getPoints( "Donkersycutj" ),
+			    // sjmConfigs.getPoints( "Donkersycutj" ),
+			    sjmConfigs.getPoints( "yNMPoints" ),
 			    analyses,
 			    new FastJetYcutCalculator( "jade" ) );
     }
     else if( nameIs( name, "durhamycut" ) ) {
       obsp= new ObsJetrate( name, 
-			    sjmConfigs.getPoints( "Donkersycutd" ),
+			    // sjmConfigs.getPoints( "Donkersycutd" ),
+			    sjmConfigs.getPoints( "yNMPoints" ),
 			    analyses,
 			    new YcutCalculator( "durham" ) );
     }
     else if( nameIs( name, "jadeycut" ) ) {
       obsp= new ObsJetrate( name, 
-			    sjmConfigs.getPoints( "Donkersycutj" ),
+			    // sjmConfigs.getPoints( "Donkersycutj" ),
+			    sjmConfigs.getPoints( "yNMPoints" ),
 			    analyses,
 			    new YcutCalculator( "jade" ) );
     }

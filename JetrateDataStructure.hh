@@ -12,7 +12,7 @@ class JetrateDataStructure : public DataStructure {
 
 public:
 
-  JetrateDataStructure( const std::vector<Double_t>&, Int_t );
+  JetrateDataStructure( const std::vector<Double_t>&, Int_t, const std::string & opt="?" );
   JetrateDataStructure() {}
   virtual ~JetrateDataStructure() {}
 
@@ -27,7 +27,8 @@ public:
 private:
 
   Int_t Jetrate;
-
+  std::string inclopt;
+  
 };
 
 #endif

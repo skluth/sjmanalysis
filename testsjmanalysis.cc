@@ -539,7 +539,7 @@ namespace sjmtests {
   TEST_F( ObsJetrTest, testfillfjycutd ) {
     fillFromNtuple( ntr, analysis1, obsfjycutd );
     vector<Double_t> n2jets= getObsValues( "durhamycutfjR2", analysis1, obsfjycutd );
-    vector<Double_t> n2jetsexp{ 0, 89, 85, 75, 58, 37, 10, 0, 0, 0, 0 };
+    vector<Double_t> n2jetsexp{ 89, 89, 85, 75, 58, 37, 10, 0, 0, 0, 0 };
     EXPECT_EQ( n2jetsexp, n2jets );
     vector<Double_t> n3jets= getObsValues( "durhamycutfjR3", analysis1, obsfjycutd );
     vector<Double_t> n3jetsexp{ 0, 0, 4, 14, 31, 37, 31, 8, 0, 0, 0 };
@@ -552,7 +552,7 @@ namespace sjmtests {
     vector<Double_t> n5jetsexp{ 0, 0, 0, 0, 0, 3, 16, 16, 6, 1, 0 };
     EXPECT_EQ( n5jetsexp, n5jets );
     vector<Double_t> n6jets= getObsValues( "durhamycutfjR6", analysis1, obsfjycutd );
-    vector<Double_t> n6jetsexp{ 0, 0, 0, 0, 0, 0, 7, 21, 8, 1, 0 };
+    vector<Double_t> n6jetsexp{ 0, 0, 0, 0, 0, 0, 9, 49, 81, 88, 89 };
     EXPECT_EQ( n6jetsexp, n6jets );
   }
 
@@ -591,7 +591,7 @@ namespace sjmtests {
     vector<Double_t> n5jetsexp{ 0, 0, 0, 0, 1, 23, 28, 5, 0, 0, 0 };
     EXPECT_EQ( n5jetsexp, n5jets );
     vector<Double_t> n6jets= getObsValues( "jadeycutfjR6", analysis1, obsfjycutj );
-    vector<Double_t> n6jetsexp{ 0, 0, 0, 0, 0, 2, 21, 13, 1, 0, 0 };
+    vector<Double_t> n6jetsexp{ 0, 0, 0, 0, 0, 2, 39, 83, 89, 89, 89 };
     EXPECT_EQ( n6jetsexp, n6jets );
   }
 
@@ -637,7 +637,7 @@ namespace sjmtests {
   TEST_F( ObsJetrTest, testfillPxEmin ) {
     fillFromNtuple( ntr, analysis1, obsfjpxemin );
     vector<Double_t> n2jets= getObsValues( "pxconeeminR2", analysis1, obsfjpxemin );
-    vector<Double_t> n2jetsexp{ 51, 67, 74, 79, 85, 83, 80  };
+    vector<Double_t> n2jetsexp{ 51, 67, 74, 79, 85, 88, 87 };
     EXPECT_EQ( n2jetsexp, n2jets );
     vector<Double_t> n3jets= getObsValues( "pxconeeminR3", analysis1, obsfjpxemin );
     vector<Double_t> n3jetsexp{ 30, 19, 15, 10, 4, 0, 0 };

@@ -83,12 +83,16 @@ class AnalysisObservable:
     def plot( self, plotoptions, opt="?" ):
         vx= array( "d", self.aostand.getPointsCenter() )
         npoints= len(vx)
+        if "xshift" in plotoptions:
+            for i in range(npoints):
+                vx[i]+= plotoptions["xshift"]
         vex= array( "d", npoints*[0.0] )
         tgest= TGraphErrors( npoints, vx, self.values, vex, self.sterrs )
         tgesy= TGraphErrors( npoints, vx, self.values, vex, self.syerrs )
         tgesy.SetMarkerStyle( plotoptions["markerStyle"] )
         tgesy.SetMarkerSize( plotoptions["markerSize"] )
         drawas= plotoptions["drawas"] if "drawas" in plotoptions else "p"
+        tgesy.SetName( self.obs )
         if "fillcolor" in plotoptions:
             tgesy.SetFillColor(plotoptions["fillcolor"])
             tgest.SetFillColor(plotoptions["fillcolor"])            
@@ -108,7 +112,8 @@ class AnalysisObservable:
             if "ylabel" in plotoptions:
                 tgesy.GetYaxis().SetTitle( plotoptions["ylabel"] )
             tgesy.Draw( "a"+drawas )
-        gPad.SetLogy()
+        optlogy= plotoptions["logy"] if "logy" in plotoptions else 0
+        gPad.SetLogy( optlogy )
         tgest.Draw( "same"+drawas )
         return tgest, tgesy
     
@@ -208,18 +213,27 @@ def createAnalysisObservable( tfile, obs="thrust", unf="bbb" ):
     return ao
 
 # Compare antikt, siscone and PXCONE jets in same plot        
-def compareConeRjets( filename="sjm91_96_test.root" ):
+def compareConeRjets( filename="sjm91_96_test.root", optR="R3" ):
     f= TFile( filename )
-    ao= createAnalysisObservable( f, "antiktRR3" )
-    plotoptions= { "xmin": 0.0, "xmax": 1.5, "ymin":0.0, "ymax":0.5, "markerStyle": 20, "markerSize": 0.75 }
-    ao.plot( plotoptions )
-    ao= createAnalysisObservable( f, "sisconeRR3" )
+    aktao= createAnalysisObservable( f, "antiktR"+optR )
+    ymax= { "R2":1.0, "R3":0.5, "R4":0.3, "R5":0.3 }
+    plotoptions= { "xmin": 0.0, "xmax": 1.0, "ymin":0.0, "ymax":ymax[optR], "markerStyle": 20, "markerSize": 0.8, "title":"Cone R "+optR }
+    akttgest, akttgesy= aktao.plot( plotoptions )
+    sisao= createAnalysisObservable( f, "sisconeR"+optR )
     plotoptions["markerStyle"]= 21
-    ao.plot( plotoptions, "s" )
-    ao= createAnalysisObservable( f, "pxconeR2R3" )
+    plotoptions["xshift"]= 0.01
+    sistgest, sistgesy= sisao.plot( plotoptions, "s" )
+    pxao= createAnalysisObservable( f, "pxconeR2"+optR )
     plotoptions["markerStyle"]= 22
-    ao.plot( plotoptions, "s" )    
+    plotoptions["xshift"]= -0.01
+    pxtgest, pxtgesy= pxao.plot( plotoptions, "s" )
+    l= TLegend( 0.7, 0.7, 0.9, 0.9 )
+    l.AddEntry( "antiktR"+optR, "anti-k_t "+optR, "ep" )
+    l.AddEntry( "sisconeR"+optR, "SISCone "+optR, "ep" )
+    l.AddEntry( "pxconeR2"+optR, "PXCONE "+optR, "ep" )
+    l.Draw()
     return
+
 def compareConeEminjets( filename="sjm91_96_test.root" ):
     f= TFile( filename )
     ao= createAnalysisObservable( f, "antikteminR3" )

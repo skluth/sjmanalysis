@@ -14,8 +14,9 @@ using std::logic_error;
 using std::vector;
 
 JetrateDataStructure::JetrateDataStructure( const vector<Double_t>& p, 
-					    Int_t njet ) :
-  DataStructure(), Jetrate(njet) {
+					    Int_t njet,
+					    const std::string & opt ) :
+  DataStructure(), Jetrate(njet), inclopt(opt) {
   size_t n= p.size();
   points.resize( n );
   values.resize( n );
@@ -28,14 +29,11 @@ JetrateDataStructure::JetrateDataStructure( const vector<Double_t>& p,
 }
 
 DataStructure* JetrateDataStructure::clone() const {
-  return new JetrateDataStructure( points, Jetrate );
+  return new JetrateDataStructure( points, Jetrate, inclopt );
 }
 
 // Set error matrix for tag with bins for point numbers:
 void JetrateDataStructure::setErrorMatrix( MatrixDataStructure* errm ) {
-  // vector<Double_t> bins;
-  // for( size_t i= 0; i <= points.size(); i++ ) bins.push_back( i+0.5 );
-  // errorMatrix= new MatrixDataStructure( bins );
   if( errm->getNdim() != points.size()+2 ) {
     throw std::runtime_error( "matrix dimensions don't match" );
   }
@@ -51,7 +49,9 @@ void JetrateDataStructure::fill( const vector<Double_t>& NJets ) {
   }
   Ntotal++;
   for( size_t i= 0; i < NJets.size(); i++ ) {
-    if( NJets[i] == Jetrate ) {
+    if( NJets[i] == Jetrate or
+	( inclopt == "<" and NJets[i] < Jetrate and NJets[i] > 0.0 ) or
+	( inclopt == ">" and NJets[i] > Jetrate ) ) {
       values[i]++;
       errors[i]= TMath::Sqrt( TMath::Power( errors[i], 2 ) + 1.0 );
     }

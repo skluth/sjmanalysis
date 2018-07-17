@@ -22,7 +22,7 @@ ObsJetrate::ObsJetrate( string name,
   Observable( name ), points( pts ), calculator( calc ) {
   addAnalyses( variations );
   if( lprint ) {
-    cout << "ObsJetrate::ObsJetrate: 2, 3, 4, 5, 6-jet fractions for " << name << endl;
+    cout << "ObsJetrate::ObsJetrate: <=2, 3, 4, 5, >=6-jet fractions for " << name << endl;
     printVectorD( "Points:", pts );
     calculator->print();
   }

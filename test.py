@@ -13,6 +13,8 @@ from ROOT import Analysis, TH1DAnalysisObject, TGEAnalysisObject
 
 from array import array
 
+import numpy as np
+
 
 # Factory method to create AnalysisObject instances
 def getAnalysisObjectFromFile( tfile, obs, analysis ):
@@ -46,7 +48,28 @@ class AnalysisObservable:
         self.syerrs=None
         self.variationsDelta=None
         return
-        
+
+    def setupStandardAnalysis( self, standardAnalysis, tfile ):
+        self.aostand= getAnalysisObjectFromFile( tfile, self.obs, standardAnalysis )
+        self.points= array( "d", self.aostand.getPoints() )
+        self.values= array( "d", self.aostand.getValues() )
+        self.sterrs= array( "d", self.aostand.getErrors() )
+        return
+    
+    def subtractVariations( self, analysisVariations, tfile ):
+        self.variationsDelta= dict()
+        for key in analysisVariations.keys():
+            variationData= array( "d", getAnalysisObjectFromFile( tfile, self.obs, analysisVariations[key] ).getValues() )
+            self.variationsDelta[key]= np.subtract( variationData, self.values )
+        return
+       
+    def calcSystSumSq( self, keys ):
+        self.syerrs= 0.0
+        for key in keys:
+            self.syerrs+= np.square( self.variationsDelta[key] )
+        self.syerrs= np.sqrt( self.syerrs )
+        return
+    
     def printResults( self, width=7, precision=3, opt="" ):
         print "Results for", self.obs
         print self.aostand.getPointLabel(),
@@ -78,6 +101,16 @@ class AnalysisObservable:
                 for key in sorted( self.variationsDelta.keys() ):
                     print fmt.format( self.variationsDelta[key][i] ),
             print
+        return
+
+    def printErrors( self, width=7, precision=4 ):
+        from math import sqrt
+        errorMatrix= self.aostand.getErrorMatrix()
+        fmt="{:"+str(width)+"."+str(precision)+"f}"
+        for i in range( len( self.sterrs )-1 ):
+            binw= self.points[i+1]-self.points[i]
+            diagError= sqrt( errorMatrix(i,i) )/binw
+            print fmt.format( self.sterrs[i] ), fmt.format( diagError )
         return
 
     def plot( self, plotoptions, opt="?" ):
@@ -117,9 +150,9 @@ class AnalysisObservable:
         tgest.Draw( "same"+drawas )
         return tgest, tgesy
     
-    def maxAbsErrorSq( self, error1, error2 ):
-        from numpy import square, maximum, absolute
-        return square( maximum( absolute( error1 ), absolute( error2 ) ) )
+    def maxAbsErrorSq( self, errorKey1, errorKey2 ):
+        return np.square( np.maximum( np.absolute( self.variationsDelta[errorKey1] ),
+                                      np.absolute( self.variationsDelta[errorKey2] ) ) )
 
     
 # LEP1 Analysis
@@ -131,32 +164,27 @@ class LEP1AnalysisObservable( AnalysisObservable ):
         analysisVariations= {
             "tc": Analysis( "data tc stand none none none py " + unf ),
             "costt07": Analysis( "data mt costt07 none none none py " + unf ),
-            # "nch7": Analysis( "data mt nch7 none none none py " + unf ),
             "hw": Analysis( "data mt stand none none none hw " + unf ) }
-        self.aostand= getAnalysisObjectFromFile( tfile, obs, standardAnalysis )
-        self.points= array( "d", self.aostand.getPoints() )
-        self.values= array( "d", self.aostand.getValues() )
-        self.sterrs= array( "d", self.aostand.getErrors() )
-        from numpy import square, sqrt, subtract
-        self.variationsDelta= dict()
-        for key in analysisVariations.keys():
-            variationData= array( "d", getAnalysisObjectFromFile( tfile, obs, analysisVariations[key] ).getValues() )
-            self.variationsDelta[key]= subtract( variationData, self.values )
-        self.syerrs= 0.0
-        for key in analysisVariations.keys():
-            self.syerrs+= square( self.variationsDelta[key] )
-        self.syerrs= sqrt(self.syerrs)
+        self.setupStandardAnalysis( standardAnalysis, tfile )
+        self.subtractVariations( analysisVariations, tfile )
+        self.calcSystSumSq( analysisVariations.keys() )
         return
 
-    def printErrors( self, width=7, precision=4 ):
-        from math import sqrt
-        errorMatrix= self.aostand.getErrorMatrix()
-        fmt="{:"+str(width)+"."+str(precision)+"f}"
-        for i in range( len( self.sterrs )-1 ):
-            binw= self.points[i+1]-self.points[i]
-            diagError= sqrt( errorMatrix(i,i) )/binw
-            print fmt.format( self.sterrs[i] ), fmt.format( diagError )
-        return            
+# LEP1.5 Analysis
+class LEP15AnalysisObservable( AnalysisObservable ):
+
+    def __init__( self, obs, tfile, unf="bbb" ):
+        AnalysisObservable.__init__( self, obs )
+        standardAnalysis= Analysis( "data mt stand none none none py " + unf )
+        analysisVariations= {
+            "tc": Analysis( "data tc stand none none none py " + unf ),
+            "costt07": Analysis( "data mt costt07 none none none py " + unf ),
+            "hw": Analysis( "data mt stand none none none hw " + unf ),
+            "sprold": Analysis( "data mt sprold none none none py " + unf  ) }
+        self.setupStandardAnalysis( standardAnalysis, tfile )
+        self.subtractVariations( analysisVariations, tfile )
+        self.calcSystSumSq( analysisVariations.keys() )
+        return
 
 # LEP2 Analysis
 class LEP2AnalysisObservable( AnalysisObservable ):
@@ -164,6 +192,7 @@ class LEP2AnalysisObservable( AnalysisObservable ):
     def __init__( self, obs, tfile, unf="bbb" ):
         AnalysisObservable.__init__( self, obs )
         standardAnalysis= Analysis( "data mt stand none none llqq:qqqq:eeqq py " + unf )
+        self.setupStandardAnalysis( standardAnalysis, tfile )
         analysisVariations= {
             "tc": Analysis( "data tc stand none none llqq:qqqq:eeqq py " + unf  ),
             "costt07": Analysis( "data mt costt07 none none llqq:qqqq:eeqq py " + unf  ), 
@@ -175,27 +204,15 @@ class LEP2AnalysisObservable( AnalysisObservable ):
             "wqqqqlo": Analysis( "data mt wqqqqlo none none llqq:qqqq:eeqq py " + unf  ),
             "bkghi": Analysis( "data mt stand none none llqq:qqqq:eeqq:hi py " + unf  ), 
             "bkglo": Analysis( "data mt stand none none llqq:qqqq:eeqq:lo py " + unf  ) }
-        self.aostand= getAnalysisObjectFromFile( tfile, obs, standardAnalysis )
-        self.points= array( "d", self.aostand.getPoints() )
-        self.values= array( "d", self.aostand.getValues() )
-        self.sterrs= array( "d", self.aostand.getErrors() )        
-        from numpy import square, sqrt, subtract
-        self.variationsDelta= dict()
-        for key in analysisVariations.keys():
-            variationData= array( "d", getAnalysisObjectFromFile( tfile, obs, analysisVariations[key] ).getValues() )
-            self.variationsDelta[key]= subtract( variationData, self.values )
-        self.syerrs= 0.0
-        for key in [ "tc", "costt07", "hw", "sprold" ]:
-            self.syerrs+= square( self.variationsDelta[key] )
-        self.syerrs+= self.maxAbsErrorSq( self.variationsDelta["wqqlnhi"], self.variationsDelta["wqqlnlo"] )
-        self.syerrs+= self.maxAbsErrorSq( self.variationsDelta["wqqqqhi"], self.variationsDelta["wqqqqlo"] )
-        self.syerrs+= self.maxAbsErrorSq( self.variationsDelta["bkghi"], self.variationsDelta["bkglo"] )
-        self.syerrs= sqrt( self.syerrs )
+        self.subtractVariations( analysisVariations, tfile )        
+        self.calcSystSumSq( [ "tc", "costt07", "hw", "sprold" ] )
+        syerrbkg= self.maxAbsErrorSq( "wqqlnhi", "wqqlnlo" )
+        syerrbkg+= self.maxAbsErrorSq( "wqqqqhi", "wqqqqlo" )
+        syerrbkg+= self.maxAbsErrorSq( "bkghi", "bkglo" )
+        self.syerrs= np.sqrt( np.square( self.syerrs ) + syerrbkg )
         return
 
-
-
-    
+   
 # Factory method to create AnalysisObservable objects:
 def createAnalysisObservable( tfile, obs="thrust", unf="bbb" ):
     filename= tfile.GetName()
@@ -204,8 +221,10 @@ def createAnalysisObservable( tfile, obs="thrust", unf="bbb" ):
     if "sjm91" in filename:
         print "LEP1AnalysisObservable"
         ao= LEP1AnalysisObservable( obs, tfile, unf )
-    elif( "sjm189" in filename or
-          "sjm161" in filename ):
+    elif( "sjm161" in filename or "sjm172" in filename or "sjm183" in filename or
+          "sjm189" in filename or "sjm192" in filename or "sjm196" in filename or
+          "sjm200" in filename or "sjm202" in filename or "sjm205" in filename or
+          "sjm207" in filename ):
         print "LEP2AnalysisObservable"
         ao= LEP2AnalysisObservable( obs, tfile, unf )
     else:
@@ -213,38 +232,29 @@ def createAnalysisObservable( tfile, obs="thrust", unf="bbb" ):
     return ao
 
 # Compare antikt, siscone and PXCONE jets in same plot        
-def compareConeRjets( filename="sjm91_96_test.root", optR="R3" ):
+def compareConejets( filename="sjm91_96_test.root", optKind="R", optR="R3" ):
     f= TFile( filename )
-    aktao= createAnalysisObservable( f, "antiktR"+optR )
-    ymax= { "R2":1.0, "R3":0.5, "R4":0.3, "R5":0.3 }
-    plotoptions= { "xmin": 0.0, "xmax": 1.0, "ymin":0.0, "ymax":ymax[optR], "markerStyle": 20, "markerSize": 0.8, "title":"Cone R "+optR }
+    algantikt= "antikt"+optKind
+    algsiscone= "siscone"+optKind
+    algpxcone= "pxcone"+optKind+"2"
+    aktao= createAnalysisObservable( f, algantikt+optR )
+    ymax= { "R2":1.0, "R3":0.5, "R4":0.3, "R5":0.3, "R6":0.3 }
+    xmax= { "R":1.0, "emin":0.15 }
+    plotoptions= { "xmin": 0.0, "xmax": xmax[optKind], "ymin":0.0, "ymax":ymax[optR], "markerStyle": 20, "markerSize": 0.8, "title":"Cone "+optKind+" "+optR+" "+filename }
     akttgest, akttgesy= aktao.plot( plotoptions )
-    sisao= createAnalysisObservable( f, "sisconeR"+optR )
+    sisao= createAnalysisObservable( f, algsiscone+optR )
     plotoptions["markerStyle"]= 21
-    plotoptions["xshift"]= 0.01
+    plotoptions["xshift"]= xmax[optKind]/100.0
     sistgest, sistgesy= sisao.plot( plotoptions, "s" )
-    pxao= createAnalysisObservable( f, "pxconeR2"+optR )
+    pxao= createAnalysisObservable( f, algpxcone+optR )
     plotoptions["markerStyle"]= 22
-    plotoptions["xshift"]= -0.01
+    plotoptions["xshift"]= -xmax[optKind]/100.0
     pxtgest, pxtgesy= pxao.plot( plotoptions, "s" )
     l= TLegend( 0.7, 0.7, 0.9, 0.9 )
-    l.AddEntry( "antiktR"+optR, "anti-k_t "+optR, "ep" )
-    l.AddEntry( "sisconeR"+optR, "SISCone "+optR, "ep" )
-    l.AddEntry( "pxconeR2"+optR, "PXCONE "+optR, "ep" )
+    l.AddEntry( algantikt+optR, "anti-k_t "+optR, "ep" )
+    l.AddEntry( algsiscone+optR, "SISCone "+optR, "ep" )
+    l.AddEntry( algpxcone+optR, "PXCONE "+optR, "ep" )
     l.Draw()
-    return
-
-def compareConeEminjets( filename="sjm91_96_test.root" ):
-    f= TFile( filename )
-    ao= createAnalysisObservable( f, "antikteminR3" )
-    plotoptions= { "xmin": 0.0, "xmax": 0.2, "ymin":0.0, "ymax":0.5, "markerStyle": 20, "markerSize": 0.75 }
-    ao.plot( plotoptions )
-    ao= createAnalysisObservable( f, "sisconeeminR3" )
-    plotoptions["markerStyle"]= 21
-    ao.plot( plotoptions, "s" )
-    ao= createAnalysisObservable( f, "pxconeemin2R3" )
-    plotoptions["markerStyle"]= 22
-    ao.plot( plotoptions, "s" )    
     return
 
 # Compare EEC from various sources with own measurements 

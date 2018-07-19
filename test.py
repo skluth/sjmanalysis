@@ -231,8 +231,177 @@ def createAnalysisObservable( tfile, obs="thrust", unf="bbb" ):
         print "no matching AnalysisObservable"
     return ao
 
+def checkJetrates( filename="sjm91_all_test.root", obs="durhamycut" ):
+    f= TFile( filename )
+    valuesmap= dict()
+    for rate in [ "R2", "R3", "R4", "R5", "R6" ]:
+        ao= createAnalysisObservable( f, obs+rate )
+        valuesmap[rate]= ao.values
+    valuessum= valuesmap["R2"]
+    for rate in [ "R3", "R4", "R5", "R6" ]:
+        valuessum= np.add( valuessum, valuesmap[rate] )
+    print valuessum
+    return
+
+def compareThrust( filename="sjm91_all_test.root" ):
+    if "91" in filename:
+        mtfordvalues= array( "d", [ 1.273, 12.26, 18.38, 13.86, 9.80, 6.502, 4.133, 2.649,
+                                        1.705, 0.913, 0.3704 ] )
+        mtfordsterrs= array( "d", [ 0.019, 0.05, 0.07, 0.06, 0.05, 0.027, 0.022, 0.014, 0.012, 0.006, 0.0033 ] )
+        mtfordsyerrs= array( "d", [ 0.043, 0.40, 0.28, 0.15, 0.18, 0.086, 0.037, 0.058, 0.075, 0.020, 0.0090 ] )
+    elif "189" in filename:
+        mtfordvalues= array( "d", [ 9.36, 21.93, 15.35, 9.82, 7.15, 5.38, 2.89, 2.44, 1.36, 0.72, 0.479 ] )
+        mtfordsterrs= array( "d", [ 0.55, 0.80, 0.64, 0.54, 0.47, 0.28, 0.24, 0.16, 0.14, 0.08, 0.065 ] )
+        mtfordsyerrs= array( "d", [ 0.58, 0.91, 0.89, 0.68, 0.51, 0.28, 0.16, 0.08, 0.14, 0.11, 0.096 ] )
+    mtforderrs= np.sqrt( np.add( np.square( mtfordsterrs ),  np.square( mtfordsyerrs ) ) )
+    f= TFile( filename )
+    aothrust= createAnalysisObservable( f, "thrust" )
+    vx= array( "d", aothrust.aostand.getPointsCenter() )
+    npoints= len(vx)-1
+    vex= array( "d", npoints*[0.0] )
+    tgethrustst= TGraphErrors( npoints, vx, mtfordvalues, vex, mtfordsterrs )
+    tgethrusttot= TGraphErrors( npoints, vx, mtfordvalues, vex, mtforderrs )
+    plotoptions= { "xmin": 0.0, "xmax": 0.5, "ymin": 0.2, "ymax": 30, "markerStyle": 20,
+                       "markerSize": 0.8, "title": "Thrust "+filename, "logy": 1,
+                       "xlabel": "1-T", "ylabel": "1/\sigma d\sigma/d(1-T)" }
+    aothrust.plot( plotoptions )
+    tgethrusttot.SetMarkerStyle( 24 )
+    tgethrusttot.SetMarkerSize( 1.25 )
+    tgethrusttot.SetName( "mtford" )
+    tgethrusttot.Draw( "psame" )
+    tgethrustst.Draw( "psame" )
+    tl= TLegend( 0.7, 0.9, 0.7, 0.9 )
+    tl.AddEntry( "mtford", "M.T. Ford thesis", "ep" )
+    tl.AddEntry( "thrust", "sjmanalysis", "ep" )
+    tl.Draw()
+    return
+
+def comparePxcone( filename="sjm91_all_test.root", optKind="emin", optRate="R2" ):
+    pr097pts= dict()
+    pr097pts["emin"]= array( "d", [ 3.0, 5.0, 7.0, 9.0, 12.0, 15.0, 18.0, 21.0, 25.0 ] )
+    pr097pts["R"]= array( "d", [ 0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5 ] )
+    npr097pts= len( pr097pts[optKind] )
+    vexpr097= array( "d", npr097pts*[0.0] )
+    pr097vals= dict()
+    pr097vals["R"]= dict()
+    pr097vals["emin"]= dict()
+    pr097st= dict()
+    pr097st["R"]= dict()
+    pr097st["emin"]= dict()
+    pr097sy= dict()
+    pr097sy["R"]= dict()
+    pr097sy["emin"]= dict()
+    pr097vals["emin"]["R2"]= array( "d", [ 61.22, 69.55, 74.69, 78.79, 83.92, 88.30, 92.34, 95.82, 98.04 ] )
+    pr097st["emin"]["R2"]= array( "d", [ 0.14, 0.10, 0.12, 0.09, 0.08, 0.08, 0.08, 0.06, 0.06 ] )
+    pr097sy["emin"]["R2"]= array( "d", [ 1.0, 1.0, 0.96, 1.0, 0.91, 1.04, 1.01, 1.12, 1.44 ] )    
+    pr097vals["R"]["R2"]= array( "d", [ 62.33, 68.74, 74.69, 81.03, 87.71, 94.87, 99.47 ] )
+    pr097st["R"]["R2"]= array( "d", [ 0.10, 0.11, 0.12, 0.07, 0.07, 0.04, 0.02 ] )
+    pr097sy["R"]["R2"]= array( "d", [ 1.63, 1.21, 0.96, 0.48, 0.25, 0.18, 0.10 ] )
+    pr097vals["emin"]["R3"]= array( "d", [ 28.84, 24.98, 21.90, 19.08, 15.10, 11.29, 7.46, 3.87, 0.61 ] )
+    pr097st["emin"]["R3"]= array( "d", [ 0.13, 0.09, 0.12, 0.10, 0.08, 0.08, 0.08, 0.05, 0.02 ] )
+    pr097sy["emin"]["R3"]= array( "d", [ 0.81, 0.77, 0.66, 0.70, 0.54, 0.59, 0.47, 0.24, 0.08 ] )
+    pr097vals["R"]["R3"]= array( "d", [ 28.36, 25.30, 21.90, 17.57, 11.99, 5.08, 0.54 ] )
+    pr097st["R"]["R3"]= array( "d", [ 0.12, 0.12, 0.12, 0.08, 0.08, 0.04, 0.02 ])
+    pr097sy["R"]["R3"]= array( "d", [ 0.50, 0.72, 0.66, 0.35, 0.16, 0.05, 0.02 ] )
+    pr097vals["emin"]["R4"]= array( "d", [ 8.26, 4.86, 3.15, 1.97, 0.87, 0.27, 0.03, 0.0, 0.0 ] )
+    pr097st["emin"]["R4"]= array( "d", [ 0.07, 0.07, 0.05, 0.05, 0.03, 0.01, 0.01, 0.0, 0.0 ] )
+    pr097sy["emin"]["R4"]= array( "d", [ 0.46, 0.28, 0.21, 0.14, 0.08, 0.04, 0.01, 0.0, 0.0 ] )
+    pr097vals["R"]["R4"]= array( "d", [ 7.94, 5.19, 3.15, 1.35, 0.29, 0.03, 0.0  ] )
+    pr097st["R"]["R4"]= array( "d", [ 0.08, 0.07, 0.05, 0.03, 0.02, 0.01, 0.0 ])
+    pr097sy["R"]["R4"]= array( "d", [ 0.42, 0.38, 0.21, 0.12, 0.02, 0.01, 0.0 ] )
+    pr097vals= np.divide( pr097vals[optKind][optRate], 100.0 )
+    pr097st= np.divide( pr097st[optKind][optRate], 100.0 )
+    pr097sy= np.divide( pr097sy[optKind][optRate], 100.0 )
+    pr097tot= np.sqrt( np.add( np.square( pr097st ),  np.square( pr097sy ) ) )
+    pr408pts= dict()
+    pr408pts["emin"]= array( "d", [ 2.0, 6.0, 10.0, 14.0, 18.0, 22.0, 25.50 ] )
+    pr408pts["R"]= array( "d", [ 0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5 ] )
+    npr408pts= len( pr408pts[optKind] )
+    vexpr408= array( "d", npr408pts*[0.0] )
+    pr408vals= dict()
+    pr408vals["R"]= dict()
+    pr408vals["emin"]= dict()
+    pr408st= dict()
+    pr408st["R"]= dict()
+    pr408st["emin"]= dict()
+    pr408sy= dict()
+    pr408sy["R"]= dict()
+    pr408sy["emin"]= dict()
+    pr408vals["emin"]["R2"]= array( "d", [ 0.5201, 0.7175, 0.8007, 0.8659, 0.9214, 0.9701, 0.9957 ] )
+    pr408st["emin"]["R2"]= array( "d", [ 0.0018, 0.0017, 0.0015, 0.0013, 0.0010, 0.0006, 0.0003 ] )
+    pr408sy["emin"]["R2"]= array( "d", [ 1.0402, 1.4350, 1.6015, 1.7318, 1.8428, 1.9402, 1.9914 ] )    
+    pr408vals["R"]["R2"]= array( "d", [ 0.6142, 0.6794, 0.7422, 0.8049, 0.8740, 0.9474, 0.9944 ] )
+    pr408st["R"]["R2"]= array( "d",   [ 0.0018, 0.0017, 0.0016, 0.0015, 0.0012, 0.0008, 0.0003 ] )
+    pr408sy["R"]["R2"]= array( "d",   [ 1.2284, 1.3587, 1.4845, 1.6097, 1.7479, 1.8947, 1.9888 ] )
+    pr408vals["emin"]["R3"]= array( "d", [ 0.3235, 0.2396, 0.1827, 0.1294, 0.0778, 0.0295, 0.0044 ] )
+    pr408st["emin"]["R3"]= array( "d",   [ 0.0018, 0.0016, 0.0015, 0.0013, 0.0010, 0.0006, 0.0002 ] )
+    pr408sy["emin"]["R3"]= array( "d",   [ 0.6470, 0.4793, 0.3654, 0.2589, 0.1556, 0.0591, 0.0088 ] )
+    pr408vals["R"]["R3"]= array( "d",    [ 0.2870, 0.2604, 0.2237, 0.1818, 0.1233, 0.0522, 0.0055 ] )
+    pr408st["R"]["R3"]= array( "d",      [ 0.0017, 0.0017, 0.0016, 0.0015, 0.0013, 0.0009, 0.0003 ] )
+    pr408sy["R"]["R3"]= array( "d",      [ 0.5740, 0.5209, 0.4475, 0.3637, 0.2466, 0.1044, 0.0110 ] )
+    pr408vals["emin"]["R4"]= array( "d", [ 0.1570, 0.0431, 0.0165, 0.0043, 0.0003, 0.0, 0.0 ] )
+    pr408st["emin"]["R4"]= array( "d",   [ 0.0015, 0.0008, 0.0005, 0.0003, 0.0001, 0.0, 0.0 ] )
+    pr408sy["emin"]["R4"]= array( "d",   [ 0.3141, 0.0863, 0.0330, 0.0085, 0.0007, 0.0, 0.0 ] )
+    pr408vals["R"]["R4"]= array( "d",    [ 0.0987, 0.0601, 0.0342, 0.0134, 0.0028, 0.0004, 0.0 ] )
+    pr408st["R"]["R4"]= array( "d",      [ 0.0012, 0.0010, 0.0008, 0.0005, 0.0002, 0.0001, 0.0 ] )
+    pr408sy["R"]["R4"]= array( "d",      [ 0.1975, 0.1201, 0.0685, 0.0268, 0.0057, 0.0009, 0.0 ] )
+    pr408vals= pr408vals[optKind][optRate]
+    pr408st= pr408st[optKind][optRate]
+    pr408sy= np.divide( pr408sy[optKind][optRate], 100.0 )
+    pr408tot= np.sqrt( np.add( np.square( pr408st ),  np.square( pr408sy ) ) )
+    f= TFile( filename )
+    aopxcone= createAnalysisObservable( f, "pxcone"+optKind+optRate )
+    xmax= { "R": 1.7, "emin": 27.0 }
+    ymax= { "R2": 1.1, "R3": 0.35, "R4": 0.18 }
+    xlabel= { "R": "R [rad.]", "emin": "E_min [GeV]" }
+    ylabel= { "R2": "2-jet rate", "R3": "3-jet rate", "R4": "4-jet rate" }
+    plotoptions= { "xmin": 0.0, "xmax": xmax[optKind], "ymin": 0.0, "ymax": ymax[optRate],
+                       "markerStyle": 20, "markerSize": 0.8,
+                       "xlabel": xlabel[optKind], "ylabel": ylabel[optRate],
+                       "title": "Cone "+optKind+" "+filename }
+    aopxcone.plot( plotoptions )
+    xshift= { "R": 0.02, "emin": 0.2 }
+    pr097pts= np.add( pr097pts[optKind], -xshift[optKind] )
+    tgepr097= TGraphErrors( npr097pts, pr097pts, pr097vals, vexpr097, pr097tot )
+    tgepr097.SetMarkerStyle( 24 )
+    tgepr097.SetMarkerSize( 1.0 )
+    tgepr097.SetName( "pr097" )
+    tgepr097.Draw( "psame" )
+    pr408pts= np.add( pr408pts[optKind], xshift[optKind] )
+    tgepr408= TGraphErrors( npr408pts, pr408pts, pr408vals, vexpr408, pr408tot )
+    tgepr408.SetMarkerStyle( 29 )
+    tgepr408.SetMarkerSize( 1.0 )
+    tgepr408.SetName( "pr408" )
+    tgepr408.Draw( "psame" )    
+    tl= TLegend( 0.7, 0.5, 0.9, 0.7 )
+    tl.AddEntry( "pr097", "OPAL PR097", "ep" )
+    tl.AddEntry( "pr408", "OPAL PR408", "ep" )
+    tl.AddEntry( "pxcone"+optKind+optRate, filename, "ep" )
+    tl.Draw()
+    return
+
+# Compare OPAL PXCONE results:
+def comparePxcones( filename="sjm91_all_test.root" ):
+    from ROOT import TCanvas
+    canv= TCanvas( "canv", "PXCONE comparison", 1000, 1200 )
+    canv.Divide(2,3)
+    canv.cd(1)
+    comparePxcone( filename, "R", "R2" )
+    canv.cd(2)
+    comparePxcone( filename, "emin", "R2" )
+    canv.cd(3)
+    comparePxcone( filename, "R", "R3" )
+    canv.cd(4)
+    comparePxcone( filename, "emin", "R3" )
+    canv.cd(5)
+    comparePxcone( filename, "R", "R4" )
+    canv.cd(6)
+    comparePxcone( filename, "emin", "R4" )
+    canv.SaveAs( "comparePxcones.pdf" )
+    return
+
 # Compare antikt, siscone and PXCONE jets in same plot        
-def compareConejets( filename="sjm91_96_test.root", optKind="R", optR="R3" ):
+def compareConejets( filename="sjm91_all_test.root", optKind="R", optR="R3" ):
     f= TFile( filename )
     algantikt= "antikt"+optKind
     algsiscone= "siscone"+optKind
@@ -240,7 +409,9 @@ def compareConejets( filename="sjm91_96_test.root", optKind="R", optR="R3" ):
     aktao= createAnalysisObservable( f, algantikt+optR )
     ymax= { "R2":1.0, "R3":0.5, "R4":0.3, "R5":0.3, "R6":0.3 }
     xmax= { "R":1.0, "emin":0.15 }
-    plotoptions= { "xmin": 0.0, "xmax": xmax[optKind], "ymin":0.0, "ymax":ymax[optR], "markerStyle": 20, "markerSize": 0.8, "title":"Cone "+optKind+" "+optR+" "+filename }
+    plotoptions= { "xmin": 0.0, "xmax": xmax[optKind], "ymin": 0.0, "ymax": ymax[optR],
+                       "markerStyle": 20, "markerSize": 0.8,
+                       "title": "Cone "+optKind+" "+optR+" "+filename }
     akttgest, akttgesy= aktao.plot( plotoptions )
     sisao= createAnalysisObservable( f, algsiscone+optR )
     plotoptions["markerStyle"]= 21
@@ -258,15 +429,13 @@ def compareConejets( filename="sjm91_96_test.root", optKind="R", optR="R3" ):
     return
 
 # Compare EEC from various sources with own measurements 
-def compareEEC( filename="sjm91_96.root", datafilename="../EECMC/share/OPAL/data.dat" ):
-
+def compareEEC( filename="sjm91_all_test.root", datafilename="../EECMC/share/OPAL/data.dat" ):
     f= TFile( filename )
     ao= createAnalysisObservable( f, "EEC" )
     tokens= datafilename.split( "/" )
     exp= tokens[3]
-    plotoptions= { "xmin": 0.0, "xmax": 3.14159, "ymin": 0.05, "ymax": 5.0, "markerStyle": 20, "markerSize": 0.5, "drawas": "3", "fillcolor": 6, "title": "EEC "+exp, "xlabel": "\chi\ [rad.]", "ylabel": "1/\sigma d\Sigma/d\chi" }
+    plotoptions= { "xmin": 0.0, "xmax": 3.14159, "ymin": 0.05, "ymax": 5.0, "markerStyle": 20, "markerSize": 0.5, "drawas": "3", "fillcolor": 6, "title": "EEC "+exp, "xlabel": "\chi\ [rad.]", "ylabel": "1/\sigma d\Sigma/d\chi", "logy": 1 }
     tgest, tgesy= ao.plot( plotoptions )
- 
     lines= [ line.rstrip( '\n' ) for line in open( datafilename ) ]
     n= len( lines )
     points= TVectorD( n )
@@ -284,17 +453,15 @@ def compareEEC( filename="sjm91_96.root", datafilename="../EECMC/share/OPAL/data
     datatge.SetMarkerStyle( 20 )
     datatge.SetMarkerSize( 0.5 )    
     datatge.Draw( "psame" )
-
     legend= TLegend( 0.2, 0.7, 0.5, 0.85 )
     datatge.SetName( "datatge" );
     tgesy.SetName( "tgesy" )
     legend.AddEntry( "datatge", exp+" data", "pe" )
-    legend.AddEntry( "tgesy", "OPAL 96", "f" )
+    legend.AddEntry( "tgesy", "OPAL "+filename, "f" )
     legend.Draw()
-    
     return 
 
-def compareEECs( filename="sjm91_96.root" ):
+def compareEECs( filename="sjm91_all_test.root" ):
     from ROOT import TCanvas
     canv= TCanvas( "canv", "EEC comparison", 1000, 1200 )
     canv.Divide(2,3)

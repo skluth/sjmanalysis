@@ -145,6 +145,8 @@ class AnalysisObservable:
             if "ylabel" in plotoptions:
                 tgesy.GetYaxis().SetTitle( plotoptions["ylabel"] )
             tgesy.Draw( "a"+drawas )
+        optlogx= plotoptions["logx"] if "logx" in plotoptions else 0
+        gPad.SetLogx( optlogx )
         optlogy= plotoptions["logy"] if "logy" in plotoptions else 0
         gPad.SetLogy( optlogy )
         tgest.Draw( "same"+drawas )
@@ -276,6 +278,7 @@ def compareThrust( filename="sjm91_all_test.root" ):
     tl.Draw()
     return
 
+# Compare PCONE OPAL results for given variant and jetrate:
 def comparePxcone( filename="sjm91_all_test.root", optKind="emin", optRate="R2" ):
     pr097pts= dict()
     pr097pts["emin"]= array( "d", [ 3.0, 5.0, 7.0, 9.0, 12.0, 15.0, 18.0, 21.0, 25.0 ] )
@@ -427,6 +430,59 @@ def compareConejets( filename="sjm91_all_test.root", optKind="R", optR="R3" ):
     l.AddEntry( algpxcone+optR, "PXCONE "+optR, "ep" )
     l.Draw()
     return
+
+# Compare Andrii's Durham jet rates 
+def compareDurhamjetrates( filename="sjm91_all_test.root",
+                            datafilename="/home/iwsatlas1/skluth/Downloads/JRTMC/share/NEW/data.dat" ):
+    f= TFile( filename )
+    R2ao= createAnalysisObservable( f, "durhamycutfjR2" )
+    R3ao= createAnalysisObservable( f, "durhamycutfjR3" )
+    plotoptions= { "xmin": 0.0, "xmax": 4.0, "ymin": 0.0, "ymax": 1.05, "markerStyle": 20,
+                       "markerSize": 0.75, "title": "Durham R2 and R3 "+filename,
+                       "xlabel": "-log10(y_{cut})", "ylabel": "Jet rates" }
+    R2tgest, R2tgesy= R2ao.plot( plotoptions )
+    plotoptions["markerStyle"]= 21
+    R3tgest, R3tgesy= R3ao.plot( plotoptions, "s" )
+    lines= [ line.rstrip( '\n' ) for line in open( datafilename ) ]
+    n= len( lines )
+    ycutpoints= array( "d", n*[0.0] )
+    R2values= array( "d", n*[0.0] )
+    R2sterrs= array( "d", n*[0.0] )
+    R2syerrs= array( "d", n*[0.0] )
+    R3values= array( "d", n*[0.0] )
+    R3sterrs= array( "d", n*[0.0] )
+    R3syerrs= array( "d", n*[0.0] )
+    xerrs= array( "d", n*[0.0] )
+    from math import log10
+    for i in range( n ):
+        line= (lines[i]).split()
+        ycutpoints[i]= - log10( float( line[0] ) )
+        R2values[i]= float( line[1] )/100.0
+        R2sterrs[i]= float( line[2] )/100.0
+        R2syerrs[i]= float( line[3] )/100.0
+        R3values[i]= float( line[4] )/100.0
+        R3sterrs[i]= float( line[5] )/100.0
+        R3syerrs[i]= float( line[6] )/100.0
+    R2datatge= TGraphErrors( n, ycutpoints, R2values, xerrs, R2syerrs )
+    R2datatge.SetMarkerStyle( 24 )
+    R2datatge.SetMarkerSize( 0.75 )    
+    R2datatge.SetName( "R2datatge" );
+    R2datatge.Draw( "psame" )
+    R3datatge= TGraphErrors( n, ycutpoints, R3values, xerrs, R3syerrs )
+    R3datatge.SetMarkerStyle( 25 )
+    R3datatge.SetMarkerSize( 0.75 )    
+    R3datatge.SetName( "R3datatge" );
+    R3datatge.Draw( "psame" )
+    legend= TLegend( 0.6, 0.6, 0.9, 0.9 )
+    R2tgesy.SetName( "R2tgesy" )
+    legend.AddEntry( "R2tgesy", "OPAL R2", "pe" )
+    R3tgesy.SetName( "R3tgesy" )
+    legend.AddEntry( "R3tgesy", "OPAL R3", "pe" )
+    legend.AddEntry( "R2datatge", "Andrii R2", "pe" )
+    legend.AddEntry( "R3datatge", "Andrii R3", "pe" )
+    legend.Draw()
+    return
+
 
 # Compare EEC from various sources with own measurements 
 def compareEEC( filename="sjm91_all_test.root", datafilename="../EECMC/share/OPAL/data.dat" ):

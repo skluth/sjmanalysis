@@ -1,7 +1,6 @@
 
 #include "ObsJetrate.hh"
 
-//#include "DataStructure.hh"
 #include "JetrateDataStructure.hh"
 #include "FilledObservable.hh"
 #include "JetrateCalculator.hh"
@@ -22,7 +21,7 @@ ObsJetrate::ObsJetrate( string name,
   Observable( name ), points( pts ), calculator( calc ) {
   addAnalyses( variations );
   if( lprint ) {
-    cout << "ObsJetrate::ObsJetrate: <=2, 3, 4, 5, >=6-jet fractions for " << name << endl;
+    cout << "ObsJetrate::ObsJetrate: <=2, 3, 4, 6, >=6 jet fractions for " << name << endl;
     printVectorD( "Points:", pts );
     calculator->print();
   }
@@ -53,7 +52,6 @@ void ObsJetrate::fill( NtupleReader* ntr, const Analysis & variation ) {
 }
 
 vector<FilledObservable*> ObsJetrate::getFilledObservables() const {
-  // cout << "ObsJetrate::getFilledObservables: " << name << ": create FilledObservables" << endl;
   FilledObservable* fobs2jetrate= new FilledObservable( name+"R2", jetrates2 );
   FilledObservable* fobs3jetrate= new FilledObservable( name+"R3", jetrates3 );
   FilledObservable* fobs4jetrate= new FilledObservable( name+"R4", jetrates4 );

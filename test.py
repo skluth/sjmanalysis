@@ -15,6 +15,17 @@ from array import array
 
 import numpy as np
 
+# Read numbers columnwise from ascii txt files into arrays indexed by column number:
+def ascii2arrays( filename ):
+    lines= [ line.rstrip( '\n' ) for line in open( filename ) ]
+    arrays= dict()
+    for line in lines:
+        tokens= line.split()
+        for itoken in range( len( tokens ) ):
+            if not itoken in arrays:
+                arrays[itoken]= array( "d" )
+            arrays[itoken].append( float( tokens[itoken] ) )
+    return arrays
 
 # Factory method to create AnalysisObject instances
 def getAnalysisObjectFromFile( tfile, obs, analysis ):
@@ -22,7 +33,6 @@ def getAnalysisObjectFromFile( tfile, obs, analysis ):
     key= obs+" "+analysis.getTag()+";1"
     obj= tfile.Get( key )
     if not obj:
-        # print "AnalysisObject with key", key, "not in file", tfile.GetName()
         raise RuntimeError( "getAnalysisObjectFromFile: AnalysisObject with key "+key+" not in file "+tfile.GetName() )
     if obj.ClassName() == "TH1D":
         errobj= tfile.Get( "errm "+obs+" "+analysis.getTag() )
@@ -223,6 +233,9 @@ def createAnalysisObservable( tfile, obs="thrust", unf="bbb" ):
     if "sjm91" in filename:
         print "LEP1AnalysisObservable"
         ao= LEP1AnalysisObservable( obs, tfile, unf )
+    elif( "sjm130" in filename or "sjm136" in filename ):
+        print "LEP15AnalysisObservable"
+        ao= LEP15AnalysisObservable( obs, tfile, unf )
     elif( "sjm161" in filename or "sjm172" in filename or "sjm183" in filename or
           "sjm189" in filename or "sjm192" in filename or "sjm196" in filename or
           "sjm200" in filename or "sjm202" in filename or "sjm205" in filename or
@@ -247,14 +260,12 @@ def checkJetrates( filename="sjm91_all_test.root", obs="durhamycut" ):
 
 def compareThrust( filename="sjm91_all_test.root" ):
     if "91" in filename:
-        mtfordvalues= array( "d", [ 1.273, 12.26, 18.38, 13.86, 9.80, 6.502, 4.133, 2.649,
-                                        1.705, 0.913, 0.3704 ] )
-        mtfordsterrs= array( "d", [ 0.019, 0.05, 0.07, 0.06, 0.05, 0.027, 0.022, 0.014, 0.012, 0.006, 0.0033 ] )
-        mtfordsyerrs= array( "d", [ 0.043, 0.40, 0.28, 0.15, 0.18, 0.086, 0.037, 0.058, 0.075, 0.020, 0.0090 ] )
+        arrays= ascii2arrays( "mtford-thrust91.txt" )
     elif "189" in filename:
-        mtfordvalues= array( "d", [ 9.36, 21.93, 15.35, 9.82, 7.15, 5.38, 2.89, 2.44, 1.36, 0.72, 0.479 ] )
-        mtfordsterrs= array( "d", [ 0.55, 0.80, 0.64, 0.54, 0.47, 0.28, 0.24, 0.16, 0.14, 0.08, 0.065 ] )
-        mtfordsyerrs= array( "d", [ 0.58, 0.91, 0.89, 0.68, 0.51, 0.28, 0.16, 0.08, 0.14, 0.11, 0.096 ] )
+        arrays= ascii2arrays( "mtford-thrust189.txt" )
+    mtfordvalues= arrays[2]
+    mtfordsterrs= arrays[3]
+    mtfordsyerrs= arrays[4]
     mtforderrs= np.sqrt( np.add( np.square( mtfordsterrs ),  np.square( mtfordsyerrs ) ) )
     f= TFile( filename )
     aothrust= createAnalysisObservable( f, "thrust" )
@@ -280,83 +291,54 @@ def compareThrust( filename="sjm91_all_test.root" ):
 
 # Compare PCONE OPAL results for given variant and jetrate:
 def comparePxcone( filename="sjm91_all_test.root", optKind="emin", optRate="R2" ):
-    pr097pts= dict()
-    pr097pts["emin"]= array( "d", [ 3.0, 5.0, 7.0, 9.0, 12.0, 15.0, 18.0, 21.0, 25.0 ] )
-    pr097pts["R"]= array( "d", [ 0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5 ] )
-    npr097pts= len( pr097pts[optKind] )
-    vexpr097= array( "d", npr097pts*[0.0] )
+
     pr097vals= dict()
-    pr097vals["R"]= dict()
-    pr097vals["emin"]= dict()
     pr097st= dict()
-    pr097st["R"]= dict()
-    pr097st["emin"]= dict()
     pr097sy= dict()
-    pr097sy["R"]= dict()
-    pr097sy["emin"]= dict()
-    pr097vals["emin"]["R2"]= array( "d", [ 61.22, 69.55, 74.69, 78.79, 83.92, 88.30, 92.34, 95.82, 98.04 ] )
-    pr097st["emin"]["R2"]= array( "d", [ 0.14, 0.10, 0.12, 0.09, 0.08, 0.08, 0.08, 0.06, 0.06 ] )
-    pr097sy["emin"]["R2"]= array( "d", [ 1.0, 1.0, 0.96, 1.0, 0.91, 1.04, 1.01, 1.12, 1.44 ] )    
-    pr097vals["R"]["R2"]= array( "d", [ 62.33, 68.74, 74.69, 81.03, 87.71, 94.87, 99.47 ] )
-    pr097st["R"]["R2"]= array( "d", [ 0.10, 0.11, 0.12, 0.07, 0.07, 0.04, 0.02 ] )
-    pr097sy["R"]["R2"]= array( "d", [ 1.63, 1.21, 0.96, 0.48, 0.25, 0.18, 0.10 ] )
-    pr097vals["emin"]["R3"]= array( "d", [ 28.84, 24.98, 21.90, 19.08, 15.10, 11.29, 7.46, 3.87, 0.61 ] )
-    pr097st["emin"]["R3"]= array( "d", [ 0.13, 0.09, 0.12, 0.10, 0.08, 0.08, 0.08, 0.05, 0.02 ] )
-    pr097sy["emin"]["R3"]= array( "d", [ 0.81, 0.77, 0.66, 0.70, 0.54, 0.59, 0.47, 0.24, 0.08 ] )
-    pr097vals["R"]["R3"]= array( "d", [ 28.36, 25.30, 21.90, 17.57, 11.99, 5.08, 0.54 ] )
-    pr097st["R"]["R3"]= array( "d", [ 0.12, 0.12, 0.12, 0.08, 0.08, 0.04, 0.02 ])
-    pr097sy["R"]["R3"]= array( "d", [ 0.50, 0.72, 0.66, 0.35, 0.16, 0.05, 0.02 ] )
-    pr097vals["emin"]["R4"]= array( "d", [ 8.26, 4.86, 3.15, 1.97, 0.87, 0.27, 0.03, 0.0, 0.0 ] )
-    pr097st["emin"]["R4"]= array( "d", [ 0.07, 0.07, 0.05, 0.05, 0.03, 0.01, 0.01, 0.0, 0.0 ] )
-    pr097sy["emin"]["R4"]= array( "d", [ 0.46, 0.28, 0.21, 0.14, 0.08, 0.04, 0.01, 0.0, 0.0 ] )
-    pr097vals["R"]["R4"]= array( "d", [ 7.94, 5.19, 3.15, 1.35, 0.29, 0.03, 0.0  ] )
-    pr097st["R"]["R4"]= array( "d", [ 0.08, 0.07, 0.05, 0.03, 0.02, 0.01, 0.0 ])
-    pr097sy["R"]["R4"]= array( "d", [ 0.42, 0.38, 0.21, 0.12, 0.02, 0.01, 0.0 ] )
-    pr097vals= np.divide( pr097vals[optKind][optRate], 100.0 )
-    pr097st= np.divide( pr097st[optKind][optRate], 100.0 )
-    pr097sy= np.divide( pr097sy[optKind][optRate], 100.0 )
+    arrays= ascii2arrays( "pr097-pxcone"+optKind+".txt" )
+    pr097pts= arrays[0]
+    pr097vals["R2"]= arrays[1]
+    pr097st["R2"]= arrays[2]
+    pr097sy["R2"]= arrays[3]
+    pr097vals["R3"]= arrays[4]
+    pr097st["R3"]= arrays[5]
+    pr097sy["R3"]= arrays[6]
+    pr097vals["R4"]= arrays[7]
+    pr097st["R4"]= arrays[8]
+    pr097sy["R4"]= arrays[9]        
+    npr097pts= len( pr097pts )
+    vexpr097= array( "d", npr097pts*[0.0] )
+    pr097vals= np.divide( pr097vals[optRate], 100.0 )
+    pr097st= np.divide( pr097st[optRate], 100.0 )
+    pr097sy= np.divide( pr097sy[optRate], 100.0 )    
     pr097tot= np.sqrt( np.add( np.square( pr097st ),  np.square( pr097sy ) ) )
-    pr408pts= dict()
-    pr408pts["emin"]= array( "d", [ 2.0, 6.0, 10.0, 14.0, 18.0, 22.0, 25.50 ] )
-    pr408pts["R"]= array( "d", [ 0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5 ] )
-    npr408pts= len( pr408pts[optKind] )
-    vexpr408= array( "d", npr408pts*[0.0] )
+
     pr408vals= dict()
-    pr408vals["R"]= dict()
-    pr408vals["emin"]= dict()
     pr408st= dict()
-    pr408st["R"]= dict()
-    pr408st["emin"]= dict()
     pr408sy= dict()
-    pr408sy["R"]= dict()
-    pr408sy["emin"]= dict()
-    pr408vals["emin"]["R2"]= array( "d", [ 0.5201, 0.7175, 0.8007, 0.8659, 0.9214, 0.9701, 0.9957 ] )
-    pr408st["emin"]["R2"]= array( "d", [ 0.0018, 0.0017, 0.0015, 0.0013, 0.0010, 0.0006, 0.0003 ] )
-    pr408sy["emin"]["R2"]= array( "d", [ 1.0402, 1.4350, 1.6015, 1.7318, 1.8428, 1.9402, 1.9914 ] )    
-    pr408vals["R"]["R2"]= array( "d", [ 0.6142, 0.6794, 0.7422, 0.8049, 0.8740, 0.9474, 0.9944 ] )
-    pr408st["R"]["R2"]= array( "d",   [ 0.0018, 0.0017, 0.0016, 0.0015, 0.0012, 0.0008, 0.0003 ] )
-    pr408sy["R"]["R2"]= array( "d",   [ 1.2284, 1.3587, 1.4845, 1.6097, 1.7479, 1.8947, 1.9888 ] )
-    pr408vals["emin"]["R3"]= array( "d", [ 0.3235, 0.2396, 0.1827, 0.1294, 0.0778, 0.0295, 0.0044 ] )
-    pr408st["emin"]["R3"]= array( "d",   [ 0.0018, 0.0016, 0.0015, 0.0013, 0.0010, 0.0006, 0.0002 ] )
-    pr408sy["emin"]["R3"]= array( "d",   [ 0.6470, 0.4793, 0.3654, 0.2589, 0.1556, 0.0591, 0.0088 ] )
-    pr408vals["R"]["R3"]= array( "d",    [ 0.2870, 0.2604, 0.2237, 0.1818, 0.1233, 0.0522, 0.0055 ] )
-    pr408st["R"]["R3"]= array( "d",      [ 0.0017, 0.0017, 0.0016, 0.0015, 0.0013, 0.0009, 0.0003 ] )
-    pr408sy["R"]["R3"]= array( "d",      [ 0.5740, 0.5209, 0.4475, 0.3637, 0.2466, 0.1044, 0.0110 ] )
-    pr408vals["emin"]["R4"]= array( "d", [ 0.1570, 0.0431, 0.0165, 0.0043, 0.0003, 0.0, 0.0 ] )
-    pr408st["emin"]["R4"]= array( "d",   [ 0.0015, 0.0008, 0.0005, 0.0003, 0.0001, 0.0, 0.0 ] )
-    pr408sy["emin"]["R4"]= array( "d",   [ 0.3141, 0.0863, 0.0330, 0.0085, 0.0007, 0.0, 0.0 ] )
-    pr408vals["R"]["R4"]= array( "d",    [ 0.0987, 0.0601, 0.0342, 0.0134, 0.0028, 0.0004, 0.0 ] )
-    pr408st["R"]["R4"]= array( "d",      [ 0.0012, 0.0010, 0.0008, 0.0005, 0.0002, 0.0001, 0.0 ] )
-    pr408sy["R"]["R4"]= array( "d",      [ 0.1975, 0.1201, 0.0685, 0.0268, 0.0057, 0.0009, 0.0 ] )
-    pr408vals= pr408vals[optKind][optRate]
-    pr408st= pr408st[optKind][optRate]
-    pr408sy= np.divide( pr408sy[optKind][optRate], 100.0 )
+    arrays= ascii2arrays( "pr408-pxcone"+optKind+"91.txt" )
+    pr408pts= arrays[0]
+    pr408vals["R2"]= arrays[1]
+    pr408st["R2"]= arrays[2]
+    pr408sy["R2"]= arrays[3]
+    pr408vals["R3"]= arrays[4]
+    pr408st["R3"]= arrays[5]
+    pr408sy["R3"]= arrays[6]
+    pr408vals["R4"]= arrays[7]
+    pr408st["R4"]= arrays[8]
+    pr408sy["R4"]= arrays[9]        
+    npr408pts= len( pr408pts )
+    vexpr408= array( "d", npr408pts*[0.0] )
+    pr408vals= pr408vals[optRate]
+    pr408st= np.divide( pr408st[optRate], 100.0 )
+    pr408sy= np.divide( pr408sy[optRate] , 100.0 )
     pr408tot= np.sqrt( np.add( np.square( pr408st ),  np.square( pr408sy ) ) )
+    
     f= TFile( filename )
     aopxcone= createAnalysisObservable( f, "pxcone"+optKind+optRate )
     xmax= { "R": 1.7, "emin": 27.0 }
     ymax= { "R2": 1.1, "R3": 0.35, "R4": 0.18 }
-    xlabel= { "R": "R [rad.]", "emin": "E_min [GeV]" }
+    xlabel= { "R": "R [rad.]", "emin": "E_{min} [GeV]" }
     ylabel= { "R2": "2-jet rate", "R3": "3-jet rate", "R4": "4-jet rate" }
     plotoptions= { "xmin": 0.0, "xmax": xmax[optKind], "ymin": 0.0, "ymax": ymax[optRate],
                        "markerStyle": 20, "markerSize": 0.8,
@@ -364,13 +346,13 @@ def comparePxcone( filename="sjm91_all_test.root", optKind="emin", optRate="R2" 
                        "title": "Cone "+optKind+" "+filename }
     aopxcone.plot( plotoptions )
     xshift= { "R": 0.02, "emin": 0.2 }
-    pr097pts= np.add( pr097pts[optKind], -xshift[optKind] )
+    pr097pts= np.add( pr097pts, -xshift[optKind] )
     tgepr097= TGraphErrors( npr097pts, pr097pts, pr097vals, vexpr097, pr097tot )
     tgepr097.SetMarkerStyle( 24 )
     tgepr097.SetMarkerSize( 1.0 )
     tgepr097.SetName( "pr097" )
     tgepr097.Draw( "psame" )
-    pr408pts= np.add( pr408pts[optKind], xshift[optKind] )
+    pr408pts= np.add( pr408pts, xshift[optKind] )
     tgepr408= TGraphErrors( npr408pts, pr408pts, pr408vals, vexpr408, pr408tot )
     tgepr408.SetMarkerStyle( 29 )
     tgepr408.SetMarkerSize( 1.0 )
@@ -432,8 +414,39 @@ def compareConejets( filename="sjm91_all_test.root", optKind="R", optR="R3" ):
     return
 
 # Compare Andrii's Durham jet rates 
+def compareAllDurhamjetrates():
+    from ROOT import TCanvas
+    canv= TCanvas( "canv", "Durham jetrates comparison", 1000, 1200 )
+    canv.Divide(2,3)
+    canv.cd( 1 )
+    compareDurhamjetrates( "sjm91_all_test.root",
+                               "/home/iwsatlas1/skluth/Downloads/JRTMC/share/NEW/data.dat",
+                               "donkers-durhamjets91.txt" )
+    canv.cd( 2 )
+    compareDurhamjetrates( "sjm130.root",
+                               "/home/iwsatlas1/skluth/Downloads/JRTMC/share/NEW2/data.dat",
+                               None )
+    canv.cd( 3 )
+    compareDurhamjetrates( "sjm136.root",
+                               "/home/iwsatlas1/skluth/Downloads/JRTMC/share/NEW3/data.dat",
+                               None )
+    canv.cd( 4 )
+    compareDurhamjetrates( "sjm161.root",
+                               "/home/iwsatlas1/skluth/Downloads/JRTMC/share/NEW4/data.dat",
+                               "donkers-durhamjets161.txt" )
+    canv.cd( 5 )
+    compareDurhamjetrates( "sjm189.root",
+                               "/home/iwsatlas1/skluth/Downloads/JRTMC/share/NEW7/data.dat",
+                              "donkers-durhamjets189.txt" )
+    canv.cd( 6 )
+    compareDurhamjetrates( "sjm192.root",
+                               "/home/iwsatlas1/skluth/Downloads/JRTMC/share/NEW8/data.dat",
+                               "donkers-durhamjets192.txt" )
+    return
+
 def compareDurhamjetrates( filename="sjm91_all_test.root",
-                            datafilename="/home/iwsatlas1/skluth/Downloads/JRTMC/share/NEW/data.dat" ):
+                               datafilename="/home/iwsatlas1/skluth/Downloads/JRTMC/share/NEW/data.dat",
+                               donkersfilename="donkers-durhamjets91.txt" ):
     f= TFile( filename )
     R2ao= createAnalysisObservable( f, "durhamycutfjR2" )
     R3ao= createAnalysisObservable( f, "durhamycutfjR3" )
@@ -443,36 +456,31 @@ def compareDurhamjetrates( filename="sjm91_all_test.root",
     R2tgest, R2tgesy= R2ao.plot( plotoptions )
     plotoptions["markerStyle"]= 21
     R3tgest, R3tgesy= R3ao.plot( plotoptions, "s" )
-    lines= [ line.rstrip( '\n' ) for line in open( datafilename ) ]
-    n= len( lines )
-    ycutpoints= array( "d", n*[0.0] )
-    R2values= array( "d", n*[0.0] )
-    R2sterrs= array( "d", n*[0.0] )
-    R2syerrs= array( "d", n*[0.0] )
-    R3values= array( "d", n*[0.0] )
-    R3sterrs= array( "d", n*[0.0] )
-    R3syerrs= array( "d", n*[0.0] )
+
+    arrays= ascii2arrays( datafilename )
+    ycutpoints= - np.log10( arrays[0] )
+    R2values= np.divide( arrays[1], 100.0 )
+    R2sterrs= np.divide( arrays[2], 100.0 )
+    R2syerrs= np.divide( arrays[3], 100.0 )
+    R3values= np.divide( arrays[4], 100.0 )
+    R3sterrs= np.divide( arrays[5], 100.0 )
+    R3syerrs= np.divide( arrays[6], 100.0 )
+    R2errs= np.sqrt( np.add( np.square( R2sterrs ), np.square( R2syerrs ) ) )
+    R3errs= np.sqrt( np.add( np.square( R3sterrs ), np.square( R3syerrs ) ) )
+    n= len(ycutpoints)
     xerrs= array( "d", n*[0.0] )
-    from math import log10
-    for i in range( n ):
-        line= (lines[i]).split()
-        ycutpoints[i]= - log10( float( line[0] ) )
-        R2values[i]= float( line[1] )/100.0
-        R2sterrs[i]= float( line[2] )/100.0
-        R2syerrs[i]= float( line[3] )/100.0
-        R3values[i]= float( line[4] )/100.0
-        R3sterrs[i]= float( line[5] )/100.0
-        R3syerrs[i]= float( line[6] )/100.0
-    R2datatge= TGraphErrors( n, ycutpoints, R2values, xerrs, R2syerrs )
+
+    R2datatge= TGraphErrors( n, ycutpoints, R2values, xerrs, R2errs )
     R2datatge.SetMarkerStyle( 24 )
     R2datatge.SetMarkerSize( 0.75 )    
-    R2datatge.SetName( "R2datatge" );
+    R2datatge.SetName( "R2datatge" )
     R2datatge.Draw( "psame" )
-    R3datatge= TGraphErrors( n, ycutpoints, R3values, xerrs, R3syerrs )
+    R3datatge= TGraphErrors( n, ycutpoints, R3values, xerrs, R3errs )
     R3datatge.SetMarkerStyle( 25 )
     R3datatge.SetMarkerSize( 0.75 )    
-    R3datatge.SetName( "R3datatge" );
+    R3datatge.SetName( "R3datatge" )
     R3datatge.Draw( "psame" )
+
     legend= TLegend( 0.6, 0.6, 0.9, 0.9 )
     R2tgesy.SetName( "R2tgesy" )
     legend.AddEntry( "R2tgesy", "OPAL R2", "pe" )
@@ -480,6 +488,35 @@ def compareDurhamjetrates( filename="sjm91_all_test.root",
     legend.AddEntry( "R3tgesy", "OPAL R3", "pe" )
     legend.AddEntry( "R2datatge", "Andrii R2", "pe" )
     legend.AddEntry( "R3datatge", "Andrii R3", "pe" )
+
+    if donkersfilename:
+        dkarrays= ascii2arrays( donkersfilename )
+        dkycutpoints= np.multiply( dkarrays[0], -1.0 )
+        dkR2values= dkarrays[1]
+        dkR2sterrs= np.divide( dkarrays[2], 100.0 )
+        dkR2syerrs= np.divide( dkarrays[3], 100.0 )
+        dkR3values= dkarrays[4]
+        dkR3sterrs= np.divide( dkarrays[5], 100.0 )
+        dkR3syerrs= np.divide( dkarrays[6], 100.0 )
+
+        dkR2errs= np.sqrt( np.add( np.square( dkR2sterrs ), np.square( dkR2syerrs ) ) )
+        dkR3errs= np.sqrt( np.add( np.square( dkR3sterrs ), np.square( dkR3syerrs ) ) )
+
+        dkn= len( dkycutpoints )
+        dkxerrs= array( "d", dkn*[0.0] )
+        dkR2datatge= TGraphErrors( dkn, dkycutpoints, dkR2values, dkxerrs, dkR2errs )
+        dkR2datatge.SetMarkerStyle( 26 )
+        dkR2datatge.SetMarkerSize( 0.75 )    
+        dkR2datatge.SetName( "dkR2datatge" )
+        dkR2datatge.Draw( "psame" )
+        dkR3datatge= TGraphErrors( dkn, dkycutpoints, dkR3values, dkxerrs, dkR3errs )
+        dkR3datatge.SetMarkerStyle( 27 )
+        dkR3datatge.SetMarkerSize( 0.75 )    
+        dkR3datatge.SetName( "dkR3datatge" );
+        dkR3datatge.Draw( "psame" )
+        legend.AddEntry( "dkR2datatge", "Donkers R2", "pe" )
+        legend.AddEntry( "dkR3datatge", "Donkers R3", "pe" )
+        
     legend.Draw()
     return
 

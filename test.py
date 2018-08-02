@@ -170,8 +170,11 @@ class AnalysisObservable:
 # LEP1 Analysis
 class LEP1AnalysisObservable( AnalysisObservable ):
 
-    def __init__( self, obs, tfile, unf="bbb" ):
+    def __init__( self, obs ):
         AnalysisObservable.__init__( self, obs )
+        return
+
+    def setupFromFile( self, tfile, unf="bbb" ):
         standardAnalysis= Analysis( "data mt stand none none none py " + unf )
         analysisVariations= {
             "tc": Analysis( "data tc stand none none none py " + unf ),
@@ -185,8 +188,11 @@ class LEP1AnalysisObservable( AnalysisObservable ):
 # LEP1.5 Analysis
 class LEP15AnalysisObservable( AnalysisObservable ):
 
-    def __init__( self, obs, tfile, unf="bbb" ):
+    def __init__( self, obs ):
         AnalysisObservable.__init__( self, obs )
+        return
+
+    def setupFromFile( self, tfile, unf="bbb" ):
         standardAnalysis= Analysis( "data mt stand none none none py " + unf )
         analysisVariations= {
             "tc": Analysis( "data tc stand none none none py " + unf ),
@@ -197,12 +203,25 @@ class LEP15AnalysisObservable( AnalysisObservable ):
         self.subtractVariations( analysisVariations, tfile )
         self.calcSystSumSq( analysisVariations.keys() )
         return
-
+    
+    def clone( self, values, sterrs, variationsDelta ):
+        aocloned= LEP15AnalysisObservable( self.obs )
+        aocloned.aostand= self.aostand
+        aocloned.points= self.points
+        aocloned.values= values
+        aocloned.sterrs= sterrs
+        aocloned.variationsDelta= variationsDelta
+        aocloned.calcSystSumSq( variationsDelta.keys() )
+        return aocloned
+ 
 # LEP2 Analysis
 class LEP2AnalysisObservable( AnalysisObservable ):
 
-    def __init__( self, obs, tfile, unf="bbb" ):
+    def __init__( self, obs ):
         AnalysisObservable.__init__( self, obs )
+        return
+
+    def setupFromFile( self, tfile, unf="bbb" ):
         standardAnalysis= Analysis( "data mt stand none none llqq:qqqq:eeqq py " + unf )
         self.setupStandardAnalysis( standardAnalysis, tfile )
         analysisVariations= {
@@ -216,7 +235,11 @@ class LEP2AnalysisObservable( AnalysisObservable ):
             "wqqqqlo": Analysis( "data mt wqqqqlo none none llqq:qqqq:eeqq py " + unf  ),
             "bkghi": Analysis( "data mt stand none none llqq:qqqq:eeqq:hi py " + unf  ), 
             "bkglo": Analysis( "data mt stand none none llqq:qqqq:eeqq:lo py " + unf  ) }
-        self.subtractVariations( analysisVariations, tfile )        
+        self.subtractVariations( analysisVariations, tfile )
+        self.calcSyst()
+        return
+
+    def calcSyst( self ):
         self.calcSystSumSq( [ "tc", "costt07", "hw", "sprold" ] )
         syerrbkg= self.maxAbsErrorSq( "wqqlnhi", "wqqlnlo" )
         syerrbkg+= self.maxAbsErrorSq( "wqqqqhi", "wqqqqlo" )
@@ -224,6 +247,15 @@ class LEP2AnalysisObservable( AnalysisObservable ):
         self.syerrs= np.sqrt( np.square( self.syerrs ) + syerrbkg )
         return
 
+    def clone( self, values, sterrs, variationsDelta ):
+        aocloned= LEP2AnalysisObservable( self.obs )
+        aocloned.aostand= self.aostand
+        aocloned.points= self.points
+        aocloned.values= values
+        aocloned.sterrs= sterrs
+        aocloned.variationsDelta= variationsDelta
+        aocloned.calcSyst()
+        return aocloned
    
 # Factory method to create AnalysisObservable objects:
 def createAnalysisObservable( tfile, obs="thrust", unf="bbb" ):
@@ -232,20 +264,46 @@ def createAnalysisObservable( tfile, obs="thrust", unf="bbb" ):
     print "createAnalysisObservable: create for", obs, "from", filename,
     if "sjm91" in filename:
         print "LEP1AnalysisObservable"
-        ao= LEP1AnalysisObservable( obs, tfile, unf )
+        ao= LEP1AnalysisObservable( obs )
     elif( "sjm130" in filename or "sjm136" in filename ):
         print "LEP15AnalysisObservable"
-        ao= LEP15AnalysisObservable( obs, tfile, unf )
+        ao= LEP15AnalysisObservable( obs )
     elif( "sjm161" in filename or "sjm172" in filename or "sjm183" in filename or
           "sjm189" in filename or "sjm192" in filename or "sjm196" in filename or
           "sjm200" in filename or "sjm202" in filename or "sjm205" in filename or
           "sjm207" in filename ):
         print "LEP2AnalysisObservable"
-        ao= LEP2AnalysisObservable( obs, tfile, unf )
+        ao= LEP2AnalysisObservable( obs )
     else:
         print "no matching AnalysisObservable"
+    ao.setupFromFile( tfile, unf )
     return ao
 
+# Error weighted average of results of input observables:
+def combineAnalysisObservables( *aobs ):
+    for ao in aobs:
+        if ao.obs != aobs[0].obs:
+            raise ValueError( "Observables don't match: "+ao[0].obs+" "+ao.obs )
+    wgts= dict()
+    sumwgts= array( "d", len(aobs[0].values)*[ 0.0 ] )
+    for ao in aobs:
+        wgts[ao]= np.divide( 1.0, np.square( ao.sterrs ) )
+        sumwgts= np.add( wgts[ao], sumwgts )
+    values= array( "d", len(aobs[0].values)*[ 0.0 ] )
+    for ao in aobs:
+        values= np.add( np.multiply( ao.values, wgts[ao] ), values )
+    values= np.divide( values, sumwgts )
+    sterrs= np.divide( 1.0, np.sqrt( sumwgts ) )
+    variationsDelta= dict()
+    for key in aobs[0].variationsDelta.keys():
+        deltas= array( "d", len(aobs[0].values)*[ 0.0 ] )
+        for ao in aobs:
+            deltas= np.add( np.multiply( ao.variationsDelta[key], wgts[ao] ), deltas )
+        variationsDelta[key]= np.divide( deltas, sumwgts )
+    aocombined= aobs[0].clone( values, sterrs, variationsDelta )        
+    return aocombined
+
+# Check jet rates add up to one:
 def checkJetrates( filename="sjm91_all_test.root", obs="durhamycut" ):
     f= TFile( filename )
     valuesmap= dict()
@@ -258,17 +316,35 @@ def checkJetrates( filename="sjm91_all_test.root", obs="durhamycut" ):
     print valuessum
     return
 
-def compareThrust( filename="sjm91_all_test.root" ):
-    if "91" in filename:
-        arrays= ascii2arrays( "mtford-thrust91.txt" )
-    elif "189" in filename:
-        arrays= ascii2arrays( "mtford-thrust189.txt" )
+def compareThrusts():
+    from ROOT import TCanvas
+    canv= TCanvas( "canv", "Thrust comparison", 1000, 1200 )
+    canv.Divide( 2, 2 )
+    canv.cd( 1 )
+    compareThrust( "sjm91_all_test.root", "mtford-thrust91.txt" )
+    canv.cd( 2 )
+    compareThrust( "sjm133.root", "mtford-thrust133.txt" )
+    canv.cd( 3 )
+    compareThrust( "sjm189.root", "mtford-thrust189.txt" )
+    canv.cd( 4 )
+    compareThrust( "sjm192.root", "mtford-thrust192.txt" )
+    return
+
+def compareThrust( filename="sjm91_all_test.root", mtffilename="mtford-thrust91.txt" ):
+    arrays= ascii2arrays( mtffilename )
     mtfordvalues= arrays[2]
     mtfordsterrs= arrays[3]
     mtfordsyerrs= arrays[4]
     mtforderrs= np.sqrt( np.add( np.square( mtfordsterrs ),  np.square( mtfordsyerrs ) ) )
-    f= TFile( filename )
-    aothrust= createAnalysisObservable( f, "thrust" )
+    if filename=="sjm133.root":
+        f1= TFile( "sjm130.root" )
+        aothrust1= createAnalysisObservable( f1, "thrust" )
+        f2= TFile( "sjm136.root" )
+        aothrust2= createAnalysisObservable( f2, "thrust" )
+        aothrust= combineAnalysisObservables( aothrust1, aothrust2 )
+    else:
+        f= TFile( filename )
+        aothrust= createAnalysisObservable( f, "thrust" )    
     vx= array( "d", aothrust.aostand.getPointsCenter() )
     npoints= len(vx)-1
     vex= array( "d", npoints*[0.0] )
@@ -498,10 +574,8 @@ def compareDurhamjetrates( filename="sjm91_all_test.root",
         dkR3values= dkarrays[4]
         dkR3sterrs= np.divide( dkarrays[5], 100.0 )
         dkR3syerrs= np.divide( dkarrays[6], 100.0 )
-
         dkR2errs= np.sqrt( np.add( np.square( dkR2sterrs ), np.square( dkR2syerrs ) ) )
         dkR3errs= np.sqrt( np.add( np.square( dkR3sterrs ), np.square( dkR3syerrs ) ) )
-
         dkn= len( dkycutpoints )
         dkxerrs= array( "d", dkn*[0.0] )
         dkR2datatge= TGraphErrors( dkn, dkycutpoints, dkR2values, dkxerrs, dkR2errs )

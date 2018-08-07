@@ -80,9 +80,9 @@ class AnalysisObservable:
         self.syerrs= np.sqrt( self.syerrs )
         return
     
-    def printResults( self, width=7, precision=3, opt="" ):
+    def printResults( self, width=7, precision=3, pointwidth=4, pointprec=2, opt="?" ):
         print "Results for", self.obs
-        print self.aostand.getPointLabel(),
+        print self.aostand.getPointLabel( pointwidth ),
         fmt= "{:>"+str(width)+"}"
         for key in [ "val", "stat", "sys" ]:
             print fmt.format( key ),
@@ -95,15 +95,14 @@ class AnalysisObservable:
         else:
             sterrs= self.sterrs            
         fmt="{:"+str(width)+"."+str(precision)+"f}"
-        for i in range(len(self.values)):
-            if( self.obs.find( "EEC" ) >= 0 and not
-                self.aostand.getPointStr(i).Index( "Integral" ) >= 0 ):
+        for i in range( len( self.values ) ):
+            if self.obs.find( "EEC" ) >= 0 and i < len( self.values )-1:
                 rad2grad= 180.0/3.14159
                 leftedge= self.points[i]*rad2grad
                 rightedge= self.points[i+1]*rad2grad
                 print "{0:3.0f} {1:3.0f}  ".format( leftedge, rightedge ),
             else:
-                print self.aostand.getPointStr(i),
+                print self.aostand.getPointStr( i, pointwidth, pointprec ),
             print fmt.format( self.values[i] ),
             print fmt.format( sterrs[i] ),
             print fmt.format( self.syerrs[i] ),
@@ -125,21 +124,27 @@ class AnalysisObservable:
 
     def plot( self, plotoptions, opt="?" ):
         vx= array( "d", self.aostand.getPointsCenter() )
+        values= self.values
+        sterrs= self.sterrs
+        if "m" in opt:
+            sterrs= self.aostand.getErrors( "m" )
+        syerrs= self.syerrs
         npoints= len(vx)
         if "xshift" in plotoptions:
             for i in range(npoints):
                 vx[i]+= plotoptions["xshift"]
         vex= array( "d", npoints*[0.0] )
-        tgest= TGraphErrors( npoints, vx, self.values, vex, self.sterrs )
-        tgesy= TGraphErrors( npoints, vx, self.values, vex, self.syerrs )
+        tgest= TGraphErrors( npoints, vx, values, vex, sterrs )
+        toterrs= np.sqrt( np.add( np.square( sterrs ),  np.square( syerrs ) ) )
+        tgesy= TGraphErrors( npoints, vx, values, vex, toterrs )
         tgesy.SetMarkerStyle( plotoptions["markerStyle"] )
         tgesy.SetMarkerSize( plotoptions["markerSize"] )
         drawas= plotoptions["drawas"] if "drawas" in plotoptions else "p"
         tgesy.SetName( self.obs )
         if "fillcolor" in plotoptions:
             tgesy.SetFillColor(plotoptions["fillcolor"])
-            tgest.SetFillColor(plotoptions["fillcolor"])            
-        if opt.find( "s" ) >= 0:
+            tgest.SetFillColor(plotoptions["fillcolor"])
+        if "s" in opt:
             tgesy.Draw( "psame" )
         else:
             if "title" in plotoptions:
@@ -167,7 +172,7 @@ class AnalysisObservable:
                                       np.absolute( self.variationsDelta[errorKey2] ) ) )
 
     
-# LEP1 Analysis
+# LEP1 Analysis:
 class LEP1AnalysisObservable( AnalysisObservable ):
 
     def __init__( self, obs ):
@@ -185,7 +190,7 @@ class LEP1AnalysisObservable( AnalysisObservable ):
         self.calcSystSumSq( analysisVariations.keys() )
         return
 
-# LEP1.5 Analysis
+# LEP1.5 Analysis:
 class LEP15AnalysisObservable( AnalysisObservable ):
 
     def __init__( self, obs ):
@@ -316,21 +321,94 @@ def checkJetrates( filename="sjm91_all_test.root", obs="durhamycut" ):
     print valuessum
     return
 
+def compareY23ds():
+    from ROOT import TCanvas
+    canv= TCanvas( "canv", "y_{23}(D) comparison 91 - 189", 1000, 1200 )
+    canv.Divide( 2, 3 )
+    canv.cd( 1 )
+    compareY23d( "sjm91_all.root", "mtford-y23d91.txt" )
+    canv.cd( 2 )
+    compareY23d( "sjm133.root", "mtford-y23d133.txt" )
+    canv.cd( 3 )
+    compareY23d( "sjm161.root", "mtford-y23d161.txt" )
+    canv.cd( 4 )
+    compareY23d( "sjm172.root", "mtford-y23d172.txt" )
+    canv.cd( 5 )
+    compareY23d( "sjm183.root", "mtford-y23d183.txt" )
+    canv.cd( 6 )
+    compareY23d( "sjm189.root", "mtford-y23d189.txt" )
+    return
+
+def compareY23d( filename="sjm91_all.root", mtffilename="mtford-y23d91.txt" ):
+    arrays= ascii2arrays( mtffilename )
+    mtfordpointsl= arrays[0]
+    mtfordpointsr= arrays[1]
+    mtfordpoints= np.divide( np.add( arrays[0], arrays[1] ), 2.0 )
+    mtfordvalues= arrays[2]
+    mtfordsterrs= arrays[3]
+    mtfordsyerrs= arrays[4]
+    mtforderrs= np.sqrt( np.add( np.square( mtfordsterrs ),  np.square( mtfordsyerrs ) ) )
+    if filename=="sjm133.root":
+        f1= TFile( "sjm130.root" )
+        ao1= createAnalysisObservable( f1, "durhamymerge23" )
+        f2= TFile( "sjm136.root" )
+        ao2= createAnalysisObservable( f2, "durhamymerge23" )
+        ao= combineAnalysisObservables( ao1, ao2 )
+    else:
+        f= TFile( filename )
+        ao= createAnalysisObservable( f, "durhamymergefj23" )
+    npoints= len( mtfordpoints )
+    vex= array( "d", npoints*[0.0] )
+    tgest= TGraphErrors( npoints, mtfordpoints, mtfordvalues, vex, mtfordsterrs )
+    tgetot= TGraphErrors( npoints, mtfordpoints, mtfordvalues, vex, mtforderrs )
+    plotoptions= { "xmin": 0.0005, "xmax": 0.5, "ymin": 0.5, "ymax": 500.0, "markerStyle": 20,
+                       "markerSize": 0.75, "title": "Durham y23 "+filename, "xlabel": "y_{23}",
+                       "ylabel": "1/\sigma d\sigma/dy_{23}", "logx":1, "logy":1 }
+    ao.plot( plotoptions )
+    tgetot.SetMarkerStyle( 24 )
+    tgetot.SetMarkerSize( 1.25 )
+    tgetot.SetName( "mtford" )
+    tgetot.Draw( "psame" )
+    tgest.Draw( "psame" )
+    tl= TLegend( 0.7, 0.9, 0.7, 0.9 )
+    tl.AddEntry( "mtford", "M.T. Ford thesis", "ep" )
+    tl.AddEntry( "durhamymerge23", "sjmanalysis", "ep" )
+    tl.Draw()
+    return
+
 def compareThrusts():
     from ROOT import TCanvas
-    canv= TCanvas( "canv", "Thrust comparison", 1000, 1200 )
-    canv.Divide( 2, 2 )
+    canv= TCanvas( "canv", "Thrust comparison 91 - 189", 1000, 1200 )
+    canv.Divide( 2, 3 )
     canv.cd( 1 )
-    compareThrust( "sjm91_all_test.root", "mtford-thrust91.txt" )
+    compareThrust( "sjm91_all.root", "mtford-thrust91.txt" )
     canv.cd( 2 )
     compareThrust( "sjm133.root", "mtford-thrust133.txt" )
     canv.cd( 3 )
-    compareThrust( "sjm189.root", "mtford-thrust189.txt" )
+    compareThrust( "sjm161.root", "mtford-thrust161.txt" )
     canv.cd( 4 )
+    compareThrust( "sjm172.root", "mtford-thrust172.txt" )
+    canv.cd( 5 )
+    compareThrust( "sjm183.root", "mtford-thrust183.txt" )
+    canv.cd( 6 )
+    compareThrust( "sjm189.root", "mtford-thrust189.txt" )
+    canv2= TCanvas( "canv2", "Thrust comparison 192 - 207", 1000, 1200 )
+    canv2.Divide( 2, 3 )
+    canv2.cd( 1 )
     compareThrust( "sjm192.root", "mtford-thrust192.txt" )
+    canv2.cd( 2 )
+    compareThrust( "sjm196.root", "mtford-thrust196.txt" )
+    canv2.cd( 3 )
+    compareThrust( "sjm200.root", "mtford-thrust200.txt" )
+    canv2.cd( 4 )
+    compareThrust( "sjm202.root", "mtford-thrust202.txt" )
+    canv2.cd( 5 )
+    compareThrust( "sjm205.root", "mtford-thrust205.txt" )
+    canv2.cd( 6 )
+    compareThrust( "sjm207.root", "mtford-thrust207.txt" )
     return
 
-def compareThrust( filename="sjm91_all_test.root", mtffilename="mtford-thrust91.txt" ):
+def compareThrust( filename="sjm91_all.root", mtffilename="mtford-thrust91.txt" ):
     arrays= ascii2arrays( mtffilename )
     mtfordvalues= arrays[2]
     mtfordsterrs= arrays[3]
@@ -366,7 +444,7 @@ def compareThrust( filename="sjm91_all_test.root", mtffilename="mtford-thrust91.
     return
 
 # Compare PCONE OPAL results for given variant and jetrate:
-def comparePxcone( filename="sjm91_all_test.root", optKind="emin", optRate="R2" ):
+def comparePxcone( filename="sjm91_all.root", optKind="emin", optRate="R2" ):
 
     pr097vals= dict()
     pr097st= dict()
@@ -442,7 +520,7 @@ def comparePxcone( filename="sjm91_all_test.root", optKind="emin", optRate="R2" 
     return
 
 # Compare OPAL PXCONE results:
-def comparePxcones( filename="sjm91_all_test.root" ):
+def comparePxcones( filename="sjm91_all.root" ):
     from ROOT import TCanvas
     canv= TCanvas( "canv", "PXCONE comparison", 1000, 1200 )
     canv.Divide(2,3)
@@ -462,7 +540,7 @@ def comparePxcones( filename="sjm91_all_test.root" ):
     return
 
 # Compare antikt, siscone and PXCONE jets in same plot        
-def compareConejets( filename="sjm91_all_test.root", optKind="R", optR="R3" ):
+def compareConejets( filename="sjm91_all.root", optKind="R", optR="R3" ):
     f= TFile( filename )
     algantikt= "antikt"+optKind
     algsiscone= "siscone"+optKind
@@ -495,7 +573,7 @@ def compareAllDurhamjetrates():
     canv= TCanvas( "canv", "Durham jetrates comparison", 1000, 1200 )
     canv.Divide(2,3)
     canv.cd( 1 )
-    compareDurhamjetrates( "sjm91_all_test.root",
+    compareDurhamjetrates( "sjm91_all.root",
                                "/home/iwsatlas1/skluth/Downloads/JRTMC/share/NEW/data.dat",
                                "donkers-durhamjets91.txt" )
     canv.cd( 2 )
@@ -520,21 +598,21 @@ def compareAllDurhamjetrates():
                                "donkers-durhamjets192.txt" )
     return
 
-def compareDurhamjetrates( filename="sjm91_all_test.root",
-                               datafilename="/home/iwsatlas1/skluth/Downloads/JRTMC/share/NEW/data.dat",
-                               donkersfilename="donkers-durhamjets91.txt" ):
+def compareDurhamjetrates( filename="sjm91_all.root",
+                           datafilename="/home/iwsatlas1/skluth/Downloads/JRTMC/share/NEW/data.dat",
+                           donkersfilename="donkers-durhamjets91.txt" ):
     f= TFile( filename )
     R2ao= createAnalysisObservable( f, "durhamycutfjR2" )
     R3ao= createAnalysisObservable( f, "durhamycutfjR3" )
-    plotoptions= { "xmin": 0.0, "xmax": 4.0, "ymin": 0.0, "ymax": 1.05, "markerStyle": 20,
+    plotoptions= { "xmin": 0.0005, "xmax": 0.5, "ymin": 0.0, "ymax": 1.05, "markerStyle": 20,
                        "markerSize": 0.75, "title": "Durham R2 and R3 "+filename,
-                       "xlabel": "-log10(y_{cut})", "ylabel": "Jet rates" }
+                       "xlabel": "y_{cut}", "ylabel": "Jet rates", "logx": 1 }
     R2tgest, R2tgesy= R2ao.plot( plotoptions )
     plotoptions["markerStyle"]= 21
     R3tgest, R3tgesy= R3ao.plot( plotoptions, "s" )
 
     arrays= ascii2arrays( datafilename )
-    ycutpoints= - np.log10( arrays[0] )
+    ycutpoints= arrays[0]
     R2values= np.divide( arrays[1], 100.0 )
     R2sterrs= np.divide( arrays[2], 100.0 )
     R2syerrs= np.divide( arrays[3], 100.0 )
@@ -567,7 +645,7 @@ def compareDurhamjetrates( filename="sjm91_all_test.root",
 
     if donkersfilename:
         dkarrays= ascii2arrays( donkersfilename )
-        dkycutpoints= np.multiply( dkarrays[0], -1.0 )
+        dkycutpoints= np.power( 10.0, dkarrays[0] )
         dkR2values= dkarrays[1]
         dkR2sterrs= np.divide( dkarrays[2], 100.0 )
         dkR2syerrs= np.divide( dkarrays[3], 100.0 )
@@ -596,12 +674,14 @@ def compareDurhamjetrates( filename="sjm91_all_test.root",
 
 
 # Compare EEC from various sources with own measurements 
-def compareEEC( filename="sjm91_all_test.root", datafilename="../EECMC/share/OPAL/data.dat" ):
+def compareEEC( filename="sjm91_all.root", datafilename="../EECMC/share/OPAL/data.dat" ):
     f= TFile( filename )
     ao= createAnalysisObservable( f, "EEC" )
     tokens= datafilename.split( "/" )
     exp= tokens[3]
-    plotoptions= { "xmin": 0.0, "xmax": 3.14159, "ymin": 0.05, "ymax": 5.0, "markerStyle": 20, "markerSize": 0.5, "drawas": "3", "fillcolor": 6, "title": "EEC "+exp, "xlabel": "\chi\ [rad.]", "ylabel": "1/\sigma d\Sigma/d\chi", "logy": 1 }
+    plotoptions= { "xmin": 0.0, "xmax": 3.14159, "ymin": 0.05, "ymax": 5.0, "markerStyle": 20,
+                       "markerSize": 0.5, "drawas": "3", "fillcolor": 6, "title": "EEC "+exp,
+                       "xlabel": "\chi\ [rad.]", "ylabel": "1/\sigma d\Sigma/d\chi", "logy": 1 }
     tgest, tgesy= ao.plot( plotoptions )
     lines= [ line.rstrip( '\n' ) for line in open( datafilename ) ]
     n= len( lines )
@@ -628,7 +708,7 @@ def compareEEC( filename="sjm91_all_test.root", datafilename="../EECMC/share/OPA
     legend.Draw()
     return 
 
-def compareEECs( filename="sjm91_all_test.root" ):
+def compareEECs( filename="sjm91_all.root" ):
     from ROOT import TCanvas
     canv= TCanvas( "canv", "EEC comparison", 1000, 1200 )
     canv.Divide(2,3)
@@ -647,7 +727,7 @@ def compareEECs( filename="sjm91_all_test.root" ):
     canv.SaveAs( "compareEECs.pdf" )
     return
 
-def testMigrationMatrix( obs="thrust", filename="sjm91_96_test.root" ):
+def testMigrationMatrix( obs="thrust", filename="sjm91_all.root" ):
     hdetstr= obs+" py mt stand"
     hhstr= obs+" py hadron stand"
     hhnrstr= obs+" py hadron none nonrad"

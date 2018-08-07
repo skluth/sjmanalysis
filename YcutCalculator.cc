@@ -22,7 +22,8 @@ YcutCalculator::getValues( NtupleReader* ntr,
   size_t n= Ycutpoints.size();
   vector<Double_t> NJets( n );
   for( size_t i= 0; i < n; i++ ) {
-    Double_t ycut= TMath::Power( 10.0, -Ycutpoints[i] );
+    // Double_t ycut= TMath::Power( 10.0, -Ycutpoints[i] );
+    Double_t ycut= Ycutpoints[i];
     for( int njet= 2; njet <= 6; njet++ ) {
       Double_t ymergelo, ymergehi;
       if( algorithm == "jade" ) {

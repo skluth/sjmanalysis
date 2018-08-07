@@ -26,15 +26,22 @@ TGEAnalysisObject::TGEAnalysisObject( TGraphErrors* t ) :
   }
 }
 
-TString TGEAnalysisObject::getPointStr( Int_t i ) {
+TString TGEAnalysisObject::getPointStr( Int_t i, Int_t width, Int_t prec ) {
   if( i < 0 || i >= points.GetNoElements() ) return "getPoint: error";
-  else return Form( "%5.2f", points[i] );
+  else {
+    std::string strwidth( std::to_string( width ) );
+    std::string strprec( std::to_string( prec ) );
+    std::string formstr( "%"+strwidth+"."+strprec+"f" );
+    return Form( formstr.c_str(), points[i] );
+  }
 }
 
 TVectorD TGEAnalysisObject::getPointsCenter() {
   return points;
 }
 
-TString TGEAnalysisObject::getPointLabel() {
-  return Form( "%-5s", "point" );
+TString TGEAnalysisObject::getPointLabel( Int_t width ) {
+  std::string strwidth( std::to_string( width ) );
+  std::string formstr= "%-"+strwidth+"s";
+  return Form( formstr.c_str(), "point" );
 }

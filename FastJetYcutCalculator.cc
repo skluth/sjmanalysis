@@ -28,7 +28,8 @@ FastJetYcutCalculator::getValues( NtupleReader* ntr,
   vector<Double_t> NJets( n );
   TFastJet tfj( vtlv, algorithm.c_str() );
   for( size_t i= 0; i < n; i++ ) {
-    NJets[i]= tfj.njets( TMath::Power( 10.0, -Ycutpoints[i] ) );
+    // NJets[i]= tfj.njets( TMath::Power( 10.0, -Ycutpoints[i] ) );
+    NJets[i]= tfj.njets( Ycutpoints[i] );
   }
   return NJets;
 }

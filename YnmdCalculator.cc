@@ -7,5 +7,6 @@
 
 Double_t YnmdCalculator::getValue( NtupleReader* ntr, 
 				   const std::string& reco ) const {
-  return -TMath::Log10( ntr->getYmergeD( reco, njet ) );
+  // return -TMath::Log10( ntr->getYmergeD( reco, njet ) );
+  return ntr->getYmergeD( reco, njet );
 }

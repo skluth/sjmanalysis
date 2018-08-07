@@ -103,7 +103,7 @@ SjmConfigParser::SjmConfigParser( int argc, const char* argv[] ) {
   generalOptsDescriptionMap["Points.as"]= "AS bin edges";
   generalOptsDescriptionMap["Points.mr"]= "MR bin edges";
   
-  generalOptsDescriptionMap["Points.yNMPoints"]= "-log10( Ynm ) points";
+  generalOptsDescriptionMap["Points.yNMPoints"]= "Ynm points";
   generalOptsDescriptionMap["Points.PxEminPoints"]= "PXCONE Emin points";
   generalOptsDescriptionMap["Points.PxRPoints"]= "PXCONE R points";
   generalOptsDescriptionMap["Points.PxConeEmin"]= "PXCONE Emin value";

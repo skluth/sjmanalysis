@@ -33,7 +33,6 @@ TH1DAnalysisObject::TH1DAnalysisObject( TH1D* h, TH2D* h2d ) :
   errors[nbin]= TMath::Sqrt( integralError );
   points[nbin]= hist->GetBinLowEdge( nbin+1 );
   if( hist2d != 0 ) {
-    // std::cout << "error matrix exists" << std::endl;
     UInt_t ndim= hist2d->GetNbinsX();
     errorMatrix.ResizeTo( ndim, ndim );
     for( UInt_t i= 0; i < ndim; i++ ) {
@@ -44,10 +43,19 @@ TH1DAnalysisObject::TH1DAnalysisObject( TH1D* h, TH2D* h2d ) :
   }
 }
 
-TString TH1DAnalysisObject::getPointStr( Int_t i ) {
+TString TH1DAnalysisObject::getPointStr( Int_t i, Int_t width, Int_t prec ) {
   if( i < 0 || i >= points.GetNoElements() ) return "getPoint: error";
-  else if( i == points.GetNoElements()-1 ) return "Integral:";
-  else return Form( "%4.2f %4.2f", points[i], points[i+1] );
+  else if( i == points.GetNoElements()-1 ) {
+    std::string strwidth( std::to_string( 2*width+1 ) );
+    std::string formstr( "%-"+strwidth+"s" );
+    return Form( formstr.c_str(), "Integral:" );
+  }
+  else {
+    std::string strwidth( std::to_string( width ) );
+    std::string strprec( std::to_string( prec ) );
+    std::string formstr( "%"+strwidth+"."+strprec+"f %"+strwidth+"."+strprec+"f" );
+    return Form( formstr.c_str(), points[i], points[i+1] );
+  }
 }
 
 TVectorD TH1DAnalysisObject::getPointsCenter() {
@@ -59,14 +67,16 @@ TVectorD TH1DAnalysisObject::getPointsCenter() {
   return bincenters;
 }
 
-TString TH1DAnalysisObject::getPointLabel() {
-  return Form( "%-4s %-4s", "lo", "hi" );
+TString TH1DAnalysisObject::getPointLabel( Int_t width ) {
+  std::string strwidth( std::to_string( width ) );
+  std::string formstr( "%-"+strwidth+"s %-"+strwidth+"s" );
+  return Form( formstr.c_str(), "lo", "hi" );
 }
 
 TVectorD TH1DAnalysisObject::getErrors( const TString & opt ) {
   TVectorD result= AnalysisObject::getErrors( opt );
   // With full stat. error matrix error on integral is 0, since the
-  // integral is contrained by the normalisation
+  // integral is constrained by the normalisation
   if( opt.Index( "m" ) >= 0 ) {
     if( errorMatrix.GetNoElements() > 0 ) {
       result[result.GetNrows()-1]= 0.0;

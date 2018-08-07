@@ -13,8 +13,8 @@
 #include "LEP1NtupleReader.hh"
 #include "LEP2NtupleReader.hh"
 #include "VectorHelpers.hh"
-
 #include "DataStructure.hh"
+#include "fastjet/Error.hh"
 
 using std::map;
 using std::vector;
@@ -102,6 +102,10 @@ AnalysisProcessor::processAnalyses( const vector<Analysis>& analyses,
 	  cout << keyValue.first << " (" << keyValue.second << ")";
 	}
 	cout << "\ncuts: " << cuts << endl;
+      }
+      catch( const fastjet::Error& fe ) {
+	cout << "AnalysisProcessor::processAnalysis: filling cought fastjet exception: "
+	     << fe.message() << ", event " << ievnt << endl;
       }
     }
   }

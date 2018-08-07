@@ -7,5 +7,6 @@
 
 Double_t YnmjCalculator::getValue( NtupleReader* ntr, 
 				   const std::string& reco ) const {
-  return -TMath::Log10( ntr->getYmergeE( reco, njet ) );
+  // return -TMath::Log10( ntr->getYmergeE( reco, njet ) );
+  return ntr->getYmergeE( reco, njet );
 }

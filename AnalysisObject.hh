@@ -27,8 +27,8 @@ public:
     return result;
   }
   virtual TMatrixD getErrorMatrix() { return errorMatrix; }
-  virtual TString getPointStr( Int_t ) = 0;
-  virtual TString getPointLabel() = 0;
+  virtual TString getPointStr( Int_t, Int_t, Int_t ) = 0;
+  virtual TString getPointLabel( Int_t ) = 0;
   virtual TVectorD getPointsCenter() = 0;
 protected:
   TVectorD points;

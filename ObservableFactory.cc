@@ -47,6 +47,10 @@ vector<Observable*>
 ObservableFactory::createObservables( const vector<string> & obsnames,
 				      const vector<Analysis> & analyses ) {
   vector<Observable*> vobs;
+  vector<Double_t> ynmpoints= sjmConfigs.getPoints( "yNMPoints" );
+  // first (0.0) and last ynm are (should be(!)) outside of kinematic range,
+  // so don't run jet rates there
+  vector<Double_t> ycutpoints( ynmpoints.begin()+1, ynmpoints.end()-2 );
   for( const string & name : obsnames ) {
     Observable* obsp= 0;
     if( nameIs( name, "thrust" ) ) {
@@ -75,53 +79,53 @@ ObservableFactory::createObservables( const vector<string> & obsnames,
     }
     else if( nameIs( name, "durhamymerge23" ) ) {
       obsp= new ObsDifferential( name, 
-				 sjmConfigs.getPoints( "yNMPoints" ),
+				 ynmpoints,
 				 analyses,
 				 new YnmdCalculator( 2 ) );
     }
     else if( nameIs( name, "jadeymerge23" ) ) {
       obsp= new ObsDifferential( name,
-				 sjmConfigs.getPoints( "yNMPoints" ),
+				 ynmpoints,
 				 analyses,
 				 new YnmjCalculator( 2 ) );
     }
     else if( nameIs( name, "durhamymergefj" ) ) {
       obsp= new ObsFastJetDiff( name, 
 				"eekt", 
-				sjmConfigs.getPoints( "yNMPoints" ),
+				ynmpoints,
 				analyses );
     }
     else if( nameIs( name, "jadeymergefj" ) ) {
       obsp= new ObsFastJetDiff( name, 
 				"jade", 
-				sjmConfigs.getPoints( "yNMPoints" ),
+				ynmpoints,
 				analyses );
     }
     else if( nameIs( name, "durhamycutfj" ) ) {
       obsp= new ObsJetrate( name, 
 			    // sjmConfigs.getPoints( "Donkersycutd" ),
-			    sjmConfigs.getPoints( "yNMPoints" ),
+			    ycutpoints,
 			    analyses,
 			    new FastJetYcutCalculator( "eekt" ) );
     }
     else if( nameIs( name, "jadeycutfj" ) ) {
       obsp= new ObsJetrate( name, 
 			    // sjmConfigs.getPoints( "Donkersycutj" ),
-			    sjmConfigs.getPoints( "yNMPoints" ),
+			    ycutpoints,
 			    analyses,
 			    new FastJetYcutCalculator( "jade" ) );
     }
     else if( nameIs( name, "durhamycut" ) ) {
       obsp= new ObsJetrate( name, 
 			    // sjmConfigs.getPoints( "Donkersycutd" ),
-			    sjmConfigs.getPoints( "yNMPoints" ),
+			    ycutpoints,
 			    analyses,
 			    new YcutCalculator( "durham" ) );
     }
     else if( nameIs( name, "jadeycut" ) ) {
       obsp= new ObsJetrate( name, 
 			    // sjmConfigs.getPoints( "Donkersycutj" ),
-			    sjmConfigs.getPoints( "yNMPoints" ),
+			    ycutpoints,
 			    analyses,
 			    new YcutCalculator( "jade" ) );
     }

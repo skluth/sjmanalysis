@@ -267,8 +267,8 @@ namespace sjmtests {
       ynmbinedges{ 0.00001, 3.16227766016838e-05, 0.0001, 0.000316227766016838,
 	  0.001, 0.00316227766016838, 0.01, 0.0316227766016838, 0.1,
 	  0.316227766016838, 1.0 },
-      analysis1( "data", "mt", "stand" ), 
-      analysis2( "data", "mt", "costt07" ),
+      analysis1( "data mt stand" ), 
+      analysis2( "data mt costt07" ),
       analyses{ analysis1, analysis2 },
       obst( "thrust", thbinedges, analyses, &tcalc, false ),
       y23dcalc( "durham", 2 ),
@@ -294,7 +294,7 @@ namespace sjmtests {
   TEST_F( ObsDiffTest, testcontainsAnalysis ) {
     EXPECT_TRUE( obst.containsAnalysis( analysis1 ) );
     EXPECT_TRUE( obst.containsAnalysis( analysis2 ) );
-    Analysis analysis3( "bla", "blo", "blu" );
+    Analysis analysis3( "bla blo blu" );
     EXPECT_FALSE( obst.containsAnalysis( analysis3 ) );
   }
   // getName:
@@ -365,24 +365,28 @@ namespace sjmtests {
     }
   }
 
-  // ObsFastJetDiff tests:
+  // ObsDifferential fill tests:
   class ObsFastJetDiffTest : public ::testing::Test {
   public:
     ObsFastJetDiffTest() :
+      thbinedges{ 0.0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.07, 
+	0.09, 0.12, 0.15, 0.22, 0.3, 0.5 },
       ynmbinedges{ 0.00001, 3.16227766016838e-05, 0.0001, 0.000316227766016838,
 	  0.001, 0.00316227766016838, 0.01, 0.0316227766016838, 0.1,
 	  0.316227766016838, 1.0 },
-      analysismt( "data", "mt", "stand" ),
-      analysistc( "data", "tc", "stand" ),
-      analysist( "data", "tracks", "stand" ), 
-      analysisc( "data", "clusters", "stand" ), 
-      analysisp( "data", "parton", "stand" ), 
-      analysish( "data", "hadron", "stand" ),
+      analysismt( "py mt stand" ),
+      analysistc( "py tc stand" ),
+      analysist( "py tracks stand" ), 
+      analysisc( "py clusters stand" ), 
+      analysisp( "py parton none nonrad" ), 
+      analysish( "py hadron none nonrad" ),
       analyses{ analysismt, analysistc, analysist, analysisc, analysisp, analysish },
+      obst( "thrust", thbinedges, analyses, &tcalc, false ),
       obsfjdd( "durhamymergefj", "eekt", ynmbinedges, analyses, false ) {
 	ntr= new LEP1NtupleReader( "mc5025_1_200.root", "h10", false );
       }
     virtual ~ObsFastJetDiffTest() { delete ntr; }
+    vector<Double_t> thbinedges;
     vector<Double_t> ynmbinedges;
     Analysis analysismt;
     Analysis analysistc;
@@ -391,51 +395,89 @@ namespace sjmtests {
     Analysis analysisp;
     Analysis analysish;
     vector<Analysis> analyses;
+    ThrustCalculator tcalc;
+    ObsDifferential obst;
     ObsFastJetDiff obsfjdd;
     NtupleReader* ntr;
   };
 
   // Fill tests:
-  TEST_F( ObsFastJetDiffTest, testfillmt ) {
+  TEST_F( ObsFastJetDiffTest, testthfillmt ) {
+    fillFromNtuple( ntr, analysismt, obst );
+    vector<Double_t> thvalues= getObsValues( "thrust", analysismt, obst );
+    vector<Double_t> thexp{ 0, 1, 14, 15, 11, 11, 11, 7, 9, 3, 5, 2, 0, 0 };
+    EXPECT_EQ( thexp, thvalues );
+  } 
+  TEST_F( ObsFastJetDiffTest, testthfilltc ) {
+    fillFromNtuple( ntr, analysistc, obst );
+    vector<Double_t> thvalues= getObsValues( "thrust", analysistc, obst );
+    vector<Double_t> thexp{ 0, 3, 14, 13, 10, 14, 9, 8, 6, 5, 4, 3, 0, 0 };
+    EXPECT_EQ( thexp, thvalues );
+  } 
+  TEST_F( ObsFastJetDiffTest, testthfillt ) {
+    fillFromNtuple( ntr, analysist, obst );
+    vector<Double_t> thvalues= getObsValues( "thrust", analysist, obst );
+    vector<Double_t> thexp{ 0, 4, 15, 12, 9, 10, 13, 6, 7, 5, 7, 1, 0, 0 };
+    EXPECT_EQ( thexp, thvalues );
+  } 
+  TEST_F( ObsFastJetDiffTest, testthfillc ) {
+    fillFromNtuple( ntr, analysisc, obst );
+    vector<Double_t> thvalues= getObsValues( "thrust", analysisc, obst );
+    vector<Double_t> thexp{ 0, 3, 16, 12, 8, 12, 16, 6, 3, 7, 5, 1, 0, 0 };
+    EXPECT_EQ( thexp, thvalues );
+  } 
+  TEST_F( ObsFastJetDiffTest, testthfillp ) {
+    fillFromNtuple( ntr, analysisp, obst );
+    vector<Double_t> thvalues= getObsValues( "thrust", analysisp, obst );
+    vector<Double_t> thexp{ 2, 14, 16, 14, 7, 9, 4, 8, 11, 3, 4, 2, 0, 0 };
+    EXPECT_EQ( thexp, thvalues );
+  } 
+  TEST_F( ObsFastJetDiffTest, testthfillh ) {
+    fillFromNtuple( ntr, analysish, obst );
+    vector<Double_t> thvalues= getObsValues( "thrust", analysish, obst );
+    vector<Double_t> thexp{ 0, 3, 15, 16, 13, 10, 12, 3, 9, 6, 5, 2, 0, 0 };
+    EXPECT_EQ( thexp, thvalues );
+  } 
+  TEST_F( ObsFastJetDiffTest, testfjy23dfillmt ) {
     fillFromNtuple( ntr, analysismt, obsfjdd );
     vector<Double_t> y23dfjvalues= getObsValues( "durhamymergefj23", analysismt, 
 						 obsfjdd );
     vector<Double_t> y23dfjexp{ 0, 0, 0, 0, 10, 27, 21, 17, 10, 4, 0, 0 };
     EXPECT_EQ( y23dfjexp, y23dfjvalues );
-  } 
-  TEST_F( ObsFastJetDiffTest, testfilltc ) {
+  }
+  TEST_F( ObsFastJetDiffTest, testfjy23dfilltc ) {
     fillFromNtuple( ntr, analysistc, obsfjdd );
     vector<Double_t> y23dfjvalues= getObsValues( "durhamymergefj23", analysistc,
 						 obsfjdd );
     vector<Double_t> y23dfjexp{ 0, 0, 0, 2, 10, 23, 24, 16, 9, 5, 0, 0 };
     EXPECT_EQ( y23dfjexp, y23dfjvalues );
-  } 
-  TEST_F( ObsFastJetDiffTest, testfillt ) {
+  }
+  TEST_F( ObsFastJetDiffTest, testjy23dfillt ) {
     fillFromNtuple( ntr, analysist, obsfjdd );
     vector<Double_t> y23dfjvalues= getObsValues( "durhamymergefj23", analysist,
 						 obsfjdd );
     vector<Double_t> y23dfjexp{ 0, 0, 0, 0, 13, 18, 25, 20, 11, 2, 0, 0 };
     EXPECT_EQ( y23dfjexp, y23dfjvalues );
   } 
-  TEST_F( ObsFastJetDiffTest, testfillc ) {
+  TEST_F( ObsFastJetDiffTest, testjy23dfillc ) {
     fillFromNtuple( ntr, analysisc, obsfjdd );
     vector<Double_t> y23dfjvalues= getObsValues( "durhamymergefj23", analysisc,
 						 obsfjdd );
     vector<Double_t> y23dfjexp{ 0, 0, 0, 3, 14, 22, 24, 13, 12, 1, 0, 0 };
     EXPECT_EQ( y23dfjexp, y23dfjvalues );
   } 
-  TEST_F( ObsFastJetDiffTest, testfillp ) {
+  TEST_F( ObsFastJetDiffTest, testjy23dfillp ) {
     fillFromNtuple( ntr, analysisp, obsfjdd );
     vector<Double_t> y23dfjvalues= getObsValues( "durhamymergefj23", analysisp,
 						 obsfjdd );
-    vector<Double_t> y23dfjexp{ 1, 1, 2, 4, 11, 24, 14, 15, 13, 4, 0, 0 };
+    vector<Double_t> y23dfjexp{ 1, 1, 2, 5, 12, 26, 14, 15, 14, 4, 0, 0 };
     EXPECT_EQ( y23dfjexp, y23dfjvalues );
   } 
-  TEST_F( ObsFastJetDiffTest, testfillh ) {
+  TEST_F( ObsFastJetDiffTest, testjy23dfillh ) {
     fillFromNtuple( ntr, analysish, obsfjdd );
     vector<Double_t> y23dfjvalues= getObsValues( "durhamymergefj23", analysish,
 						 obsfjdd );
-    vector<Double_t> y23dfjexp{ 0, 0, 0, 2, 12, 28, 19, 13, 12, 3, 0, 0 };
+    vector<Double_t> y23dfjexp{ 0, 0, 0, 2, 14, 30, 18, 16, 11, 3, 0, 0 };
     EXPECT_EQ( y23dfjexp, y23dfjvalues );
   } 
 
@@ -448,8 +490,8 @@ namespace sjmtests {
       binedgesC202{ 0.355, 0.402, 0.424, 0.446, 0.468, 0.495 },
       binedgesAS{ -0.05, 0.04, 0.1, 0.16, 0.22, 0.28, 0.34, 0.43 },
       binedgesMR{ 0.0, 0.06, 0.15, 0.38, 0.69, 1.0 },
-      analysis1( "data", "mt", "stand" ), 
-      analysis2( "data", "mt", "costt07" ),
+      analysis1( "py mt stand" ), 
+      analysis2( "py mt costt07" ),
       analyses{ analysis1, analysis2 },
       obsps( binedgesA14, binedgesC202, binedgesAS, binedgesMR,
 	     analyses, 0.0045, 0.5, false ) {
@@ -489,7 +531,6 @@ namespace sjmtests {
   class ObsJetrTest : public ::testing::Test {
   public:
     ObsJetrTest() :
-      // Ycutpoints{ 0.0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5 },
       Ycutpoints{ 0.00001, 3.16227766016838e-05, 0.0001, 0.000316227766016838,
 	0.001, 0.00316227766016838, 0.01, 0.0316227766016838, 0.1,
 	0.316227766016838, 1.0 },
@@ -497,8 +538,8 @@ namespace sjmtests {
       Rpoints{ 0.2, 0.4, 0.6, 0.7, 0.8, 1.0, 1.2, 1.4 },
       EminPxpoints{ 2, 6, 10, 14, 18, 22, 25.5 },
       RPxpoints{ 0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5 },
-      analysis1( "data", "mt", "stand" ), 
-      analysis2( "data", "mt", "costt07" ),
+      analysis1( "data mt stand" ), 
+      analysis2( "data mt costt07" ),
       analyses{ analysis1, analysis2 },
       yccd( "durham" ),
       yccj( "jade" ),
@@ -551,47 +592,37 @@ namespace sjmtests {
   TEST_F( ObsJetrTest, testfillycutd ) {
     fillFromNtuple( ntr, analysis1, obsycutd );
     vector<Double_t> n2jets= getObsValues( "durhamycutR2", analysis1, obsycutd );
-    // vector<Double_t> n2jetsexp{ 0, 89, 85, 75, 58, 37, 10, 0, 0, 0, 0 };
     vector<Double_t> n2jetsexp{ 0, 0, 0, 0, 10, 37, 58, 75, 85, 89, 0 };
     EXPECT_EQ( n2jetsexp, n2jets );
     vector<Double_t> n3jets= getObsValues( "durhamycutR3", analysis1, obsycutd );
-    // vector<Double_t> n3jetsexp{ 0, 0, 4, 14, 31, 37, 31, 8, 0, 0, 0 };
     vector<Double_t> n3jetsexp{ 0, 0, 0, 8, 31, 37, 31, 14, 4, 0, 0 };
     EXPECT_EQ( n3jetsexp, n3jets );
     vector<Double_t> n4jets= getObsValues( "durhamycutR4", analysis1, obsycutd );
-    // vector<Double_t> n4jetsexp{ 0, 0, 0, 0, 0, 12, 23, 16, 2, 0, 0 };
     vector<Double_t> n4jetsexp{ 0, 0, 2, 16, 23, 12, 0, 0, 0, 0, 0 };
     EXPECT_EQ( n4jetsexp, n4jets );
     vector<Double_t> n5jets= getObsValues( "durhamycutR5", analysis1, obsycutd );
-    // vector<Double_t> n5jetsexp{ 0, 0, 0, 0, 0, 3, 16, 16, 7, 1, 0 };
     vector<Double_t> n5jetsexp{ 0, 1, 7, 16, 16, 3, 0, 0, 0, 0, 0 };
     EXPECT_EQ( n5jetsexp, n5jets );
     vector<Double_t> n6jets= getObsValues( "durhamycutR6", analysis1, obsycutd );
-    // vector<Double_t> n6jetsexp{ 0, 0, 0, 0, 0, 0, 7, 21, 8, 1, 0 };
     vector<Double_t> n6jetsexp{ 0, 1, 8, 21, 7, 0, 0, 0, 0, 0, 0 };
     EXPECT_EQ( n6jetsexp, n6jets );
   }
   TEST_F( ObsJetrTest, testfillfjycutd ) {
     fillFromNtuple( ntr, analysis1, obsfjycutd );
     vector<Double_t> n2jets= getObsValues( "durhamycutfjR2", analysis1, obsfjycutd );
-    // vector<Double_t> n2jetsexp{ 89, 89, 85, 75, 58, 37, 10, 0, 0, 0, 0 };
     vector<Double_t> n2jetsexp{ 0, 0, 0, 0, 10, 37, 58, 75, 85, 89, 89 };
     EXPECT_EQ( n2jetsexp, n2jets );
     vector<Double_t> n3jets= getObsValues( "durhamycutfjR3", analysis1, obsfjycutd );
-    // vector<Double_t> n3jetsexp{ 0, 0, 4, 14, 31, 37, 31, 8, 0, 0, 0 };
     vector<Double_t> n3jetsexp{ 0, 0, 0, 8, 31, 37, 31, 14, 4, 0, 0 };
     EXPECT_EQ( n3jetsexp, n3jets );
     vector<Double_t> n4jets= getObsValues( "durhamycutfjR4", analysis1, obsfjycutd );
-    // vector<Double_t> n4jetsexp{ 0, 0, 0, 0, 0, 12, 23, 16, 2, 0, 0 };
     vector<Double_t> n4jetsexp{ 0, 0, 2, 16, 23, 12, 0, 0, 0, 0, 0 };
     EXPECT_EQ( n4jetsexp, n4jets );
     vector<Double_t> n5jets= getObsValues( "durhamycutfjR5", analysis1, obsfjycutd );
-    // note "6" instead of "7" in 9th ycut point
-    // vector<Double_t> n5jetsexp{ 0, 0, 0, 0, 0, 3, 16, 16, 6, 1, 0 };
+    // note "6" instead of "7" in 3rd ycut point
     vector<Double_t> n5jetsexp{ 0, 1, 6, 16, 16, 3, 0, 0, 0, 0, 0 };
     EXPECT_EQ( n5jetsexp, n5jets );
     vector<Double_t> n6jets= getObsValues( "durhamycutfjR6", analysis1, obsfjycutd );
-    // vector<Double_t> n6jetsexp{ 0, 0, 0, 0, 0, 0, 9, 49, 81, 88, 89 };
     vector<Double_t> n6jetsexp{ 89, 88, 81, 49, 9, 0, 0, 0, 0, 0, 0 };
     EXPECT_EQ( n6jetsexp, n6jets );
   }
@@ -600,23 +631,18 @@ namespace sjmtests {
   TEST_F( ObsJetrTest, testfillycutj ) {
     fillFromNtuple( ntr, analysis1, obsycutj );
     vector<Double_t> n2jets= getObsValues( "jadeycutR2", analysis1, obsycutj );
-    // vector<Double_t> n2jetsexp{ 0, 89, 80, 54, 26, 10, 1, 0, 0, 0, 0  };
     vector<Double_t> n2jetsexp{ 0, 0, 0, 0, 1, 10, 26, 54, 80, 89, 0 };
     EXPECT_EQ( n2jetsexp, n2jets );
     vector<Double_t> n3jets= getObsValues( "jadeycutR3", analysis1, obsycutj );
-    // vector<Double_t> n3jetsexp{ 0, 0, 9, 34, 47, 29, 6, 1, 1, 1, 0 };
     vector<Double_t> n3jetsexp{ 0, 1, 1, 1, 6, 29, 47, 34, 9, 0, 0 };
     EXPECT_EQ( n3jetsexp, n3jets );
     vector<Double_t> n4jets= getObsValues( "jadeycutR4", analysis1, obsycutj );
-    // vector<Double_t> n4jetsexp{ 0, 0, 0, 1, 15, 25, 18, 2, 0, 0, 0 };
     vector<Double_t> n4jetsexp{ 0, 0, 0, 2, 18, 25, 15, 1, 0, 0, 0 };
     EXPECT_EQ( n4jetsexp, n4jets );
     vector<Double_t> n5jets= getObsValues( "jadeycutR5", analysis1, obsycutj );
-    // vector<Double_t> n5jetsexp{ 0, 0, 0, 0, 1, 23, 28, 6, 0, 0, 0 };
     vector<Double_t> n5jetsexp{ 0, 0, 0, 6, 28, 23, 1, 0, 0, 0, 0 };
     EXPECT_EQ( n5jetsexp, n5jets );
     vector<Double_t> n6jets= getObsValues( "jadeycutR6", analysis1, obsycutj );
-    // vector<Double_t> n6jetsexp{ 0, 0, 0, 0, 0, 2, 19, 12, 4, 1, 1 };
     vector<Double_t> n6jetsexp{ 1, 1, 4, 12, 19, 2, 0, 0, 0, 0, 0 };
     EXPECT_EQ( n6jetsexp, n6jets );
   }
@@ -624,23 +650,18 @@ namespace sjmtests {
   TEST_F( ObsJetrTest, testfillfjycutj ) {
     fillFromNtuple( ntr, analysis1, obsfjycutj );
     vector<Double_t> n2jets= getObsValues( "jadeycutfjR2", analysis1, obsfjycutj );
-    // vector<Double_t> n2jetsexp{ 0, 89, 80, 54, 26, 10, 1, 0, 0, 0, 0 };
     vector<Double_t> n2jetsexp{ 0, 0, 0, 0, 1, 10, 26, 54, 80, 89, 34 };
     EXPECT_EQ( n2jetsexp, n2jets );
     vector<Double_t> n3jets= getObsValues( "jadeycutfjR3", analysis1, obsfjycutj );
-    // vector<Double_t> n3jetsexp{ 0, 0, 9, 34, 47, 29, 4, 0, 0, 0, 0 };
     vector<Double_t> n3jetsexp{ 0, 0, 0, 0, 4, 29, 47, 34, 9, 0, 0 };
     EXPECT_EQ( n3jetsexp, n3jets );
     vector<Double_t> n4jets= getObsValues( "jadeycutfjR4", analysis1, obsfjycutj );
-    // vector<Double_t> n4jetsexp{ 0, 0, 0, 1, 15, 25, 17, 1, 0, 0, 0 };
     vector<Double_t> n4jetsexp{ 0, 0, 0, 1, 17, 25, 15, 1, 0, 0, 0 };
     EXPECT_EQ( n4jetsexp, n4jets );
     vector<Double_t> n5jets= getObsValues( "jadeycutfjR5", analysis1, obsfjycutj );
-    // vector<Double_t> n5jetsexp{ 0, 0, 0, 0, 1, 23, 28, 5, 0, 0, 0 };
     vector<Double_t> n5jetsexp{ 0, 0, 0, 5, 28, 23, 1, 0, 0, 0, 0 };
     EXPECT_EQ( n5jetsexp, n5jets );
     vector<Double_t> n6jets= getObsValues( "jadeycutfjR6", analysis1, obsfjycutj );
-    // vector<Double_t> n6jetsexp{ 0, 0, 0, 0, 0, 2, 39, 83, 89, 89, 89 };
     vector<Double_t> n6jetsexp{ 89, 89, 89, 83, 39, 2, 0, 0, 0, 0, 0 };
     EXPECT_EQ( n6jetsexp, n6jets );
   }

@@ -6,14 +6,8 @@
 LEP2NtupleReader::LEP2NtupleReader( const char* filename, 
 				    const char* ntid, 
 				    const bool lpr ) : 
-  NtupleReader( filename, ntid, lpr ) {
-  SetBranchAddressChecked( "Il2mh", &nt_Il2mh ); 
-  SetBranchAddressChecked( "Ebeam", &nt_Ebeam );
-  SetBranchAddressChecked( "Pspr", &nt_Pspr );
-  SetBranchAddressChecked( "Pspri", &nt_Pspri );
-  SetBranchAddressChecked( "Lwqqln", &nt_Lwqqln );
-  SetBranchAddressChecked( "Lwqqqq", &nt_Lwqqqq );
-  ecmsranges= {
+  NtupleReader( filename, ntid, lpr ),
+  ecmsranges{
     { "130", range( 129.0, 131.0 ) },
     { "136", range( 135.0, 137.0 ) },
     { "161", range( 160.0, 162.0 ) },
@@ -26,7 +20,13 @@ LEP2NtupleReader::LEP2NtupleReader( const char* filename,
     { "202", range( 201.0, 202.5 ) },
     { "205", range( 202.5, 205.5 ) },
     { "207", range( 205.5, 209.5 ) },
-  };
+  } {
+  SetBranchAddressChecked( "Il2mh", &nt_Il2mh ); 
+  SetBranchAddressChecked( "Ebeam", &nt_Ebeam );
+  SetBranchAddressChecked( "Pspr", &nt_Pspr );
+  SetBranchAddressChecked( "Pspri", &nt_Pspri );
+  SetBranchAddressChecked( "Lwqqln", &nt_Lwqqln );
+  SetBranchAddressChecked( "Lwqqqq", &nt_Lwqqqq );
 }
 
 bool LEP2NtupleReader::Preselection( const std::string& ecms ) {

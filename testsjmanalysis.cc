@@ -8,8 +8,7 @@
 #include "LEP1NtupleReader.hh"
 #include "FilledObservable.hh"
 #include "ThrustCalculator.hh"
-#include "YnmdCalculator.hh"
-#include "YnmjCalculator.hh"
+#include "YnmCalculator.hh"
 #include "ObsFastJetDiff.hh"
 #include "ObsJetrate.hh"
 #include "YcutCalculator.hh"
@@ -167,16 +166,6 @@ namespace sjmtests {
     EXPECT_FLOAT_EQ( errors[2], TMath::Sqrt( 2.0 ) );
   }
 
-  // // Error matrix:
-  // TEST_F( JetrateDataStructureTest, testgetErrorMatrix ) {
-  //   jrds.setErrorMatrix();
-  //   MatrixDataStructure* errorMatrix= jrds.getErrorMatrix();
-  //   vector<Double_t> bins= errorMatrix->getBinedges();
-  //   vector<Double_t> binedges;
-  //   for( size_t i= 0; i <= points.size(); i++ ) binedges.push_back( i+0.5 );
-  //   EXPECT_EQ( binedges, bins );
-  // }
-
   // normalise:
   TEST_F( JetrateDataStructureTest, testnormalise ) {
     jrds.normalise();
@@ -243,14 +232,6 @@ namespace sjmtests {
     EXPECT_FLOAT_EQ( errors[3], TMath::Sqrt( 2.0 ) );
   }
 
-  // // Error matrix:
-  // TEST_F( DifferentialDataStructureTest, testgetErrorMatrix ) {
-  //   dds.setErrorMatrix();
-  //   MatrixDataStructure* errorMatrix= dds.getErrorMatrix();
-  //   vector<Double_t> bins= errorMatrix->getBinedges();
-  //   EXPECT_EQ( binedges, bins );
-  // }
-
   // normalise:
   TEST_F( DifferentialDataStructureTest, testnormalise ) {
     dds.normalise();
@@ -275,8 +256,7 @@ namespace sjmtests {
   class MockNtupleReader: public LEP1NtupleReader {
   public:
     MOCK_METHOD1( getThrust, Double_t( const TString& ) );
-    MOCK_METHOD2( getYmergeD, Double_t( const TString&, Int_t ) );
-    MOCK_METHOD2( getYmergeE, Double_t( const TString&, Int_t ) );
+    MOCK_METHOD3( getYmerge, Double_t( const TString&, const TString&, Int_t ) );
   };
 
   class ObsDiffTest : public ::testing::Test {
@@ -284,7 +264,6 @@ namespace sjmtests {
     ObsDiffTest() : 
       thbinedges{ 0.0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.07, 
 	0.09, 0.12, 0.15, 0.22, 0.3, 0.5 },
-      // ynmbinedges{ 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5 },
       ynmbinedges{ 0.00001, 3.16227766016838e-05, 0.0001, 0.000316227766016838,
 	  0.001, 0.00316227766016838, 0.01, 0.0316227766016838, 0.1,
 	  0.316227766016838, 1.0 },
@@ -292,9 +271,9 @@ namespace sjmtests {
       analysis2( "data", "mt", "costt07" ),
       analyses{ analysis1, analysis2 },
       obst( "thrust", thbinedges, analyses, &tcalc, false ),
-      y23dcalc( 2 ),
+      y23dcalc( "durham", 2 ),
       obsy23d( "durhamymerge23", ynmbinedges, analyses, &y23dcalc, false ),
-      y23jcalc( 2 ),
+      y23jcalc( "jade", 2 ),
       obsy23j( "jadeymerge23", ynmbinedges, analyses, &y23jcalc, false ) {}
     virtual ~ObsDiffTest() {}
     vector<double> thbinedges;
@@ -304,9 +283,9 @@ namespace sjmtests {
     vector<Analysis> analyses;
     ThrustCalculator tcalc;
     ObsDifferential obst;
-    YnmdCalculator y23dcalc;
+    YnmCalculator y23dcalc;
     ObsDifferential obsy23d;
-    YnmjCalculator y23jcalc;
+    YnmCalculator y23jcalc;
     ObsDifferential obsy23j;
     MockNtupleReader mntr;
   };
@@ -345,12 +324,12 @@ namespace sjmtests {
 							  fobs.end(), 
 							  namepred );
     if( it == fobs.end() ) {
-      throw std::logic_error( "getObsValues: not found: "+name );
+      throw std::runtime_error( "getObsValues: not found: "+name );
     }
     return (*it)->getDataStructure( anal )->getValues();
   }
 
-  // fill tests via mock NtupleReader:
+  // Fill tests via mock NtupleReader:
   TEST_F( ObsDiffTest, testfill ) {
     EXPECT_CALL( mntr, getThrust(_) ).WillOnce(Return(0.25));
     obst.fill( &mntr, analysis1 );
@@ -360,12 +339,11 @@ namespace sjmtests {
     EXPECT_EQ( 0.25, tw1values[11] );
     vector<Double_t> tw2values= getObsValues( "thrustW2", analysis1, obst );
     EXPECT_EQ( 0.0625, tw2values[11] );
-    EXPECT_CALL( mntr, getYmergeD(_,_) ).WillOnce(Return(0.11));
+    EXPECT_CALL( mntr, getYmerge(_,_,_) ).WillOnce(Return(0.11));
     obsy23d.fill( &mntr, analysis1 );
     vector<Double_t> y23dvalues= getObsValues( "durhamymerge23", analysis1, obsy23d );
-    // EXPECT_EQ( 1.0, y23dvalues[2] );
     EXPECT_EQ( 1.0, y23dvalues[9] );
-    EXPECT_CALL( mntr, getYmergeE(_,_) ).WillOnce(Return(0.11));
+    EXPECT_CALL( mntr, getYmerge(_,_,_) ).WillOnce(Return(0.11));
     obsy23j.fill( &mntr, analysis1 );
     vector<Double_t> y23jvalues= getObsValues( "jadeymerge23", analysis1, obsy23j );
     EXPECT_EQ( 1.0, y23jvalues[9] );
@@ -390,32 +368,74 @@ namespace sjmtests {
   // ObsFastJetDiff tests:
   class ObsFastJetDiffTest : public ::testing::Test {
   public:
-    ObsFastJetDiffTest() : 
-      // ynmbinedges{ 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5 },
+    ObsFastJetDiffTest() :
       ynmbinedges{ 0.00001, 3.16227766016838e-05, 0.0001, 0.000316227766016838,
 	  0.001, 0.00316227766016838, 0.01, 0.0316227766016838, 0.1,
 	  0.316227766016838, 1.0 },
-      analysis1( "data", "mt", "stand" ), 
-      analysis2( "data", "mt", "costt07" ),
-      analyses{ analysis1, analysis2 },
+      analysismt( "data", "mt", "stand" ),
+      analysistc( "data", "tc", "stand" ),
+      analysist( "data", "tracks", "stand" ), 
+      analysisc( "data", "clusters", "stand" ), 
+      analysisp( "data", "parton", "stand" ), 
+      analysish( "data", "hadron", "stand" ),
+      analyses{ analysismt, analysistc, analysist, analysisc, analysisp, analysish },
       obsfjdd( "durhamymergefj", "eekt", ynmbinedges, analyses, false ) {
 	ntr= new LEP1NtupleReader( "mc5025_1_200.root", "h10", false );
       }
     virtual ~ObsFastJetDiffTest() { delete ntr; }
     vector<Double_t> ynmbinedges;
-    Analysis analysis1;
-    Analysis analysis2;
+    Analysis analysismt;
+    Analysis analysistc;
+    Analysis analysist;
+    Analysis analysisc;
+    Analysis analysisp;
+    Analysis analysish;
     vector<Analysis> analyses;
     ObsFastJetDiff obsfjdd;
     NtupleReader* ntr;
   };
 
-  // fill test:
-  TEST_F( ObsFastJetDiffTest, testfill ) {
-    fillFromNtuple( ntr, analysis1, obsfjdd );
-    vector<Double_t> y23dfjvalues= getObsValues( "durhamymergefj23", analysis1, 
+  // Fill tests:
+  TEST_F( ObsFastJetDiffTest, testfillmt ) {
+    fillFromNtuple( ntr, analysismt, obsfjdd );
+    vector<Double_t> y23dfjvalues= getObsValues( "durhamymergefj23", analysismt, 
 						 obsfjdd );
     vector<Double_t> y23dfjexp{ 0, 0, 0, 0, 10, 27, 21, 17, 10, 4, 0, 0 };
+    EXPECT_EQ( y23dfjexp, y23dfjvalues );
+  } 
+  TEST_F( ObsFastJetDiffTest, testfilltc ) {
+    fillFromNtuple( ntr, analysistc, obsfjdd );
+    vector<Double_t> y23dfjvalues= getObsValues( "durhamymergefj23", analysistc,
+						 obsfjdd );
+    vector<Double_t> y23dfjexp{ 0, 0, 0, 2, 10, 23, 24, 16, 9, 5, 0, 0 };
+    EXPECT_EQ( y23dfjexp, y23dfjvalues );
+  } 
+  TEST_F( ObsFastJetDiffTest, testfillt ) {
+    fillFromNtuple( ntr, analysist, obsfjdd );
+    vector<Double_t> y23dfjvalues= getObsValues( "durhamymergefj23", analysist,
+						 obsfjdd );
+    vector<Double_t> y23dfjexp{ 0, 0, 0, 0, 13, 18, 25, 20, 11, 2, 0, 0 };
+    EXPECT_EQ( y23dfjexp, y23dfjvalues );
+  } 
+  TEST_F( ObsFastJetDiffTest, testfillc ) {
+    fillFromNtuple( ntr, analysisc, obsfjdd );
+    vector<Double_t> y23dfjvalues= getObsValues( "durhamymergefj23", analysisc,
+						 obsfjdd );
+    vector<Double_t> y23dfjexp{ 0, 0, 0, 3, 14, 22, 24, 13, 12, 1, 0, 0 };
+    EXPECT_EQ( y23dfjexp, y23dfjvalues );
+  } 
+  TEST_F( ObsFastJetDiffTest, testfillp ) {
+    fillFromNtuple( ntr, analysisp, obsfjdd );
+    vector<Double_t> y23dfjvalues= getObsValues( "durhamymergefj23", analysisp,
+						 obsfjdd );
+    vector<Double_t> y23dfjexp{ 1, 1, 2, 4, 11, 24, 14, 15, 13, 4, 0, 0 };
+    EXPECT_EQ( y23dfjexp, y23dfjvalues );
+  } 
+  TEST_F( ObsFastJetDiffTest, testfillh ) {
+    fillFromNtuple( ntr, analysish, obsfjdd );
+    vector<Double_t> y23dfjvalues= getObsValues( "durhamymergefj23", analysish,
+						 obsfjdd );
+    vector<Double_t> y23dfjexp{ 0, 0, 0, 2, 12, 28, 19, 13, 12, 3, 0, 0 };
     EXPECT_EQ( y23dfjexp, y23dfjvalues );
   } 
 
@@ -605,7 +625,7 @@ namespace sjmtests {
     fillFromNtuple( ntr, analysis1, obsfjycutj );
     vector<Double_t> n2jets= getObsValues( "jadeycutfjR2", analysis1, obsfjycutj );
     // vector<Double_t> n2jetsexp{ 0, 89, 80, 54, 26, 10, 1, 0, 0, 0, 0 };
-    vector<Double_t> n2jetsexp{ 0, 0, 0, 0, 1, 10, 26, 54, 80, 89, 0 };
+    vector<Double_t> n2jetsexp{ 0, 0, 0, 0, 1, 10, 26, 54, 80, 89, 34 };
     EXPECT_EQ( n2jetsexp, n2jets );
     vector<Double_t> n3jets= getObsValues( "jadeycutfjR3", analysis1, obsfjycutj );
     // vector<Double_t> n3jetsexp{ 0, 0, 9, 34, 47, 29, 4, 0, 0, 0, 0 };

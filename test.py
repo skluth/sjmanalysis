@@ -127,7 +127,8 @@ class AnalysisObservable:
         values= self.values
         sterrs= self.sterrs
         if "m" in opt:
-            sterrs= self.aostand.getErrors( "m" )
+            print "AnalysisObservable::plot: use errors from error matrix"
+            sterrs= array( "d", self.aostand.getErrors( "m" ) )
         syerrs= self.syerrs
         npoints= len(vx)
         if "xshift" in plotoptions:
@@ -337,9 +338,25 @@ def compareY23ds():
     compareY23d( "sjm183.root", "mtford-y23d183.txt" )
     canv.cd( 6 )
     compareY23d( "sjm189.root", "mtford-y23d189.txt" )
+
+    canv2= TCanvas( "canv2", "y_{23}(D) comparison 192 - 207", 1000, 1200 )
+    canv2.Divide( 2, 3 )
+    canv2.cd( 1 )
+    compareY23d( "sjm192.root", "mtford-y23d192.txt" )
+    canv2.cd( 2 )
+    compareY23d( "sjm196.root", "mtford-y23d196.txt" )
+    canv2.cd( 3 )
+    compareY23d( "sjm200.root", "mtford-y23d200.txt" )
+    canv2.cd( 4 )
+    compareY23d( "sjm202.root", "mtford-y23d202.txt" )
+    canv2.cd( 5 )
+    compareY23d( "sjm205.root", "mtford-y23d205.txt" )
+    canv2.cd( 6 )
+    compareY23d( "sjm207.root", "mtford-y23d207.txt" )
+
     return
 
-def compareY23d( filename="sjm91_all.root", mtffilename="mtford-y23d91.txt" ):
+def compareY23d( filename="sjm91_all.root", mtffilename="mtford-y23d91.txt", opt="m" ):
     arrays= ascii2arrays( mtffilename )
     mtfordpointsl= arrays[0]
     mtfordpointsr= arrays[1]
@@ -361,10 +378,10 @@ def compareY23d( filename="sjm91_all.root", mtffilename="mtford-y23d91.txt" ):
     vex= array( "d", npoints*[0.0] )
     tgest= TGraphErrors( npoints, mtfordpoints, mtfordvalues, vex, mtfordsterrs )
     tgetot= TGraphErrors( npoints, mtfordpoints, mtfordvalues, vex, mtforderrs )
-    plotoptions= { "xmin": 0.0005, "xmax": 0.5, "ymin": 0.5, "ymax": 500.0, "markerStyle": 20,
+    plotoptions= { "xmin": 0.0003, "xmax": 0.5, "ymin": 0.5, "ymax": 500.0, "markerStyle": 20,
                        "markerSize": 0.75, "title": "Durham y23 "+filename, "xlabel": "y_{23}",
                        "ylabel": "1/\sigma d\sigma/dy_{23}", "logx":1, "logy":1 }
-    ao.plot( plotoptions )
+    ao.plot( plotoptions, opt )
     tgetot.SetMarkerStyle( 24 )
     tgetot.SetMarkerSize( 1.25 )
     tgetot.SetName( "mtford" )

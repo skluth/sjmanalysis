@@ -10,25 +10,37 @@ using std::endl;
 #include <string>
 using std::string;
 #include <stdexcept>
-using std::logic_error;
 
 // Link PXLIB Fortran
 // extern "C" {
 //   void pxlth4_( Int_t*, Int_t*, Float_t*, Float_t*, Float_t*, Int_t* );
 // };
 
-NtupleReader::NtupleReader() : nt_file(0), nt_tree(0), nt_isMC(false), 
-			       nt_vtlvcache(false) {}
+NtupleReader::NtupleReader() : nt_file(0), nt_tree(0), nt_isMC(false), lprint(false) {}
 
 NtupleReader::NtupleReader( const char* filename, const char* ntid, const bool lpr ) :
-  nt_file(0), nt_tree(0), nt_isMC(false), nt_vtlvcache(false), lprint(lpr) {
+  nt_file(0), nt_tree(0), nt_isMC(false),
+  lprint(lpr),
+  vtlvCache{ { "parton", std::vector<TLorentzVector>() },
+    { "hadron", std::vector<TLorentzVector>() },
+    { "tracks", std::vector<TLorentzVector>() },
+    { "cluster", std::vector<TLorentzVector>() },
+    { "tc", std::vector<TLorentzVector>() },
+    { "mt", std::vector<TLorentzVector>() } },
+  cacheIsValid{ { "parton", false },
+    { "hadron", false },
+    { "tracks", false },
+    { "cluster", false },
+    { "tc", false },
+    { "mt", false } }
+{
   OpenFileAndLoadNtuple( filename, ntid );
   return;
 }
 
 NtupleReader::~NtupleReader() {
   try { CloseFile(); }
-  catch( std::logic_error e ) {}
+  catch( std::runtime_error e ) {}
 }
 
 void NtupleReader::OpenFileAndLoadNtuple( const char* filename, 
@@ -76,7 +88,7 @@ void NtupleReader::CloseFile() {
     nt_file= 0;
   }
   else {
-    throw std::logic_error( "NtupleReader::CloseFile: NULL file pointer" );
+    throw std::runtime_error( "NtupleReader::CloseFile: NULL file pointer" );
   }
   return;
 }
@@ -90,7 +102,7 @@ bool NtupleReader::GetEvent( Int_t ievnt ) {
   bool result= false;
   if( nt_tree and nt_tree->GetEvent( ievnt ) > 0 ) {
     result= true;
-    nt_vtlvcache= false;
+    for( const auto & keyValue : cacheIsValid ) cacheIsValid[keyValue.first]= false;
     nt_nevents++;
   }
   return result;
@@ -147,19 +159,24 @@ Double_t NtupleReader::getRecoValue( const TString& reco,
   return value;
 }
 
-Double_t NtupleReader::getYmergeD( const TString& reco, Int_t njet ) {
-  return getRecoYmergeValue( reco, njet, 
-			     nt_Nxjdmt, nt_Yddmt, nt_Nxjdtc, nt_Yddtc,
-			     nt_Nxjdt, nt_Yddt, nt_Nxjdc, nt_Yddc,
-			     nt_Nxjdh, nt_Ydh, nt_Nxjdp, nt_Ydp );
+Double_t NtupleReader::getYmerge( const TString& algorithm, const TString& reco, Int_t njet ) {
+  if( algorithm == "jade" ) {
+    return getRecoYmergeValue( reco, njet, 
+			       nt_Nxjemt, nt_Yedmt, nt_Nxjetc, nt_Yedtc,
+			       nt_Nxjet, nt_Yedt, nt_Nxjec, nt_Yedc,
+			       nt_Nxjeh, nt_Yeh, nt_Nxjep, nt_Yep );
+  }
+  else if( algorithm == "durham" ) {
+    return getRecoYmergeValue( reco, njet, 
+			       nt_Nxjdmt, nt_Yddmt, nt_Nxjdtc, nt_Yddtc,
+			       nt_Nxjdt, nt_Yddt, nt_Nxjdc, nt_Yddc,
+			       nt_Nxjdh, nt_Ydh, nt_Nxjdp, nt_Ydp );    
+  }
+  else {
+    throw std::runtime_error( " NtupleReader::getYmerge: algorithm not known "+algorithm );
+  }
 }
 
-Double_t NtupleReader::getYmergeE( const TString& reco, Int_t njet ) {
-  return getRecoYmergeValue( reco, njet, 
-			     nt_Nxjemt, nt_Yedmt, nt_Nxjetc, nt_Yedtc,
-			     nt_Nxjet, nt_Yedt, nt_Nxjec, nt_Yedc,
-			     nt_Nxjeh, nt_Yeh, nt_Nxjep, nt_Yep );
-}
 
 Double_t NtupleReader::getThrust( const TString& reco ) {
   return getRecoValue( reco, nt_Tdmt, nt_Tdtc, nt_Tdt, nt_Tdc, nt_Th, nt_Tp );
@@ -252,117 +269,100 @@ void NtupleReader::Init() {
 
 }  
 
-const std::vector<TLorentzVector>& NtupleReader::GetLorentzVectors( const std::string & opt ) {
-  static std::vector<TLorentzVector> vtlv;
-  static std::string lastopt= "none";
-  if( nt_vtlvcache and lastopt == opt ) return vtlv;
-  static Float_t ptrack[nt_maxtrk][4];
-  Int_t ntrack;
+std::vector<TLorentzVector> NtupleReader::GetLorentzVectors( const std::string & opt ) {
+  if( cacheIsValid[opt] ) return vtlvCache[opt];
+  vtlv= vtlvCache[opt];
   if( opt == "parton" ) {
-    GetP( ptrack, nt_maxtrk, ntrack );
+    getPTlv();
   }
   else if( opt == "hadron" ) {
-    GetH( ptrack, nt_maxtrk, ntrack );
+    getHTlv();
   }
   else if( opt == "tracks" ) {
-    GetTrk( ptrack, nt_maxtrk, ntrack );
+    getTrkTlv();
   }
   else if( opt == "clusters" ) {
-    GetCls( ptrack, nt_maxtrk, ntrack );
+    getClsTlv();
   }
   else if( opt == "tc" ) {
-    GetTC( ptrack, nt_maxtrk, ntrack );
+    getTCTlv();
   }
   else if( opt == "mt" ) {
-    GetMt( ptrack, nt_maxtrk, ntrack );
+    getMtTlv();
   }
   else {
-    std::cout << "NtupleReader::GetLorentzVectors: option " << opt << " not recognised" 
-	      << std::endl;
-    exit( 1 );
+    throw std::runtime_error( "NtupleReader::GetLorentzVectors: option "+opt+" not recognised" );
   }
-  vtlv.clear();
-  vtlv.reserve( ntrack );
-  for( Int_t itrk= 0; itrk < ntrack; itrk++ ) {
-    TLorentzVector tlv( ptrack[itrk][0], ptrack[itrk][1], 
-			ptrack[itrk][2], ptrack[itrk][3] );
-    vtlv.push_back( tlv );
-  }
-  nt_vtlvcache= true;
-  lastopt= opt;
+  vtlvCache[opt]= vtlv;
+  cacheIsValid[opt]= true;
   return vtlv;
 }
 
-void NtupleReader::GetP( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack ) {
+void NtupleReader::getPTlv() {
+  vtlv.resize( nt_Ntrkp );
   for( Int_t itrk= 0; itrk < nt_Ntrkp; itrk++ ) {
-    for( Int_t j= 0; j < 4; j++ ) {
-      ptrack[itrk][j]= nt_Ptrkp[itrk][j];
-    }
+    for( Int_t j= 0; j < 4; j++ ) vtlv[itrk][j]= nt_Ptrkp[itrk][j];
   }
-  ntrack= nt_Ntrkp;
-  return;
 }
-void NtupleReader::GetH( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack ) {
+
+void NtupleReader::getHTlv() {
+  vtlv.resize( nt_Ntrkh );
   for( Int_t itrk= 0; itrk < nt_Ntrkh; itrk++ ) {
-    for( Int_t j= 0; j < 4; j++ ) {
-      ptrack[itrk][j]= nt_Ptrkh[itrk][j];
-    }
+    for( Int_t j= 0; j < 4; j++ ) vtlv[itrk][j]= nt_Ptrkh[itrk][j];
   }
-  ntrack= nt_Ntrkh;
+}
+
+void NtupleReader::getTCTlv() {
+  Int_t ntrack= getTrkTlv();
+  getClsTlv( ntrack );
   return;
 }
 
-void NtupleReader::GetTC( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack ) {
-  GetTrk( ptrack, maxtrack, ntrack );
-  GetCls( ptrack, maxtrack, ntrack, ntrack );
-  return;
-}
-
-void NtupleReader::GetTrk( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack ) {
+Int_t NtupleReader::getTrkTlv() {
+  vtlv.resize( nt_Ntrk );
   Float_t mpi2= pow( 0.140, 2 );
   Int_t ifill= 0;
   for( Int_t itrk= 0; itrk < nt_Ntrk; itrk++ ) {
     if( nt_Id02[itrk] == 0 ) continue;
-    if( ifill == maxtrack ) {
+    if( ifill == nt_maxtrk ) {
       std::cout << "NtupleReader::getTrk: array too small " << ifill << std::endl;
       break;
     }
     Float_t sum= 0.0;
     for( Int_t j= 0; j < 3; j++ ) {
-      ptrack[ifill][j]= nt_Ptrk[itrk][j];
-      sum+= pow( ptrack[ifill][j], 2 );
+      vtlv[ifill][j]= nt_Ptrk[itrk][j];
+      sum+= pow( vtlv[ifill][j], 2 );
     }
-    ptrack[ifill][3]= sqrt( sum+mpi2 );
+    vtlv[ifill][3]= sqrt( sum+mpi2 );
     ifill++;
   }
-  ntrack= ifill;
-  return;
+  vtlv.resize( ifill );
+  return ifill;
 }
-void NtupleReader::GetCls( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack,
-			   Int_t ioff ) {
-  if( nt_Nclus > maxtrack ) {
-    std::cout << "Ntuple::getcls: array too small " << maxtrack << std::endl;
-  }
-  Int_t iclus;
-  for( iclus= 0; iclus < TMath::Min( maxtrack, nt_Nclus ); iclus++ ) {
+
+void NtupleReader::getClsTlv( Int_t ioff ) {
+  vtlv.resize( ioff+nt_Nclus );
+  for( Int_t iclus= 0; iclus < nt_Nclus; iclus++ ) {
     Float_t sum= 0.0;
     for( Int_t j= 0; j < 3; j++ ) {
-      ptrack[ioff+iclus][j]= nt_Pclus[iclus][j];
-      sum+= pow( ptrack[ioff+iclus][j], 2 );
+      vtlv[ioff+iclus][j]= nt_Pclus[iclus][j];
+      sum+= pow( vtlv[ioff+iclus][j], 2 );
     }
-    ptrack[ioff+iclus][3]= sqrt( sum );
+    vtlv[ioff+iclus][3]= sqrt( sum );
   }
-  ntrack= ioff+iclus;
   return;
 }
-void NtupleReader::GetMt( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack ) {
+
+void NtupleReader::getMtTlv() {
+
+  vtlv.resize( nt_Ntrk+nt_Nclus );
 
   // Tracks first:
   Float_t mpi2= pow( 0.140, 2 );
   Int_t ifill= 0;
   for( Int_t itrk= 0; itrk < nt_Ntrk; itrk++ ) {
-    if( ifill == maxtrack ) {
-      std::cout << "NtupleReader::getMt: array too small " << ifill << std::endl;
+    if( ifill == nt_maxtrk ) {
+      std::cout << "NtupleReader::getMtTlv: array too small " << ifill << std::endl;
       break;
     }
     // Check if track is selected:
@@ -371,32 +371,32 @@ void NtupleReader::GetMt( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack ) 
     Float_t scf= 1.0;
     for( Int_t jmttrk= 0; jmttrk < nt_Nmttrk; jmttrk++ ) {
       if( nt_Imttrk[jmttrk]-1 == itrk ) {
-	scf= nt_Mtscft[jmttrk];
-	break;
+        scf= nt_Mtscft[jmttrk];
+        break;
       }
     }
     // Copy track components:
     Float_t sum= 0.0; 
     for( Int_t j= 0; j < 3; j++ ) {
-      ptrack[ifill][j]= nt_Ptrk[itrk][j]*scf;
-      sum+= pow( ptrack[ifill][j], 2 );
+      vtlv[ifill][j]= nt_Ptrk[itrk][j]*scf;
+      sum+= pow( vtlv[ifill][j], 2 );
     }
-    ptrack[ifill][3]= sqrt( sum + mpi2 );
+    vtlv[ifill][3]= sqrt( sum + mpi2 );
     ifill++;
-  }    
- 
+  }
+
   // Clusters are either killed, scaled or copied:
-  for( Int_t iclus= 0; iclus < TMath::Min( maxtrack, nt_Nclus ); iclus++ ) {
-    if( ifill == maxtrack ) {
-      std::cout << "Ntuple::getmt: array too small " << ifill << std::endl;
+  for( Int_t iclus= 0; iclus < TMath::Min( nt_maxtrk, nt_Nclus ); iclus++ ) {
+    if( ifill == nt_maxtrk ) {
+      std::cout << "Ntuple::getMtTlv: array too small " << ifill << std::endl;
       break;
     }
     // Check if cluster is killed:
     bool killed= false;
     for( Int_t jmtkil= 0; jmtkil < nt_Nmtkil; jmtkil++ ) {
       if( nt_Imtkil[jmtkil]-1 == iclus ) {
-	killed= true;
-	break;
+        killed= true;
+        break;
       }
     }
     if( killed ) continue;
@@ -404,26 +404,30 @@ void NtupleReader::GetMt( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack ) 
     Float_t scf= 1.0;
     for( Int_t jmtcls= 0; jmtcls < nt_Nmtcls; jmtcls++ ) {
       if( nt_Imtcls[jmtcls]-1 == iclus ) {
-	scf= nt_Mtscfc[jmtcls];
-	break;
+        scf= nt_Mtscfc[jmtcls];
+        break;
       }
     }
     // Copy cluster components:
     Float_t sum= 0.0;
     for( Int_t j= 0; j < 3; j++ ) {
-      ptrack[ifill][j]= nt_Pclus[iclus][j]*scf;
-      sum+= pow( ptrack[ifill][j], 2 );
+      vtlv[ifill][j]= nt_Pclus[iclus][j]*scf;
+      sum+= pow( vtlv[ifill][j], 2 );
     }
-    ptrack[ifill][3]= sqrt( sum );
+    vtlv[ifill][3]= sqrt( sum );
     ifill++;
 
   }
 
   // The End:
-  ntrack= ifill;
+  vtlv.resize( ifill );
   return;
 
 }
+
+
+
+
 
 Double_t NtupleReader::Evis( const std::vector<TLorentzVector>& v ) const {
   Double_t evis= std::accumulate( v.begin(), v.end(), 0.0,
@@ -433,4 +437,3 @@ Double_t NtupleReader::Evis( const std::vector<TLorentzVector>& v ) const {
 				  );
   return evis;
 }
-

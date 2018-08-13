@@ -25,16 +25,16 @@ public:
   Int_t GetNumberEntries();
   bool GetEvent( Int_t ievnt );
  
-  const std::vector<TLorentzVector>& GetLorentzVectors( const std::string & opt );
-  void GetP( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack );
-  void GetH( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack );
-  void GetTrk( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack );
-  void GetCls( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack, Int_t ioff=0 );
-  void GetTC( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack );
-  void GetMt( Float_t ptrack[][4], Int_t maxtrack, Int_t & ntrack );
+  std::vector<TLorentzVector> GetLorentzVectors( const std::string & opt );
+  
+  void getPTlv();
+  void getHTlv();
+  Int_t getTrkTlv();
+  void getClsTlv( Int_t ioff=0 );
+  void getTCTlv();
+  void getMtTlv();
 
   Double_t Evis( const std::vector<TLorentzVector>& v ) const;
-
   
   // Selections via subclasses:
   virtual bool Preselection( const std::string& ) = 0;
@@ -45,8 +45,9 @@ public:
   bool isMC() { return nt_isMC; }
 
   Float_t abscostt() { return fabs(nt_Tvectc[2]); }
-  virtual Double_t getYmergeD( const TString& reco, Int_t njet );
-  virtual Double_t getYmergeE( const TString& reco, Int_t njet );
+  //virtual Double_t getYmergeD( const TString& reco, Int_t njet );
+  //virtual Double_t getYmergeE( const TString& reco, Int_t njet );
+  virtual Double_t getYmerge( const TString& algorithm, const TString& reco, Int_t njet );
   virtual Double_t getThrust( const TString& reco );
 
 protected:
@@ -55,6 +56,8 @@ protected:
   void SetBranchAddressChecked( const char*, void* );
 
 private:
+
+  void ptrack2tlv( Int_t ntrack );
 
   bool inRange( Int_t, Int_t );
   Double_t getRecoValue( const TString&, 
@@ -73,12 +76,20 @@ private:
   bool nt_vtlvcache;
   Int_t nt_nevents;
   bool lprint;
+  
+  // Variables for reading objects from ntuple
+  std::vector<TLorentzVector> vtlv;
+  // std::string lastopt;
 
+  std::map<std::string,std::vector<TLorentzVector>> vtlvCache;
+  std::map<std::string,Bool_t> cacheIsValid;
+
+  
 protected:
 
   static const Int_t nt_maxtrk= 501;
   static const Int_t nt_maxp= 50;
-  static const Int_t nt_maxh= 2004;
+  static const Int_t nt_maxh= 2004;  
   UShort_t nt_Irun;
   Int_t    nt_Ievnt;
   UChar_t  nt_Itkmh;

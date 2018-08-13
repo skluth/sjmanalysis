@@ -5,8 +5,7 @@
 #include "ObsDifferential.hh"
 #include "ObsEEC.hh"
 #include "ThrustCalculator.hh"
-#include "YnmdCalculator.hh"
-#include "YnmjCalculator.hh"
+#include "YnmCalculator.hh"
 
 #include "ObsPartonShower.hh"
 #include "ObsFastJetDiff.hh"
@@ -81,13 +80,13 @@ ObservableFactory::createObservables( const vector<string> & obsnames,
       obsp= new ObsDifferential( name, 
 				 ynmpoints,
 				 analyses,
-				 new YnmdCalculator( 2 ) );
+				 new YnmCalculator( "durham", 2 ) );
     }
     else if( nameIs( name, "jadeymerge23" ) ) {
       obsp= new ObsDifferential( name,
 				 ynmpoints,
 				 analyses,
-				 new YnmjCalculator( 2 ) );
+				 new YnmCalculator( "jade", 2 ) );
     }
     else if( nameIs( name, "durhamymergefj" ) ) {
       obsp= new ObsFastJetDiff( name, 

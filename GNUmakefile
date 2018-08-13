@@ -33,7 +33,7 @@ JetrateDataStructure.cc DifferentialDataStructure.cc MatrixDataStructure.cc \
 Observable.cc ObsDifferential.cc ObsJetrate.cc ObsFastJetDiff.cc \
 ObsPartonShower.cc ObsEEC.cc ObservableFactory.cc \
 FilledObservable.cc Unfolder.cc BbbUnfolder.cc MtxUnfolder.cc OutputWriter.cc \
-ThrustCalculator.cc YnmdCalculator.cc YnmjCalculator.cc \
+ThrustCalculator.cc YnmCalculator.cc \
 FastJetYcutCalculator.cc FastJetEminCalculator.cc FastJetRCalculator.cc \
 FastJetPxConeRCalculator.cc FastJetPxConeEminCalculator.cc \
 YcutCalculator.cc AnalysisProcessor.cc SjmConfigParser.cc \

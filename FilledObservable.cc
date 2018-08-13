@@ -76,7 +76,7 @@ DataStructure* FilledObservable::getDataStructure( const Analysis & anal ) const
   }
   else {
     cout << "FilledObservable::getDataStructure: " << tag << " not found" << endl;
-    throw std::runtime_error( "Tag for datastructrue not found" );
+    throw std::runtime_error( "Tag for datastructure not found: "+tag );
   }
   return ds;
 }
@@ -91,7 +91,7 @@ FilledObservable::getMigrationMatrix( const Analysis & anal ) const {
   }
   else {
     cout << "FilledObservable::getMigrationMatrix: " << tag << " not found" << endl;
-    throw std::runtime_error( "Tag for MatrixDataStructure not found" );
+    throw std::runtime_error( "Tag for MatrixDataStructure not found: "+tag );
   }
   return mds;
 }

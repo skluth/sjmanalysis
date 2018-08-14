@@ -82,10 +82,11 @@ void ObsPartonShower::fill( NtupleReader* ntr, const Analysis& variation ) {
 // From Nadines code example A14.C, C202.C, AS.C, MR.C
 vector<Double_t> ObsPartonShower::getValues( NtupleReader* ntr, 
 					     const string& reco ) {
-  const vector<TLorentzVector>& vtlv= ntr->GetLorentzVectors( reco );
+  vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( reco );
   TFastJet tfj( vtlv, "eekt" );
-  vector<Double_t> values( 4 );
-  for( size_t i= 0; i < 4; i++ ) values[i]= -1.0;
+  // vector<Double_t> values( 4 );
+  // for( size_t i= 0; i < 4; i++ ) values[i]= -1.0;
+  vector<Double_t> values{ -1.0, -1.0, -1.0, -1.0 };
   if( tfj.ymerge( 3 ) > y34cut ) {
     vector<TLorentzVector> jets= tfj.exclusive_eejets( 4 );
     Double_t angle12= calcAngle( jets[0], jets[1] );
@@ -114,8 +115,8 @@ vector<Double_t> ObsPartonShower::getValues( NtupleReader* ntr,
 
 Double_t ObsPartonShower::calcAngle( const TLorentzVector& tlv1, 
 				     const TLorentzVector& tlv2 ) {
-  const TVector3& tv1= tlv1.Vect();
-  const TVector3& tv2= tlv2.Vect();
+  TVector3 tv1= tlv1.Vect();
+  TVector3 tv2= tlv2.Vect();
   Double_t angle= tv1.Angle( tv2 );
   return angle;
 }

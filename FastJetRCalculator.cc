@@ -24,7 +24,7 @@ vector<Double_t>
 FastJetRCalculator::getValues( NtupleReader* ntr, 
 			       const vector<Double_t>& Rpoints, 
 			       const string& reco ) const {
-  const vector<TLorentzVector>& vtlv= ntr->GetLorentzVectors( reco );
+  vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( reco );
   Double_t Evis= ntr->Evis( vtlv );
   size_t n= Rpoints.size();
   vector<Double_t> NJets( n );

@@ -23,7 +23,7 @@ vector<Double_t>
 FastJetPxConeRCalculator::getValues( NtupleReader* ntr, 
 				     const vector<Double_t>& RPoints,
 				     const string& reco ) const {
-  const vector<TLorentzVector>& vtlv= ntr->GetLorentzVectors( reco );
+  vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( reco );
   size_t n= RPoints.size();
   vector<Double_t> NJets( n );
   for( size_t i= 0; i < n; i++ ) {

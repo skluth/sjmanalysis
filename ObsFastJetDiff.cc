@@ -39,13 +39,9 @@ void ObsFastJetDiff::addAnalysis( const Analysis& analysis ) {
 }
 
 void ObsFastJetDiff::fill( NtupleReader* ntr, const Analysis& variation ) {
-  const vector<TLorentzVector>& vtlv= ntr->GetLorentzVectors( variation.getReco() );
+  vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( variation.getReco() );
   TFastJet tfj( vtlv, Algorithm.c_str() );
   string tag= variation.getTag();
-  // ymerge23.at( tag )->fill( -TMath::Log10( tfj.ymerge( 2 ) ) );
-  // ymerge34.at( tag )->fill( -TMath::Log10( tfj.ymerge( 3 ) ) );
-  // ymerge45.at( tag )->fill( -TMath::Log10( tfj.ymerge( 4 ) ) );
-  // ymerge56.at( tag )->fill( -TMath::Log10( tfj.ymerge( 5 ) ) );
   ymerge23.at( tag )->fill( tfj.ymerge( 2 ) );
   ymerge34.at( tag )->fill( tfj.ymerge( 3 ) );
   ymerge45.at( tag )->fill( tfj.ymerge( 4 ) );

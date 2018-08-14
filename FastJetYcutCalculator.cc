@@ -23,7 +23,7 @@ vector<Double_t>
 FastJetYcutCalculator::getValues( NtupleReader* ntr, 
 				  const vector<Double_t>& Ycutpoints,
 				  const string& reco ) const {
-  vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( reco );
+  const vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( reco );
   size_t n= Ycutpoints.size();
   vector<Double_t> NJets( n );
   TFastJet tfj( vtlv, algorithm.c_str() );

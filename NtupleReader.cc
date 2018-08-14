@@ -269,7 +269,7 @@ void NtupleReader::Init() {
 
 }  
 
-std::vector<TLorentzVector> NtupleReader::GetLorentzVectors( const std::string & opt ) {
+const std::vector<TLorentzVector> NtupleReader::GetLorentzVectors( const std::string & opt ) {
   if( cacheIsValid[opt] ) return vtlvCache[opt];
   vtlv= vtlvCache[opt];
   if( opt == "parton" ) {
@@ -424,9 +424,6 @@ void NtupleReader::getMtTlv() {
   return;
 
 }
-
-
-
 
 
 Double_t NtupleReader::Evis( const std::vector<TLorentzVector>& v ) const {

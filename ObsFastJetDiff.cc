@@ -39,7 +39,7 @@ void ObsFastJetDiff::addAnalysis( const Analysis& analysis ) {
 }
 
 void ObsFastJetDiff::fill( NtupleReader* ntr, const Analysis& variation ) {
-  vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( variation.getReco() );
+  const vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( variation.getReco() );
   TFastJet tfj( vtlv, Algorithm.c_str() );
   string tag= variation.getTag();
   ymerge23.at( tag )->fill( tfj.ymerge( 2 ) );

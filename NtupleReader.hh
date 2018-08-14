@@ -25,15 +25,8 @@ public:
   Int_t GetNumberEntries();
   bool GetEvent( Int_t ievnt );
  
-  std::vector<TLorentzVector> GetLorentzVectors( const std::string & opt );
+  const std::vector<TLorentzVector> GetLorentzVectors( const std::string & opt );
   
-  void getPTlv();
-  void getHTlv();
-  Int_t getTrkTlv();
-  void getClsTlv( Int_t ioff=0 );
-  void getTCTlv();
-  void getMtTlv();
-
   Double_t Evis( const std::vector<TLorentzVector>& v ) const;
   
   // Selections via subclasses:
@@ -45,8 +38,6 @@ public:
   bool isMC() { return nt_isMC; }
 
   Float_t abscostt() { return fabs(nt_Tvectc[2]); }
-  //virtual Double_t getYmergeD( const TString& reco, Int_t njet );
-  //virtual Double_t getYmergeE( const TString& reco, Int_t njet );
   virtual Double_t getYmerge( const TString& algorithm, const TString& reco, Int_t njet );
   virtual Double_t getThrust( const TString& reco );
 
@@ -57,7 +48,14 @@ protected:
 
 private:
 
-  void ptrack2tlv( Int_t ntrack );
+  void getPTlv();
+  void getHTlv();
+  Int_t getTrkTlv();
+  void getClsTlv( Int_t ioff=0 );
+  void getTCTlv();
+  void getMtTlv();
+
+  //  void ptrack2tlv( Int_t ntrack );
 
   bool inRange( Int_t, Int_t );
   Double_t getRecoValue( const TString&, 

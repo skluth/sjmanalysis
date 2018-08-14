@@ -41,7 +41,7 @@ void ObsEEC::addAnalysis( const Analysis & analysis ) {
 // Calculuate EEC as 1/sigma*dEEC/dchi with chi in radian
 // incl. self-correlation or not
 void ObsEEC::fill( NtupleReader* ntr, const Analysis & variation ) {
-  vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( variation.getReco() );
+  const vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( variation.getReco() );
   Double_t evis= ntr->Evis( vtlv );
   Double_t evis2= evis*evis;
   string tag= variation.getTag();

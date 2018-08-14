@@ -82,7 +82,7 @@ void ObsPartonShower::fill( NtupleReader* ntr, const Analysis& variation ) {
 // From Nadines code example A14.C, C202.C, AS.C, MR.C
 vector<Double_t> ObsPartonShower::getValues( NtupleReader* ntr, 
 					     const string& reco ) {
-  vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( reco );
+  const vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( reco );
   TFastJet tfj( vtlv, "eekt" );
   vector<Double_t> values{ -1.0, -1.0, -1.0, -1.0 };
   if( tfj.ymerge( 3 ) > y34cut ) {

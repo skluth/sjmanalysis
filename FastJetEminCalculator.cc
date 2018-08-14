@@ -23,7 +23,7 @@ vector<Double_t>
 FastJetEminCalculator::getValues( NtupleReader* ntr, 
 				  const vector<Double_t>& Eminfpoints,
 				  const string& reco ) const {
-  vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( reco );
+  const vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( reco );
   Double_t Evis= ntr->Evis( vtlv );
   size_t n= Eminfpoints.size();
   vector<Double_t> NJets( n );

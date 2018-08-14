@@ -19,8 +19,6 @@ public:
   NtupleReader( const char* filename, const char* ntid="h10", const bool lpr=true );
   virtual ~NtupleReader();
 
-  void OpenFileAndLoadNtuple( const char* filename, const char* ntid="h10" );
-  void CloseFile();
 
   Int_t GetNumberEntries();
   bool GetEvent( Int_t ievnt );
@@ -47,6 +45,9 @@ protected:
   void SetBranchAddressChecked( const char*, void* );
 
 private:
+  
+  void OpenFileAndLoadNtuple( const char* filename, const char* ntid="h10" );
+  void CloseFile();
 
   void getPTlv();
   void getHTlv();

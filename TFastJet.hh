@@ -9,6 +9,9 @@ namespace fastjet {
   class PseudoJet;
 }
 
+class JetDefinition_Recombiner;
+class JetDefinition_Plugin;
+
 class TFastJet {
 
 public:

@@ -21,8 +21,6 @@ using std::string;
 using std::cout;
 using std::endl;
 #include <stdexcept>
-using std::runtime_error;
-using std::logic_error;
 
 using std::vector;
 
@@ -59,10 +57,11 @@ TFastJet::TFastJet( const vector<TLorentzVector> & vtl,
   string jetalgString( jetalg );
   if( jamap.find( jetalgString ) == jamap.end() ) {
     string txt= "TFastJet::TFastJet: wrong algorithm: " + jetalgString;
-    throw runtime_error( txt );
+    throw std::runtime_error( txt );
   }
 
-  // Setup fastjet components:
+  // Setup fastjet components, there is no mem leak for Recombiner and Plugin
+  // objects since ownership is passed to fastjet::JetDefinition object:
   fastjet::JetAlgorithm ja= jamap[jetalgString];
   fastjet::JetDefinition jetdef;
   fastjet::JetDefinition::Recombiner* recombiner= 0;
@@ -83,7 +82,7 @@ TFastJet::TFastJet( const vector<TLorentzVector> & vtl,
     }
     else {
       string txt= "TFastJet::TFastJet: wrong plugin: " + jetalgString;
-      throw logic_error( txt );
+      throw std::runtime_error( txt );
     }
     jetdef= fastjet::JetDefinition( plugin );
     jetdef.delete_plugin_when_unused();
@@ -104,11 +103,11 @@ TFastJet::TFastJet( const vector<TLorentzVector> & vtl,
 
   // Run jet algorithm:
   clusseq= new fastjet::ClusterSequence( vtl, jetdef );
-
+  
 }
 
 TFastJet::~TFastJet() {
-  if( clusseq ) delete clusseq;
+  if( clusseq ) delete clusseq;  
 }
 
 // All jets with p_t > p_t,min:

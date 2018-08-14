@@ -84,8 +84,6 @@ vector<Double_t> ObsPartonShower::getValues( NtupleReader* ntr,
 					     const string& reco ) {
   vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( reco );
   TFastJet tfj( vtlv, "eekt" );
-  // vector<Double_t> values( 4 );
-  // for( size_t i= 0; i < 4; i++ ) values[i]= -1.0;
   vector<Double_t> values{ -1.0, -1.0, -1.0, -1.0 };
   if( tfj.ymerge( 3 ) > y34cut ) {
     vector<TLorentzVector> jets= tfj.exclusive_eejets( 4 );

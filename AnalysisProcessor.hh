@@ -11,7 +11,7 @@
 
 class Observable;
 class FilledObservable;
-class NtupleReader;
+class LEPNtupleReader;
 
 class AnalysisProcessor {
 
@@ -30,7 +30,7 @@ class AnalysisProcessor {
 
   std::vector<Analysis> fillAnalyses( const std::string& tag );
 
-  NtupleReader* createNtupleReader( const std::string& filename );
+  LEPNtupleReader* createLEPNtupleReader( const std::string& filename );
 
   std::vector<Analysis>
   subtractBackground( const std::vector<FilledObservable*> & vfobs,

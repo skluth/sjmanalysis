@@ -6,7 +6,7 @@
 LEP2NtupleReader::LEP2NtupleReader( const char* filename, 
 				    const char* ntid, 
 				    const bool lpr ) : 
-  NtupleReader( filename, ntid, lpr ),
+  LEPNtupleReader( filename, ntid, lpr ),
   ecmsranges{
     { "130", range( 129.0, 131.0 ) },
     { "136", range( 135.0, 137.0 ) },

@@ -1,9 +1,9 @@
 #ifndef LEP2NTUPLEREADER_HH
 #define LEP2NTUPLEREADER_HH
 
-#include "NtupleReader.hh"
+#include "LEPNtupleReader.hh"
 
-class LEP2NtupleReader : public NtupleReader {
+class LEP2NtupleReader : public LEPNtupleReader {
 
   typedef std::pair<float,float> range;
   typedef std::map<std::string,range> rangemap;

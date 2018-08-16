@@ -4,14 +4,14 @@
 #include "Observable.hh"
 #include "ObsDifferential.hh"
 #include "ObsEEC.hh"
-#include "ThrustCalculator.hh"
-#include "YnmCalculator.hh"
+#include "LEPThrustCalculator.hh"
+#include "LEPYnmCalculator.hh"
 
 #include "ObsPartonShower.hh"
 #include "ObsFastJetDiff.hh"
 
 #include "ObsJetrate.hh"
-#include "YcutCalculator.hh"
+#include "LEPYcutCalculator.hh"
 #include "FastJetYcutCalculator.hh"
 #include "FastJetEminCalculator.hh"
 #include "FastJetRCalculator.hh"
@@ -56,7 +56,7 @@ ObservableFactory::createObservables( const vector<string> & obsnames,
       obsp= new ObsDifferential( "thrust", 
 				 sjmConfigs.getPoints( "thrust" ),
 				 analyses, 
-				 new ThrustCalculator() );
+				 new LEPThrustCalculator() );
     }
     else if( nameIs( name, "EECnsc" ) ) {
       obsp= new ObsEEC( name,
@@ -80,13 +80,13 @@ ObservableFactory::createObservables( const vector<string> & obsnames,
       obsp= new ObsDifferential( name, 
 				 ynmpoints,
 				 analyses,
-				 new YnmCalculator( "durham", 2 ) );
+				 new LEPYnmCalculator( "durham", 2 ) );
     }
     else if( nameIs( name, "jadeymerge23" ) ) {
       obsp= new ObsDifferential( name,
 				 ynmpoints,
 				 analyses,
-				 new YnmCalculator( "jade", 2 ) );
+				 new LEPYnmCalculator( "jade", 2 ) );
     }
     else if( nameIs( name, "durhamymergefj" ) ) {
       obsp= new ObsFastJetDiff( name, 
@@ -119,14 +119,14 @@ ObservableFactory::createObservables( const vector<string> & obsnames,
 			    // sjmConfigs.getPoints( "Donkersycutd" ),
 			    ycutpoints,
 			    analyses,
-			    new YcutCalculator( "durham" ) );
+			    new LEPYcutCalculator( "durham" ) );
     }
     else if( nameIs( name, "jadeycut" ) ) {
       obsp= new ObsJetrate( name, 
 			    // sjmConfigs.getPoints( "Donkersycutj" ),
 			    ycutpoints,
 			    analyses,
-			    new YcutCalculator( "jade" ) );
+			    new LEPYcutCalculator( "jade" ) );
     }
     else if( nameIs( name, "antiktemin" ) ) {
       obsp= new ObsJetrate( name,

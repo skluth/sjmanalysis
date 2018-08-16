@@ -9,7 +9,7 @@
 #include "BbbUnfolder.hh"
 #include "MtxUnfolder.hh"
 #include "OutputWriter.hh"
-#include "NtupleReader.hh"
+#include "LEPNtupleReader.hh"
 #include "LEP1NtupleReader.hh"
 #include "LEP2NtupleReader.hh"
 #include "VectorHelpers.hh"
@@ -31,22 +31,22 @@ AnalysisProcessor::AnalysisProcessor( const SjmConfigParser& sjmcp ) :
   sjmConfigs( sjmcp ), maxevt( sjmcp.getItem<int>( "General.maxevt" ) ) {
 }  
 
-NtupleReader*
-AnalysisProcessor::createNtupleReader( const string& filename ) {
+LEPNtupleReader*
+AnalysisProcessor::createLEPNtupleReader( const string& filename ) {
   string ecms= sjmConfigs.getItem<string>( "General.energy" );
   vector<string> lep2ecms= { "130", "136", "161", "172", "183", "189", 
 			     "192", "196", "200", "202", "205", "207" };
-  NtupleReader* result= 0;
+  LEPNtupleReader* result= 0;
   if( ecms == "91.2" ) {
-    cout << "AnalysisProcessor::createNtupleReader: LEP1NtupleReader" << endl;
+    cout << "AnalysisProcessor::createLEPNtupleReader: LEP1NtupleReader" << endl;
     result= new LEP1NtupleReader( filename.c_str() );
   }
   else if( std::find( lep2ecms.begin(), lep2ecms.end(), ecms ) != lep2ecms.end() ) {
-    cout << "AnalysisProcessor::createNtupleReader: LEP2NtupleReader" << endl;
+    cout << "AnalysisProcessor::createLEPNtupleReader: LEP2NtupleReader" << endl;
     result= new LEP2NtupleReader( filename.c_str() );
   }
   else {
-    throw std::runtime_error( "AnalysisProcessor::createNtupleReader: wrong ecms "+ecms );
+    throw std::runtime_error( "AnalysisProcessor::createLEPNtupleReader: wrong ecms "+ecms );
   }
   return result;
 }
@@ -59,7 +59,7 @@ AnalysisProcessor::processAnalyses( const vector<Analysis>& analyses,
   for( const Analysis& analysis : analyses ) {
     cout << analysis.getTag() << endl;
   }
-  NtupleReader* ntr= createNtupleReader( filename );
+  LEPNtupleReader* ntr= createLEPNtupleReader( filename );
   Int_t nevnt= ntr->GetNumberEntries();
   if( nevnt > maxevt ) cout << "processAnalyses: process " 
 			    << maxevt << " events" << endl;

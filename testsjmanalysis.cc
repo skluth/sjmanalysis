@@ -7,11 +7,11 @@
 #include "NtupleReader.hh"
 #include "LEP1NtupleReader.hh"
 #include "FilledObservable.hh"
-#include "ThrustCalculator.hh"
-#include "YnmCalculator.hh"
+#include "LEPThrustCalculator.hh"
+#include "LEPYnmCalculator.hh"
 #include "ObsFastJetDiff.hh"
 #include "ObsJetrate.hh"
-#include "YcutCalculator.hh"
+#include "LEPYcutCalculator.hh"
 #include "FastJetYcutCalculator.hh"
 #include "FastJetEminCalculator.hh"
 #include "FastJetRCalculator.hh"
@@ -281,11 +281,11 @@ namespace sjmtests {
     Analysis analysis1;
     Analysis analysis2;
     vector<Analysis> analyses;
-    ThrustCalculator tcalc;
+    LEPThrustCalculator tcalc;
     ObsDifferential obst;
-    YnmCalculator y23dcalc;
+    LEPYnmCalculator y23dcalc;
     ObsDifferential obsy23d;
-    YnmCalculator y23jcalc;
+    LEPYnmCalculator y23jcalc;
     ObsDifferential obsy23j;
     MockNtupleReader mntr;
   };
@@ -395,7 +395,7 @@ namespace sjmtests {
     Analysis analysisp;
     Analysis analysish;
     vector<Analysis> analyses;
-    ThrustCalculator tcalc;
+    LEPThrustCalculator tcalc;
     ObsDifferential obst;
     ObsFastJetDiff obsfjdd;
     NtupleReader* ntr;
@@ -569,8 +569,8 @@ namespace sjmtests {
     Analysis analysis1;
     Analysis analysis2;
     vector<Analysis> analyses;
-    YcutCalculator yccd;
-    YcutCalculator yccj;
+    LEPYcutCalculator yccd;
+    LEPYcutCalculator yccj;
     FastJetYcutCalculator fjyccd;
     FastJetYcutCalculator fjyccj;
     FastJetEminCalculator fjeminc;

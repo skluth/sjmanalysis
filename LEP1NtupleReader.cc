@@ -5,7 +5,7 @@
 LEP1NtupleReader::LEP1NtupleReader( const char* filename, 
 				    const char* ntid, 
 				    const bool lpr ) : 
-  NtupleReader( filename, ntid, lpr ) {
+  LEPNtupleReader( filename, ntid, lpr ) {
   SetBranchAddressChecked( "Itkmh", &nt_Itkmh );
 }
 

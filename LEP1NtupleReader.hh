@@ -1,9 +1,9 @@
 #ifndef LEP1NTUPLEREADERLEP1_HH
 #define LEP1NTUPLEREADERLEP1_HH
 
-#include "NtupleReader.hh"
+#include "LEPNtupleReader.hh"
 
-class LEP1NtupleReader : public NtupleReader {
+class LEP1NtupleReader : public LEPNtupleReader {
 
 public:
 

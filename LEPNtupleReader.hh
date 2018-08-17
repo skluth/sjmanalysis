@@ -20,7 +20,6 @@ public:
   LEPNtupleReader( const char* filename, const char* ntid="h10", const bool lpr=true );
   virtual ~LEPNtupleReader();
 
-
   virtual Int_t GetNumberEntries();
   virtual bool GetEvent( Int_t ievnt );
  
@@ -79,11 +78,8 @@ private:
   
   // Variables for reading objects from ntuple
   std::vector<TLorentzVector> vtlv;
-  // std::string lastopt;
-
   std::map<std::string,std::vector<TLorentzVector>> vtlvCache;
   std::map<std::string,Bool_t> cacheIsValid;
-
   
 protected:
 

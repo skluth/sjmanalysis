@@ -26,10 +26,6 @@ public:
 
   virtual bool MCNonRad() = 0;
   virtual bool isMC() = 0;
-
-  virtual Float_t abscostt() = 0;
-  // virtual Double_t getYmerge( const TString& algorithm, const TString& reco, Int_t njet ) = 0;
-  // virtual Double_t getThrust( const TString& reco ) = 0;
   
 };
 

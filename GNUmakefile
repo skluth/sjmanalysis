@@ -7,6 +7,8 @@ RC       = rootcint
 OPT      = -g
 CXXSTD   = -std=c++11
 CXXFLAGS = -Wall -fPIC $(OPT) $(CXXSTD) -Wno-deprecated-declarations
+FC       = gfortran
+FFLAGS   = -fPIC $(OPT) 
 
 #GTESTPATH = $(HOME)/Downloads/googletest/googletest-master/googletest
 #GMOCKPATH = $(HOME)/Downloads/googletest/googletest-master/googlemock
@@ -33,11 +35,15 @@ JetrateDataStructure.cc DifferentialDataStructure.cc MatrixDataStructure.cc \
 Observable.cc ObsDifferential.cc ObsJetrate.cc ObsFastJetDiff.cc \
 ObsPartonShower.cc ObsEEC.cc ObservableFactory.cc \
 FilledObservable.cc Unfolder.cc BbbUnfolder.cc MtxUnfolder.cc OutputWriter.cc \
-LEPThrustCalculator.cc LEPYnmCalculator.cc \
+LEPThrustCalculator.cc LEPYnmCalculator.cc PxThrustCalculator.cc \
 FastJetYcutCalculator.cc FastJetEminCalculator.cc FastJetRCalculator.cc \
 FastJetPxConeRCalculator.cc FastJetPxConeEminCalculator.cc \
 LEPYcutCalculator.cc AnalysisProcessor.cc SjmConfigParser.cc \
 LEP1NtupleReader.cc LEP2NtupleReader.cc
+
+# Fortran stuff for thrust
+FSRCS = pxlth4.f
+
 
 LIB = libNtupleReader.so
 
@@ -47,13 +53,19 @@ DICTSRCS = Analysis.cc TH1DAnalysisObject.cc TGEAnalysisObject.cc
 
 DEPS = $(SRCS:.cc=.d) $(filter-out $(SRCS:.cc=.d), $(DICTSRCS:.cc=.d) )
 
+
 all: testsjmanalysis runjob
+
+# Compile Fortran
+%.o : %.f
+	$(FC) $(FFLAGS) -c -o $@ $<
+
 
 $(DEPS): %.d: %.cc
 	$(CXX) $(CPPFLAGS) $(CXXSTD) -MM $< -MF $@
 -include $(DEPS)
 
-$(LIB): $(SRCS:.cc=.o)
+$(LIB): $(SRCS:.cc=.o) $(FSRCS:.f=.o)
 	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) -o $@ $^
 
 testsjmanalysis: testsjmanalysis.cc $(LIB)

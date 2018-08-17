@@ -7,6 +7,7 @@
 #include "NtupleReader.hh"
 #include "LEP1NtupleReader.hh"
 #include "FilledObservable.hh"
+#include "PxThrustCalculator.hh"
 #include "LEPThrustCalculator.hh"
 #include "LEPYnmCalculator.hh"
 #include "ObsFastJetDiff.hh"
@@ -381,7 +382,8 @@ namespace sjmtests {
       analysisp( "py parton none nonrad" ), 
       analysish( "py hadron none nonrad" ),
       analyses{ analysismt, analysistc, analysist, analysisc, analysisp, analysish },
-      obst( "thrust", thbinedges, analyses, &tcalc, false ),
+      obslt( "thrust", thbinedges, analyses, &ltcalc, false ),
+      obspxt( "thrust", thbinedges, analyses, &pxtcalc, false ),
       obsfjdd( "durhamymergefj", "eekt", ynmbinedges, analyses, false ) {
 	ntr= new LEP1NtupleReader( "mc5025_1_200.root", "h10", false );
       }
@@ -395,46 +397,54 @@ namespace sjmtests {
     Analysis analysisp;
     Analysis analysish;
     vector<Analysis> analyses;
-    LEPThrustCalculator tcalc;
-    ObsDifferential obst;
+    LEPThrustCalculator ltcalc;
+    ObsDifferential obslt;
+    PxThrustCalculator pxtcalc;
+    ObsDifferential obspxt;
     ObsFastJetDiff obsfjdd;
     NtupleReader* ntr;
   };
 
   // Fill tests:
+  TEST_F( ObsFastJetDiffTest, testpxthfillmt ) {
+    fillFromNtuple( ntr, analysismt, obspxt );
+    vector<Double_t> thvalues= getObsValues( "thrust", analysismt, obspxt );
+    vector<Double_t> thexp{ 0, 1, 14, 15, 11, 11, 11, 7, 9, 3, 5, 2, 0, 0 };
+    EXPECT_EQ( thexp, thvalues );
+  }
   TEST_F( ObsFastJetDiffTest, testthfillmt ) {
-    fillFromNtuple( ntr, analysismt, obst );
-    vector<Double_t> thvalues= getObsValues( "thrust", analysismt, obst );
+    fillFromNtuple( ntr, analysismt, obslt );
+    vector<Double_t> thvalues= getObsValues( "thrust", analysismt, obslt );
     vector<Double_t> thexp{ 0, 1, 14, 15, 11, 11, 11, 7, 9, 3, 5, 2, 0, 0 };
     EXPECT_EQ( thexp, thvalues );
   } 
   TEST_F( ObsFastJetDiffTest, testthfilltc ) {
-    fillFromNtuple( ntr, analysistc, obst );
-    vector<Double_t> thvalues= getObsValues( "thrust", analysistc, obst );
+    fillFromNtuple( ntr, analysistc, obslt );
+    vector<Double_t> thvalues= getObsValues( "thrust", analysistc, obslt );
     vector<Double_t> thexp{ 0, 3, 14, 13, 10, 14, 9, 8, 6, 5, 4, 3, 0, 0 };
     EXPECT_EQ( thexp, thvalues );
   } 
-  TEST_F( ObsFastJetDiffTest, testthfillt ) {
-    fillFromNtuple( ntr, analysist, obst );
-    vector<Double_t> thvalues= getObsValues( "thrust", analysist, obst );
+  TEST_F( ObsFastJetDiffTest, testthfilllt ) {
+    fillFromNtuple( ntr, analysist, obslt );
+    vector<Double_t> thvalues= getObsValues( "thrust", analysist, obslt );
     vector<Double_t> thexp{ 0, 4, 15, 12, 9, 10, 13, 6, 7, 5, 7, 1, 0, 0 };
     EXPECT_EQ( thexp, thvalues );
   } 
   TEST_F( ObsFastJetDiffTest, testthfillc ) {
-    fillFromNtuple( ntr, analysisc, obst );
-    vector<Double_t> thvalues= getObsValues( "thrust", analysisc, obst );
+    fillFromNtuple( ntr, analysisc, obslt );
+    vector<Double_t> thvalues= getObsValues( "thrust", analysisc, obslt );
     vector<Double_t> thexp{ 0, 3, 16, 12, 8, 12, 16, 6, 3, 7, 5, 1, 0, 0 };
     EXPECT_EQ( thexp, thvalues );
   } 
   TEST_F( ObsFastJetDiffTest, testthfillp ) {
-    fillFromNtuple( ntr, analysisp, obst );
-    vector<Double_t> thvalues= getObsValues( "thrust", analysisp, obst );
+    fillFromNtuple( ntr, analysisp, obslt );
+    vector<Double_t> thvalues= getObsValues( "thrust", analysisp, obslt );
     vector<Double_t> thexp{ 2, 14, 16, 14, 7, 9, 4, 8, 11, 3, 4, 2, 0, 0 };
     EXPECT_EQ( thexp, thvalues );
   } 
   TEST_F( ObsFastJetDiffTest, testthfillh ) {
-    fillFromNtuple( ntr, analysish, obst );
-    vector<Double_t> thvalues= getObsValues( "thrust", analysish, obst );
+    fillFromNtuple( ntr, analysish, obslt );
+    vector<Double_t> thvalues= getObsValues( "thrust", analysish, obslt );
     vector<Double_t> thexp{ 0, 3, 15, 16, 13, 10, 12, 3, 9, 6, 5, 2, 0, 0 };
     EXPECT_EQ( thexp, thvalues );
   } 

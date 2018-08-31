@@ -24,20 +24,20 @@ FastJetEminCalculator::getValues( NtupleReader* ntr,
 				  const vector<Double_t>& Eminfpoints,
 				  const string& reco ) const {
   const vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( reco );
-  Double_t Evis= ntr->Evis( vtlv );
+  Double_t evis= Evis( vtlv );
   size_t n= Eminfpoints.size();
   vector<Double_t> NJets( n );
   if( algorithm == "pxcone" ) {
     for( size_t i= 0; i < n; i++ ) {
-      TFastJet tfj( vtlv, algorithm.c_str(), Rvalue, Eminfpoints[i]*Evis );
-      vector<TLorentzVector> incljets= tfj.inclusive_eejets( Eminfpoints[i]*Evis );
+      TFastJet tfj( vtlv, algorithm.c_str(), Rvalue, Eminfpoints[i]*evis );
+      vector<TLorentzVector> incljets= tfj.inclusive_eejets( Eminfpoints[i]*evis );
       NJets[i]= incljets.size();
     }
   }
   else {
     TFastJet tfj( vtlv, algorithm.c_str(), Rvalue );
     for( size_t i= 0; i < n; i++ ) {
-      vector<TLorentzVector> incljets= tfj.inclusive_eejets( Eminfpoints[i]*Evis );
+      vector<TLorentzVector> incljets= tfj.inclusive_eejets( Eminfpoints[i]*evis );
       NJets[i]= incljets.size();
     }
   }

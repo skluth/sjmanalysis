@@ -14,6 +14,7 @@ extern "C" {
 
 Double_t PxThrustCalculator::getValue( NtupleReader* ntr, 
 				     const std::string& reco ) const {  
+  // Need local array ptrak because method is const
   static const Int_t maxtrk=500;
   Int_t itkdm= 4;
   Float_t ptrak[maxtrk*itkdm];
@@ -32,7 +33,7 @@ Double_t PxThrustCalculator::getValue( NtupleReader* ntr,
   Int_t ierr;
   pxlth4_( &ntrak, &itkdm, ptrak, thrval, thrvec, &ierr );
   if( ierr != 0 ) {
-    throw std::runtime_error( "ThrustCalculator::getValue: pxlth4 error"+std::to_string( ierr ) );
+    throw std::runtime_error( "PxThrustCalculator::getValue: pxlth4 error"+std::to_string( ierr ) );
   }
   return 1.0-thrval[2];
 }

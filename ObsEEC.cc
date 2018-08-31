@@ -42,7 +42,7 @@ void ObsEEC::addAnalysis( const Analysis & analysis ) {
 // incl. self-correlation or not
 void ObsEEC::fill( NtupleReader* ntr, const Analysis & variation ) {
   const vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( variation.getReco() );
-  Double_t evis= ntr->Evis( vtlv );
+  Double_t evis= Evis( vtlv );
   Double_t evis2= evis*evis;
   string tag= variation.getTag();
   DifferentialDataStructure* dds= data.at( tag );

@@ -25,8 +25,6 @@ public:
  
   virtual const std::vector<TLorentzVector> GetLorentzVectors( const std::string & opt );
   
-  virtual Double_t Evis( const std::vector<TLorentzVector>& v ) const;
-  
   // LEP1, or 1.5 and 2 Selections via subclasses:
   virtual bool Preselection( const std::string& ) = 0;
   virtual bool Selection( const std::string& ) = 0;
@@ -55,8 +53,6 @@ private:
   void getClsTlv( Int_t ioff=0 );
   void getTCTlv();
   void getMtTlv();
-
-  //  void ptrack2tlv( Int_t ntrack );
 
   bool inRange( Int_t, Int_t );
   Double_t getRecoValue( const TString&, 

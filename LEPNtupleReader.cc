@@ -425,12 +425,3 @@ void LEPNtupleReader::getMtTlv() {
 
 }
 
-
-Double_t LEPNtupleReader::Evis( const std::vector<TLorentzVector>& v ) const {
-  Double_t evis= std::accumulate( v.begin(), v.end(), 0.0,
-				  []( Double_t sum, const TLorentzVector& tlv ) {
-				    return sum+= tlv.E();
-				  }
-				  );
-  return evis;
-}

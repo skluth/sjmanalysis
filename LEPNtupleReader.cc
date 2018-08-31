@@ -119,7 +119,8 @@ bool LEPNtupleReader::inRange( Int_t njet, Int_t max ) {
   return njet > 0 and njet <= max;
 }
 
-Double_t LEPNtupleReader::getRecoYmergeValue( const TString& reco, Int_t njet,
+Double_t LEPNtupleReader::getRecoYmergeValue( const std::string& reco, 
+					      Int_t njet,
 					   Int_t maxmt, Float_t* Ymt, 
 					   Int_t maxtc, Float_t* Ytc, 
 					   Int_t maxt, Float_t* Yt, 
@@ -140,7 +141,7 @@ Double_t LEPNtupleReader::getRecoYmergeValue( const TString& reco, Int_t njet,
   return result;
 }
 
-Double_t LEPNtupleReader::getRecoValue( const TString& reco, 
+Double_t LEPNtupleReader::getRecoValue( const std::string& reco, 
 				     Float_t mt,
 				     Float_t tc,
 				     Float_t tracks,
@@ -159,7 +160,8 @@ Double_t LEPNtupleReader::getRecoValue( const TString& reco,
   return value;
 }
 
-Double_t LEPNtupleReader::getYmerge( const TString& algorithm, const TString& reco, Int_t njet ) {
+Double_t LEPNtupleReader::getYmerge( const std::string& algorithm, 
+				     const std::string& reco, Int_t njet ) {
   if( algorithm == "jade" ) {
     return getRecoYmergeValue( reco, njet, 
 			       nt_Nxjemt, nt_Yedmt, nt_Nxjetc, nt_Yedtc,
@@ -173,12 +175,12 @@ Double_t LEPNtupleReader::getYmerge( const TString& algorithm, const TString& re
 			       nt_Nxjdh, nt_Ydh, nt_Nxjdp, nt_Ydp );    
   }
   else {
-    throw std::runtime_error( " LEPNtupleReader::getYmerge: algorithm not known "+algorithm );
+    throw std::runtime_error( "LEPNtupleReader::getYmerge: algorithm not known "+algorithm );
   }
 }
 
 
-Double_t LEPNtupleReader::getThrust( const TString& reco ) {
+Double_t LEPNtupleReader::getThrust( const std::string& reco ) {
   return getRecoValue( reco, nt_Tdmt, nt_Tdtc, nt_Tdt, nt_Tdc, nt_Th, nt_Tp );
 }
 
@@ -425,3 +427,12 @@ void LEPNtupleReader::getMtTlv() {
 
 }
 
+
+Double_t LEPNtupleReader::Evis( const std::vector<TLorentzVector>& v ) const {
+  Double_t evis= std::accumulate( v.begin(), v.end(), 0.0,
+				  []( Double_t sum, const TLorentzVector& tlv ) {
+				    return sum+= tlv.E();
+				  }
+				  );
+  return evis;
+}

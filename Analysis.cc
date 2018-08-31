@@ -7,8 +7,7 @@ using std::vector;
 #include <iostream>
 using std::cout;
 using std::endl;
-#include <exception>
-using std::runtime_error;
+#include <stdexcept>
 
 #include <boost/algorithm/string.hpp>
 
@@ -29,7 +28,7 @@ Analysis::Analysis( const string & options ) :
   vector<string> tokens;
   boost::split( tokens, options, boost::is_any_of( " " ), boost::token_compress_on );
   size_t ntoken= tokens.size();
-  if( ntoken < 3 ) throw runtime_error( "Analysis::Analysis: options wrong" );
+  if( ntoken < 3 ) throw std::runtime_error( "Analysis::Analysis: options wrong" );
   source= tokens[0];
   reco= tokens[1];
   cuts= tokens[2];

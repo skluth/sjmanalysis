@@ -3,7 +3,6 @@
 
 #include "Rtypes.h"
 #include "TLorentzVector.h"
-#include "TString.h"
 #include <vector>
 #include <string>
 #include <map>
@@ -25,6 +24,8 @@ public:
  
   virtual const std::vector<TLorentzVector> GetLorentzVectors( const std::string & opt );
   
+  virtual Double_t Evis( const std::vector<TLorentzVector>& v ) const;
+  
   // LEP1, or 1.5 and 2 Selections via subclasses:
   virtual bool Preselection( const std::string& ) = 0;
   virtual bool Selection( const std::string& ) = 0;
@@ -34,8 +35,9 @@ public:
   bool isMC() { return nt_isMC; }
 
   virtual Float_t abscostt() { return fabs(nt_Tvectc[2]); }
-  virtual Double_t getYmerge( const TString& algorithm, const TString& reco, Int_t njet );
-  virtual Double_t getThrust( const TString& reco );
+  virtual Double_t getYmerge( const std::string& algorithm, 
+			      const std::string& reco, Int_t njet );
+  virtual Double_t getThrust( const std::string& reco );
 
 protected:
 
@@ -54,10 +56,12 @@ private:
   void getTCTlv();
   void getMtTlv();
 
+  //  void ptrack2tlv( Int_t ntrack );
+
   bool inRange( Int_t, Int_t );
-  Double_t getRecoValue( const TString&, 
+  Double_t getRecoValue( const std::string&, 
 			 Float_t, Float_t, Float_t, Float_t, Float_t, Float_t );
-  Double_t getRecoYmergeValue( const TString& reco, Int_t njet,
+  Double_t getRecoYmergeValue( const std::string& reco, Int_t njet,
 			       Int_t maxmt, Float_t* Ymt, 
 			       Int_t maxtc, Float_t* Ytc, 
 			       Int_t maxt, Float_t* Yt, 

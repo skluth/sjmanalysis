@@ -256,8 +256,9 @@ namespace sjmtests {
 
   class MockNtupleReader: public LEP1NtupleReader {
   public:
-    MOCK_METHOD1( getThrust, Double_t( const TString& ) );
-    MOCK_METHOD3( getYmerge, Double_t( const TString&, const TString&, Int_t ) );
+    MOCK_METHOD1( getThrust, Double_t( const std::string& ) );
+    MOCK_METHOD3( getYmerge, Double_t( const std::string&, 
+				       const std::string&, Int_t ) );
   };
 
   class ObsDiffTest : public ::testing::Test {

@@ -13,125 +13,176 @@ nbin= len(binEdges)-1
 def inBinRange( value ):
     return binEdges[0] < value and value < binEdges[nbin]
 
-def testWeighted( mnevent=1000, nsample=1000, resolutionFactor=0.02 ):
+def testWeighted( mnevent=1000, nsample=1000, resolutionFactor=0.02, nmom=1, width=7, precision=4 ):
 
     # Prepare
     gRandom= TRandom3()
     fun= TF1( "fun", "1000*x*exp(-x*20)", 0.0 , 0.5 )
     histh= TH1D( "histh", "1000*x*exp(-x*20) h", nbin, binEdges )
-    histhw1= TH1D( "histhw1", "1000*x*exp(-x*20) w1 h", nbin, binEdges )
     histd= TH1D( "histd", "1000*x*exp(-x*20) d", nbin, binEdges )
-    histdw1= TH1D( "histdw1", "1000*x*exp(-x*20) w1 d", nbin, binEdges )
     histm= TH2D( "histm", "migration h vs d", nbin, binEdges, nbin, binEdges )
-    histmw1h= TH2D( "histmw1h", "migration h vs d w1 h", nbin, binEdges, nbin, binEdges )
-    histmw1d= TH2D( "histmw1d", "migration h vs d w1 d", nbin, binEdges, nbin, binEdges )
+    histhw= TH1D( "histhw", "1000*x*exp(-x*20) w h", nbin, binEdges )
+    histdw= TH1D( "histdw", "1000*x*exp(-x*20) w d", nbin, binEdges )
+    histmwh= TH2D( "histmwh", "migration h vs d w h", nbin, binEdges, nbin, binEdges )
+    histmwd= TH2D( "histmwd", "migration h vs d w d", nbin, binEdges, nbin, binEdges )
+    histhw2= TH1D( "histhw2", "1000*x*exp(-x*20) w2 h", nbin, binEdges )
+    histdw2= TH1D( "histdw2", "1000*x*exp(-x*20) w2 d", nbin, binEdges )
+    histmw2h= TH2D( "histmw2h", "migration h vs d w2 h", nbin, binEdges, nbin, binEdges )
+    histmw2d= TH2D( "histmw2d", "migration h vs d w2 d", nbin, binEdges, nbin, binEdges )
     SetOwnership( histh, False )
-    SetOwnership( histhw1, False )
     SetOwnership( histd, False )
-    SetOwnership( histdw1, False )
     SetOwnership( histm, False )
-    SetOwnership( histmw1h, False )
-    SetOwnership( histmw1d, False )
+    SetOwnership( histhw, False )
+    SetOwnership( histdw, False )
+    SetOwnership( histmwh, False )
+    SetOwnership( histmwd, False )
+    SetOwnership( histhw2, False )
+    SetOwnership( histdw2, False )
+    SetOwnership( histmw2h, False )
+    SetOwnership( histmw2d, False )
 
-    # Generate
+    # Generate and fill histos
     for i in range( mnevent ):
         value= fun.GetRandom()
         histh.Fill( value )
         resValue= resolution( value, resolutionFactor )
         histd.Fill( resValue )
-        histhw1.Fill( value, value )
-        histdw1.Fill( resValue, resValue )
         histm.Fill( resValue, value )
-        histmw1h.Fill( resValue, value, value )
-        histmw1d.Fill( resValue, value, resValue )
+        histhw.Fill( value, value**nmom )
+        histdw.Fill( resValue, resValue**nmom )
+        histmwh.Fill( resValue, value, value**nmom )
+        histmwd.Fill( resValue, value, resValue**nmom )
+        nmom2= nmom*2
+        histhw2.Fill( value, value**nmom2 )
+        histdw2.Fill( resValue, resValue**nmom2 )
+        histmw2h.Fill( resValue, value, value**nmom2 )
+        histmw2d.Fill( resValue, value, resValue**nmom2 )
         
     # Print raw migration matrices
-    print "Migration"
+    print "Migration of events hadron detector level"
     migrMatrix= getMatrix( histm )
     valuesh= getArray( histh )
     valuesd= getArray( histd )
     printMatrixVectors( migrMatrix, valuesd, valuesh )
-    print "Migration w1 h"
-    migrMatrixw1h= getMatrix( histmw1h )
-    valueshw1= getArray( histhw1 )
-    valuesdw1= getArray( histdw1 )
-    printMatrixVectors( migrMatrixw1h, valuesdw1, valueshw1 )
-    print "Migration w1 d"
-    migrMatrixw1d= getMatrix( histmw1d )
-    printMatrixVectors( migrMatrixw1d, valuesdw1, valueshw1 )
+    print "Migration weighted hadron level"
+    migrMatrixwh= getMatrix( histmwh )
+    valueshw= getArray( histhw )
+    valuesdw= getArray( histdw )
+    printMatrixVectors( migrMatrixwh, valuesdw, valueshw )
+    print "Migration weighted detector level"
+    migrMatrixwd= getMatrix( histmwd )
+    printMatrixVectors( migrMatrixwd, valuesdw, valueshw )
     
-    # Normalised det-level migration
-    migrMatrixw1dNorm= normaliseColumns( migrMatrixw1d )
-    print "Migration w1 d normalised column-wise"
-    printMatrix( migrMatrixw1dNorm )
-
-    # Ratio of had- to det-level migrations
-    hdratioMatrix= divideChecked( migrMatrixw1h, migrMatrixw1d )
-    print "Migration w1 h/d ratio"
-    printMatrix( hdratioMatrix )
-
-    # Multiply normalised det-level migration by had- to det-level ratio
-    migrMatrixw1Rec= hdratioMatrix*migrMatrixw1dNorm
-    print "Migration w1 d->h corr. normalised column-wise"
-    printMatrix( migrMatrixw1Rec )
+    # Calculate "unfolding" matrix detector->hadron level
+    # Normalised weighted det-level migration
+    migrMatrixwdNorm= normaliseColumns( migrMatrixwd )
+    # print "Migration weighted detector level normalised column-wise"
+    # printMatrix( migrMatrixwdNorm )
+    # Ratio of weighted had- to det-level migration matrices
+    hdratioMatrix= divideChecked( migrMatrixwh, migrMatrixwd )
+    # print "Migration weighted ratio hadron/detector"
+    # printMatrix( hdratioMatrix )
+    # Multiply normalised weighted det-level migration by had- to det-level ratio
+    # of weighted migrations
+    migrMatrixwRec= hdratioMatrix*migrMatrixwdNorm
+    # print "Migration weighted detector->hadron corrected normalised column-wise"
+    # printMatrix( migrMatrixwRec )
+    # Efficiency at hadron level correction
+    histmwy= histmwh.ProjectionY( "Migr weighted h y proj", 1, nbin )
+    cacc= divideHistos( histhw, histmwy )
+    # print "Effciciency correction hadron level", cacc
+    # Final detector->hadron correction matrix and closure test
+    CR= np.dot( np.diag( cacc ), migrMatrixwRec )
+    valueshwRec= np.dot( CR, valuesdw )
+    print "Closure test weighted distributions reconstructed vs hadron level"
+    print valueshwRec
+    print valueshw
+    # Same for moment**2
+    migrMatrixw2h= getMatrix( histmw2h )
+    migrMatrixw2d= getMatrix( histmw2d )
+    migrMatrixw2dNorm= normaliseColumns( migrMatrixw2d )
+    hdratioMatrix2= divideChecked( migrMatrixw2h, migrMatrixw2d )
+    migrMatrixw2Rec= hdratioMatrix2*migrMatrixw2dNorm
+    histmw2y= histmw2h.ProjectionY( "Migr w2 h y proj", 1, nbin )
+    cacc2= divideHistos( histhw2, histmw2y )
+    CR2= np.dot( np.diag( cacc2 ), migrMatrixw2Rec )
+    valuesdw2= getArray( histdw2 )
+    valueshw2Rec= np.dot( CR2, valuesdw2 )
     
-    # Efficiency correction
-    histmw1y= histmw1h.ProjectionY( "Migr w1 h y proj", 1, nbin )
-    cacc= divideHistos( histhw1, histmw1y )
-    print "Effciciency h", cacc
-
-    # Final correction matrix and closure test
-    CR= np.dot( np.diag( cacc ), migrMatrixw1Rec )
-    valueshw1Rec= np.dot( CR, valuesdw1 )
-    print "Closure"
-    print valueshw1Rec
-    print valueshw1
-
+    # Calculate folding matrix hadron->detector level 
+    # Normalised (row-wise) weighted had-level migration
+    migrMatrixwhNorm= normaliseRows( migrMatrixwh )
+    #print "Migration weighted had level normalised row-wise"
+    #printMatrix( migrMatrixwhNorm )
+    # Ratio of weighted had- to det-level migration matrices
+    hdratioMatrix2= divideChecked( migrMatrixwd, migrMatrixwh )
+    #print "Migration weighted ratio detector/hadron"
+    #printMatrix( hdratioMatrix2 )
+    # Multiply normalised weighted det-level migration by had- to det-level ratio
+    # of weighted migrations
+    migrMatrixwh2d= hdratioMatrix2*migrMatrixwhNorm
+    #print "Migration weighted detector->hadron corrected normalised column-wise"
+    #printMatrix( migrMatrixwh2d )
+    # Efficiency at hadron level correction
+    caccd= np.divide( 1.0, cacc )
+    # print "Effciciency correction detector level", caccd
+    # Final hadron-> correction matrix and closure test
+    CRh2d= np.dot( migrMatrixwh2d.transpose(), np.diag( caccd ) )
+    valuesdwRec= np.dot( CRh2d, valueshw )
+    print "Closure test weighted distributions folded vs detector level"
+    print valuesdwRec
+    print valuesdw
+    
     # Put results with propagated errors into histo for normalisation
     histhrec= TH1D( "histhrec", "1000*x*exp(-x*20) h rec", nbin, binEdges )
     for i in range( nbin ):
-        histhrec.SetBinContent( i+1, valueshw1Rec[i] )
+        histhrec.SetBinContent( i+1, valueshwRec[i] )
     histhrec.SetEntries( mnevent )
-    errorsdw1= getArrayErrors( histdw1 )
-    diagErrorMatrixdw1= np.diag( errorsdw1**2 )
-    errorMatrixhw1= np.dot( CR, np.dot( diagErrorMatrixdw1, CR.transpose() ) )
-    errorMatrixhw1Norm= normalise( histhrec, errorMatrixhw1 )
+    errorsdw= getArrayErrors( histdw )
+    diagErrorMatrixdw= np.diag( errorsdw**2 )
+    errorMatrixhw= np.dot( CR, np.dot( diagErrorMatrixdw, CR.transpose() ) )
+    errorMatrixhwNorm= normalise( histhrec, errorMatrixhw )
 
     # Print results
-    width, precision= 7, 4
     fmt="{:"+str(width)+"."+str(precision)+"f}"
-    print "Result corrected normalised w1 distribution"
+    print "Result corrected normalised weighted distribution"
     for i in range( nbin ):
-        valuehw1RecNorm= histhrec.GetBinContent( i+1 )
-        errorhw1RecNorm= sqrt( errorMatrixhw1Norm[i,i] )
-        histhrec.SetBinError( i+1, errorhw1RecNorm )
-        print fmt.format( valuehw1RecNorm ), fmt.format( errorhw1RecNorm )        
+        valuehwRecNorm= histhrec.GetBinContent( i+1 )
+        errorhwRecNorm= sqrt( errorMatrixhwNorm[i,i] )
+        histhrec.SetBinError( i+1, errorhwRecNorm )
+        print fmt.format( valuehwRecNorm ), fmt.format( errorhwRecNorm )
     print "Correlation matrix"
-    corr= cov2corr( errorMatrixhw1Norm )
+    corr= cov2corr( errorMatrixhwNorm )
     printMatrix( corr )
 
-    # Integral of corrected weighted is 1st moment of unweighted
-    # Error from diagonal bin errors only
-    sumw1= calcIntegral( histhrec )
+    # Integral of corrected weighted is 1st moment of unweighted,
+    # error from diagonal bin errors only
+    sumw= calcIntegral( histhrec )
     errors= getArrayErrors( histhrec )
     binw= binEdges[1:]-binEdges[:nbin]
     errorsbw= errors*binw
-    errSumw1= sqrt( sum(errorsbw**2) )
+    errSumw= sqrt( sum(errorsbw**2) )
 
-    # Error of integral given by Sum V_ij*binw_i*binw_j
-    # but does not work in single closure sample
-    # errSumw1= 0.0
-    # for i in range( nbin ):
-    #     for j in range( nbin ):
-    #         term= corr[i,j]*errorsbw[i]*errorsbw[j]
-    #         errSumw1+= term
-    #         print corr[i,j], errorsbw[i], errorsbw[j], term, errSumw1
-    # errSumw1= np.sum( errorMatrixhw1Norm )
-    # errSumw1= sqrt( errSumw1 )
-    width, precision= 7, 4
+    # Results from unnormalised distribution and errors from covariance or mom*2 
+    sumwunn= np.sum( valueshwRec ) / float(mnevent)
+    errSumwunn= sqrt( np.sum( errorMatrixhw ) ) / float(mnevent)
+    sumw2unn= np.sum( valueshw2Rec ) / float(mnevent)
+    # "Error of mean is s.d./sqrt(N)", i.e. from moment*2
+    errSumw2unn= sqrt( ( sumw2unn - sumwunn**2 ) / float(mnevent) )
+
+    # # Error of integral given by Sum V_ij*binw_i*binw_j
+    # # but does not work in single closure sample
+    # errSumw= 0.0
+    # for i in range( nbin-1 ):
+    #     for j in range( nbin-1 ):
+    #         errSumw+= errorMatrixhwNorm[i,j]*binw[i]*binw[j]
+    
     fmt="{:"+str(width)+"."+str(precision)+"f}"
-    print "Integrated corrected w1 distribution with diag. errors:",
-    print fmt.format( sumw1 ), "+/-", fmt.format( errSumw1 )
+    print "Moment", nmom, "from integrated corrected weighted distribution:",
+    print fmt.format( sumw ), "+/-", fmt.format( errSumw ), "(diag.)"
+    print "Moment", nmom, "from unnormalised weighted distribution:",
+    print fmt.format( sumwunn ), "+/-", fmt.format( errSumwunn ), "(covm)",
+    print fmt.format( errSumw2unn ), "(s.d.)"
     print "Mean of had-level histo from ROOT:",
     print fmt.format( histh.GetMean() ), "+/-", fmt.format( histh.GetMeanError() )
 
@@ -139,17 +190,17 @@ def testWeighted( mnevent=1000, nsample=1000, resolutionFactor=0.02 ):
     canv= TCanvas( "canv", "Weighted correction", 800, 1000 )
     canv.Divide( 2, 3 )
     canv.cd( 1 )
-    normalise( histhw1 )
-    histhw1.Draw()
+    normalise( histhw )
+    histhw.Draw()
     canv.cd( 2 )
-    normalise( histdw1 )
-    histdw1.Draw()
+    normalise( histdw )
+    histdw.Draw()
     canv.cd( 3 )
     histm.Draw( "box" )
     canv.cd( 4 )
-    histmw1h.Draw( "box" )
+    histmwh.Draw( "box" )
     canv.cd( 5 )
-    histmw1d.Draw( "box" )
+    histmwd.Draw( "box" )
     canv.cd( 6 )
     histh.Draw()
         
@@ -165,7 +216,7 @@ def divideChecked( nom, denom ):
     shapeNom= nom.shape
     shapeDenom= denom.shape
     if shapeNom != shapeDenom:
-        raise "shapes not equal"
+        raise "divideChecked: shapes not equal"
     result= np.array( np.zeros( shapeNom ) )
     if len(shapeNom) == 1:
         for i in range( shapeNom[0] ):
@@ -196,6 +247,7 @@ def printMatrixVectors( m, vx, vy, width=7, precision=3 ):
     return
 
 def calcIntegral( hist ):
+    nbin= hist.GetNbinsX()
     sumw= 0.0
     for i in range( nbin ):
         sumw+= hist.GetBinContent( i+1 )*hist.GetBinWidth( i+1 )
@@ -241,7 +293,9 @@ def testSampling( mnevent=1000, nsamples=1000, opt="p" ):
             nevent= mnevent
         for i in range( int( nevent ) ):
             value= fun.GetRandom()
-            fillweight= weight( value, opt )
+            nmom= nmomFromOpt( opt )
+            # fillweight= weight( value, opt )
+            fillweight= value**nmom
             hist.Fill( value, fillweight )
         hists[isample]= hist
     errorMatrixSample= sampleErrorMatrix( hists )
@@ -270,6 +324,10 @@ def sample( nsample=1000, acc=0.8, resolutionFactor=0.02, mnevent=1000, opt="sme
         print "Use Gaus function"
     if "u" in opt:
         print "Use expected errors for sampled detector level"
+    import re
+    mo= re.search( "w[0-5]", opt )
+    if mo:
+        print "Use weighted distribution", mo.group()
 
     # Initialise ROOT random numbers
     gRandom= TRandom3()
@@ -282,16 +340,16 @@ def sample( nsample=1000, acc=0.8, resolutionFactor=0.02, mnevent=1000, opt="sme
     fun.SetNormalized(True)
     
     # Correction factors, matrix and reference histo
-    cf, CR, eventAcc, histref, histdet= generate( fun, 1000000, acc, resolutionFactor, opt )
+    cf, CR, cf2, CR2, eventAcc, histref, histdet, histref2, histdet2= generate( fun, 1000000, acc, resolutionFactor, opt )
 
     # Create and fill sample histos
     if "s" in opt:
-        histds, hisths= fillSampleHistosSmear( fun, nsample, mnevent,
-                                                            resolutionFactor, opt )
+        histds, histd2s, hisths= fillSampleHistosSmear( fun, nsample, mnevent,
+                                                        resolutionFactor, opt )
     elif "d" in opt:
         histds, hisths= fillSampleHistosDraw( histref, histdet, nsample,
-                                                           mnevent )
-        
+                                                  mnevent )
+
     # Error matrices after filling
     errorMatrixhSample= sampleErrorMatrix( hisths )
     errorMatrixdSample= sampleErrorMatrix( histds )
@@ -303,6 +361,8 @@ def sample( nsample=1000, acc=0.8, resolutionFactor=0.02, mnevent=1000, opt="sme
     elif "m" in opt:
         histcs, errorMatricesCorr= matrixCorrection( histds, cf, CR, eventAcc,
                                                          histdet, opt )
+        histc2s, errorMatricesCorr2= matrixCorrection( histd2s, cf2, CR2, eventAcc,
+                                                         histdet2, opt )
 
     # Error matrices after correction
     errorMatrixCorrAvg= averageMatrix( errorMatricesCorr )
@@ -345,8 +405,14 @@ def sample( nsample=1000, acc=0.8, resolutionFactor=0.02, mnevent=1000, opt="sme
     mvaluesh= np.array( nbin*[0.0] )
     merrorsh= np.array( nbin*[0.0] )
     merrors2= np.array( nbin*[0.0] )
+    mmomentc= 0.0
+    mmomentc2= 0.0
+    mmomerrc= 0.0
+    mmomenth= 0.0
+    mmomenth2= 0.0
     for isample in range( nsample ):
         histc= histcs[isample]
+        histc2= histc2s[isample]
         histh= hisths[isample]
         for i in range( nbin ):
             valueh= histh.GetBinContent( i+1 )
@@ -357,6 +423,15 @@ def sample( nsample=1000, acc=0.8, resolutionFactor=0.02, mnevent=1000, opt="sme
             merrors[i]+= valuei**2
             error= histc.GetBinError( i+1 )
             merrors2[i]+= error
+        momentc= calcIntegral( histc )
+        momentc2= histc2.Integral( 1, nbin )/histc2.GetEntries()
+        mmomentc+= momentc
+        mmomentc2+= momentc**2
+        # mmomerrc+= np.sqrt( np.sum( errorMatricesCorr[isample] ) )/histc.GetEntries()
+        mmomerrc+= sqrt( ( momentc2 - momentc**2 ) / histc2.GetEntries() )
+        momenth= calcIntegral( histh )
+        mmomenth+= momenth
+        mmomenth2+= momenth**2
     mvaluesh/= float(nsample)
     merrorsh/= float(nsample)
     mvalues/= float(nsample)
@@ -366,6 +441,11 @@ def sample( nsample=1000, acc=0.8, resolutionFactor=0.02, mnevent=1000, opt="sme
     merrorsh-= mvaluesh**2
     merrorsh= np.sqrt( merrorsh )
     merrors2/= float(nsample)
+    mmomentc/= float(nsample)
+    mmomentc2/= float(nsample)
+    mmomerrc/= float(nsample)
+    mmomenth/= float(nsample)
+    mmomenth2/= float(nsample)
 
     errorMatrixNormSample= sampleErrorMatrix( histcs )
     errorMatrixNormAvg= averageMatrix( errorMatricesNorm )
@@ -375,8 +455,10 @@ def sample( nsample=1000, acc=0.8, resolutionFactor=0.02, mnevent=1000, opt="sme
         
     # Pulls
     pulls= np.array( nbin*[0.0] )
-    pullsstd= np.array( nbin*[0.0] )    
-    for isample in range( nsample ): 
+    pullsstd= np.array( nbin*[0.0] )
+    pullmom= 0.0
+    pullmom2= 0.0
+    for isample in range( nsample ):
         histc= histcs[isample]
         # errorMatrix= errorMatricesNorm[isample]
         # errorMatrix= errorMatrixNormAvg
@@ -386,11 +468,24 @@ def sample( nsample=1000, acc=0.8, resolutionFactor=0.02, mnevent=1000, opt="sme
                 pull= ( ( histc.GetBinContent( i+1 ) - histref.GetBinContent( i+1 ) ) /
                         sqrt( errorMatrix[i,i] ) )
                 pulls[i]+= pull
-                pullsstd[i]+= pull**2                
+                pullsstd[i]+= pull**2
+        # Error from covariance matrix or from sampling
+        # pullmerr= np.sqrt( np.sum( errorMatricesCorr[isample] ) )/histc.GetEntries()
+        # pullmerr= sqrt( mmomentc2 - mmomentc**2 )
+        histc2= histc2s[isample]
+        moment= calcIntegral( histc )
+        nevent= histc2.GetEntries()
+        moment2= histc2.Integral( 1, nbin )/nevent
+        pullmerr= sqrt( ( moment2 - moment**2 ) / nevent )
+        pullm= ( moment - calcIntegral( histref ) ) / pullmerr
+        pullmom+= pullm
+        pullmom2+= pullm**2
     pulls/= float(nsample)
     pullsstd/= float(nsample)
     pullsstd-= pulls**2
     pullsstd= np.sqrt( pullsstd )
+    pullmom/= float(nsample)
+    pullmom2/= float(nsample)
             
     # Chi^2s w.r.t. reference
     hchi2diag= TH1D( "hchi2diag", "P(Chi^2) diag. errors", 20, 0.0, 1.0 )
@@ -420,6 +515,10 @@ def sample( nsample=1000, acc=0.8, resolutionFactor=0.02, mnevent=1000, opt="sme
     # Printing
     fmt="{:"+str(width)+"."+str(precision)+"f}"
     print "Sample averages"
+    print "Avg. rec. moment:", fmt.format(mmomentc), "+/-", fmt.format(mmomerrc), "(avg.)",
+    print fmt.format(sqrt( mmomentc2 - mmomentc**2 )), "(sample)"
+    print "Avg. had. moment:", fmt.format(mmomenth), "+/-", fmt.format(sqrt( mmomenth2 - mmomenth**2 ))
+    print "Ref. moment, pull:", fmt.format(histref.Integral("width")), fmt.format(pullmom), fmt.format(sqrt(pullmom2-pullmom**2))
     print "val.corr.err.sam.err.avg.M.sam.  M.calc. val.had.err.had.ref.    pull    pull.std."
     for i in range( nbin ):
         print fmt.format( mvalues[i] ),
@@ -491,8 +590,9 @@ def fillSampleHistosDraw( histref, histdet, nsample, mnevent ):
     histds= dict()
     hisths= dict()
     for isample in range( nsample ):
-        histh= TH1D( "histh"+str(isample), "1000*x*exp(-x*20) h", nbin, binEdges )
-        histd= TH1D( "histd"+str(isample), "1000*x*exp(-x*20) d", nbin, binEdges )
+        title= fun.GetTitle()
+        histh= TH1D( "histh"+str(isample), title+" h", nbin, binEdges )
+        histd= TH1D( "histd"+str(isample), title+" d", nbin, binEdges )
         nevent= gRandom.Poisson( mnevent )
         for ievent in range( nevent ):
             histh.Fill( histref.GetRandom() )
@@ -504,41 +604,42 @@ def fillSampleHistosDraw( histref, histdet, nsample, mnevent ):
 # Sample by generating from "true" function and smearing
 def fillSampleHistosSmear( fun, nsample, mnevent, resolutionFactor, opt ):
     histds= dict()
+    histd2s= dict()
     hisths= dict()
     for isample in range( nsample ):
-        histh= TH1D( "histh"+str(isample), "1000*x*exp(-x*20) h", nbin, binEdges )
-        histd= TH1D( "histd"+str(isample), "1000*x*exp(-x*20) d", nbin, binEdges )
+        title= fun.GetTitle()
+        histh= TH1D( "histh"+str(isample), title+" h", nbin, binEdges )
+        histd= TH1D( "histd"+str(isample), title+" d", nbin, binEdges )
+        histd2= TH1D( "histd2"+str(isample), title+" d 2", nbin, binEdges )
         nevent= gRandom.Poisson( mnevent )
         neventsFilled= 0.0
         for i in range( nevent ):
+            nmom= nmomFromOpt( opt )
             value= fun.GetRandom()
-            hWeight= weight( value, opt )
+            hWeight= value**nmom
             histh.Fill( value, hWeight )
             resValue= resolution( value, resolutionFactor )
-            dWeight= weight( resValue, opt )
+            dWeight= resValue**nmom
+            dWeight2= dWeight**2
             histd.Fill( resValue, dWeight )
+            histd2.Fill( resValue, dWeight2 )
             if inBinRange( resValue ):
                 neventsFilled+= 1.0
         hisths[isample]= histh
         histd.SetEntries( neventsFilled )
         histds[isample]= histd
-    return histds, hisths
+        histd2.SetEntries( neventsFilled )
+        histd2s[isample]= histd2
+    return histds, histd2s, hisths
 
-# Weight or not
-def weight( value, opt ):
-    if "w1" in opt:
-        return value
-    elif "w2" in opt:
-        return value**2
-    elif "w3" in opt:
-        return value**3
-    elif "w4" in opt:
-        return value**4
-    elif "w5" in opt:
-        return value**5
-    else:
-        return 1.0
-
+def nmomFromOpt( opt ):
+    import re
+    mo= re.search( "w[1-5]", opt )
+    result= 0
+    if mo:
+        result= int( mo.group()[1] )
+    return result
+    
 # Average matrix from collection
 def averageMatrix( errorMatrices ):
     merrorMatrix= np.zeros( (nbin,nbin) )
@@ -575,7 +676,9 @@ def matrixCorrection( histds, cf, CR, eventAcc, histdet, opt ):
     nsample= len( histds )
     for isample in range( nsample ):
         histd= histds[isample]
-        histc= TH1D( "histc"+str(isample), "1000*x*exp(-x*20) corr", nbin, binEdges )
+        title= histd.GetTitle()
+        histc= TH1D( "histc"+str(isample), title+" corr", nbin, binEdges )
+        SetOwnership( histc, False )
         valuesd= getArray( histd )
         errorsd= getArrayErrors( histd )
         valuesh= CR.dot( valuesd )
@@ -588,13 +691,6 @@ def matrixCorrection( histds, cf, CR, eventAcc, histdet, opt ):
         # symmetric so order of indices matters
         diagErrorMatrixd= np.diag( errorsd**2 )
         errorMatrixh= np.dot( CR, np.dot( diagErrorMatrixd, CR.transpose() ) )
-        # errorMatrixh= np.zeros( (nbin,nbin) )
-        # for i in range( nbin ):
-        #     for j in range( nbin ):
-        #         sumk= 0.0
-        #         for k in range( nbin ):
-        #             sumk+= errorsd[k]**2*CR[i,k]*CR[j,k]
-        #         errorMatrixh[i,j]= sumk                
         # Set corrected values and bin-by-bin error in histo
         errorsh= errorsd*cf
         for i in range( nbin ):
@@ -616,7 +712,8 @@ def bbbCorrection( histds, cf, eventAcc, histdet, opt ):
     nsample= len( histds )
     for isample in range( nsample ):
         histd= histds[isample]
-        histc= TH1D( "histc", "1000*x*exp(-x*20) corr", nbin, binEdges )
+        title= histd.GetTitle()
+        histc= TH1D( "histc", title+" corr", nbin, binEdges )
         valuesh= np.array( nbin*[0.0] )
         errorsh= np.array( nbin*[0.0] )
         for i in range( nbin ):
@@ -668,7 +765,7 @@ def cov2corr( m ):
     corr= np.zeros( (nbin,nbin) )
     for i in range( nbin ):
         for j in range( nbin ):
-            corr[i,j]= m[i,j]/sqrt( m[i,i]* m[j,j])
+            corr[i,j]= m[i,j]/sqrt( m[i,i]*m[j,j] )
     return corr
 
 # Error matrix for normalised histo from diagonal errors
@@ -694,82 +791,123 @@ def calcErrorMatrix( values, errors, nevent ):
 
 # Generate correction matrix and factors
 def generate( fun, n=1000, acc=0.8, resolutionFactor=0.01, opt="" ):
+
+    print "Generate events for corrections"
     
     # Histos at hadron and detector level, migrations
-    histh= TH1D( "histh", "1000*x*exp(-x*20) h", nbin, binEdges )
-    histd= TH1D( "histd", "1000*x*exp(-x*20) d", nbin, binEdges )
-    histm= TH2D( "histm", "migration h vs d d", nbin, binEdges, nbin, binEdges )
-    histmh= TH2D( "histm", "migration h vs d h", nbin, binEdges, nbin, binEdges )
+    title= fun.GetTitle()
+    histh= TH1D( "histh", title+" h", nbin, binEdges )
+    histd= TH1D( "histd", title+" d", nbin, binEdges )
+    histmd= TH2D( "histmd", "migration h vs d d", nbin, binEdges, nbin, binEdges )
+    histmh= TH2D( "histmh", "migration h vs d h", nbin, binEdges, nbin, binEdges )
+    histh2= TH1D( "histh2", title+" h", nbin, binEdges )
+    histd2= TH1D( "histd2", title+" d", nbin, binEdges )
+    histmd2= TH2D( "histmd2", "migration h vs d d", nbin, binEdges, nbin, binEdges )
+    histmh2= TH2D( "histmh2", "migration h vs d h", nbin, binEdges, nbin, binEdges )
     neventsd= 0.0
     for i in range( n ):
+        nmom= nmomFromOpt( opt )
         hValue= fun.GetRandom()
-        hWeight= weight( hValue, opt )
+        hWeight= hValue**nmom
+        hWeight2= hWeight**2
         histh.Fill( hValue, hWeight )
+        histh2.Fill( hValue, hWeight2 )
         if acceptance( acc ):
             dValue= resolution( hValue, resolutionFactor )
-            dWeight= weight( dValue, opt )
+            dWeight= dValue**nmom
+            dWeight2= dWeight**2
             histd.Fill( dValue, dWeight )
-            histm.Fill( dValue, hValue, dWeight )
+            histmd.Fill( dValue, hValue, dWeight )
             histmh.Fill( dValue, hValue, hWeight )
+            histd2.Fill( dValue, dWeight2 )
+            histmd2.Fill( dValue, hValue, dWeight2 )
+            histmh2.Fill( dValue, hValue, hWeight2 )
             if inBinRange( dValue ):
                 neventsd+= 1.0
 
     # Prepare for expected errors calculation, exclude
     # over- and underflows
     histd.SetEntries( neventsd )
+    histd2.SetEntries( neventsd )
 
     # Event acceptance
     eventAcc= histh.GetEntries()/neventsd
-    print "Events: ", histh.GetEntries(), neventsd
+    print "Generated events before/after cuts:", histh.GetEntries(), neventsd
     print "Event acceptance:", eventAcc
     
     # Bin-by-bin correction factors
     cf= divideHistos( histh, histd )
-        
-    # Migration matrix normalised row-wise as correction
-    revMigr= getMatrix( histm )
+    cf2= divideHistos( histh2, histd2 )
+
+    # Migration matrix normalised column-wise as correction
+    revMigr= getMatrix( histmd )
     revMigrNorm= normaliseColumns( revMigr )
+    revMigr2= getMatrix( histmd2 )
+    revMigrNorm2= normaliseColumns( revMigr2 )
 
     # h->d correction of migration matrix if weighted
     if "w" in opt:
         revMigrh= getMatrix( histmh )
         hdRatioMatrix= divideChecked( revMigrh, revMigr )
         revMigrNormCorr= hdRatioMatrix*revMigrNorm
+        revMigrh2= getMatrix( histmh2 )
+        hdRatioMatrix2= divideChecked( revMigrh2, revMigr2 )
+        revMigrNormCorr2= hdRatioMatrix2*revMigrNorm2
     else:
         revMigrNormCorr= revMigrNorm
+        revMigrNormCorr2= revMigrNorm2
 
     # Acceptance correction
     histmhy= histmh.ProjectionY( "revMigr y proj", 1, nbin )
     cacc= divideHistos( histh, histmhy )
+    histmhy2= histmh2.ProjectionY( "revMigr2 y proj", 1, nbin )
+    cacc2= divideHistos( histh2, histmhy2 )
 
     # Combine matrix and acceptance correction
-    C= np.diag( cacc )
-    CR= np.dot( C, revMigrNormCorr )
+    CR= np.dot( np.diag( cacc ), revMigrNormCorr )
+    CR2= np.dot( np.diag( cacc2 ), revMigrNormCorr2 )
 
-    # Closure test
+    # Closure tests
     valuesd= getArray( histd )
     valuesh= getArray( histh )
     print "Rev. migr., cacc"
     printMatrix( revMigr )
     print cacc
-    print "Closure"
+    print "Closure test hadron vs corrected"
     print valuesh
     print CR.dot( valuesd )
+
+    valuesd2= getArray( histd2 )
+    valuesh2= getArray( histh2 )
+    print "Closure test hadron vs corrected mom**2"
+    print valuesh2
+    print CR2.dot( valuesd2 )
     
     # Fin
-    return cf, CR, eventAcc, histh, histd
+    return cf, CR, cf2, CR2, eventAcc, histh, histd, histh2, histd2
 
 # Normalise matrix columns
 def normaliseColumns( matrix ):
     shape= matrix.shape
     result= np.array( np.zeros( shape ) )
-    for i in range( shape[1] ):
-        sumcol= sum( matrix[:,i] )
+    for icol in range( shape[1] ):
+        sumcol= sum( matrix[:,icol] )
         if sumcol != 0.0:
-            result[:,i]= matrix[:,i]/sumcol
+            result[:,icol]= matrix[:,icol]/sumcol
     return result
 
-# Normalise histogram to unit area
+# Normalise matrix rows
+def normaliseRows( matrix ):
+    shape= matrix.shape
+    result= np.array( np.zeros( shape ) )
+    for irow in range( shape[0] ):
+        sumrow= sum( matrix[irow,:] )
+        if sumrow != 0.0:
+            result[irow,:]= matrix[irow,:]/sumrow
+    return result
+
+# Normalise histogram by number of entries and calculate
+# covariance matrix
 def normalise( hist, errorMatrix=None ):
     nevent= hist.GetEntries()
     values= getArray( hist )

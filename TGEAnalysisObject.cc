@@ -7,21 +7,20 @@
 
 #include <iostream>
 
-TGEAnalysisObject::TGEAnalysisObject( TGraphErrors* t ) : 
-  AnalysisObject( IsNormalised( *t ) ? t->GetN() : t->GetN()-1 ), tge(t) {
+TGEAnalysisObject::TGEAnalysisObject( TGraphErrors* tge ) :
+  AnalysisObject( tge->GetN() ) {
   points.SetElements( tge->GetX() );
+  nevents= tge->GetMaximum();
   if( IsNormalised( *tge ) ) {
     values.SetElements( tge->GetY() );
     errors.SetElements( tge->GetEY() );
   }
   else {
-    Int_t npoints= tge->GetN()-1;
     Double_t* tgevalues= tge->GetY();
     Double_t* tgeerrors= tge->GetEY();
-    Double_t nentries= tgevalues[npoints];
-    for( Int_t i= 0; i < npoints; i++ ) {
-      values[i]= tgevalues[i]/nentries;
-      errors[i]= tgeerrors[i]/nentries;
+    for( Int_t i= 0; i < tge->GetN(); i++ ) {
+      values[i]= tgevalues[i]/nevents;
+      errors[i]= tgeerrors[i]/nevents;
     }
   }
 }

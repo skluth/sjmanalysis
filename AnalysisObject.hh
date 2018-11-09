@@ -8,7 +8,7 @@
 
 class AnalysisObject {
 public:
-  AnalysisObject( UInt_t n ) : points(n), values(n), errors(n) {}
+  AnalysisObject( UInt_t n ) : points(n), values(n), errors(n), nevents(0.0) {}
   virtual ~AnalysisObject() {}
   virtual TVectorD getPoints() { return points; }
   virtual TVectorD getValues() { return values; }
@@ -27,6 +27,7 @@ public:
     return result;
   }
   virtual TMatrixD getErrorMatrix() { return errorMatrix; }
+  virtual Double_t getNEvents() { return nevents; }
   virtual TString getPointStr( Int_t, Int_t, Int_t ) = 0;
   virtual TString getPointLabel( Int_t ) = 0;
   virtual TVectorD getPointsCenter() = 0;
@@ -35,6 +36,7 @@ protected:
   TVectorD values;
   TVectorD errors;
   TMatrixD errorMatrix;
+  Double_t nevents;
 };
 
 #endif

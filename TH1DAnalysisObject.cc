@@ -9,11 +9,12 @@
 
 #include <iostream>
 
-TH1DAnalysisObject::TH1DAnalysisObject( TH1D* h, TH2D* h2d ) :
-  AnalysisObject( h->GetNbinsX()+1 ), hist(h), hist2d(h2d) {
+TH1DAnalysisObject::TH1DAnalysisObject( TH1D* hist, TH2D* hist2d ) :
+  AnalysisObject( hist->GetNbinsX()+1 ) {
   Double_t integral= 0.0;
   Double_t integralError= 0.0;
   UInt_t nbin= hist->GetNbinsX();
+  nevents= hist->GetEntries();
   for( UInt_t i= 0; i < nbin; i++ ) {
     points[i]= hist->GetBinLowEdge( i+1 );
     Double_t binw= hist->GetBinWidth( i+1 );
@@ -22,7 +23,7 @@ TH1DAnalysisObject::TH1DAnalysisObject( TH1D* h, TH2D* h2d ) :
       errors[i]= hist->GetBinError( i+1 );
     }
     else {
-      Double_t norm= hist->GetEntries()*binw;
+      Double_t norm= nevents*binw;
       values[i]= hist->GetBinContent( i+1 )/norm;
       errors[i]= hist->GetBinError( i+1 )/norm;
     }

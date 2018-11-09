@@ -17,9 +17,6 @@ public:
   virtual TString getPointStr( Int_t i, Int_t width=4, Int_t prec=2 );
   virtual TString getPointLabel( Int_t width=4 );
   virtual TVectorD getPointsCenter();
-private:
-  TH1D* hist;
-  TH2D* hist2d;
 };
 
 #endif

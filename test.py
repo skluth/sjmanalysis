@@ -171,7 +171,17 @@ class AnalysisObservable:
     def maxAbsErrorSq( self, errorKey1, errorKey2 ):
         return np.square( np.maximum( np.absolute( self.variationsDelta[errorKey1] ),
                                       np.absolute( self.variationsDelta[errorKey2] ) ) )
+    
 
+    # def getSelectedEvents( self, analysisVariations ):
+    #     for key in analysisVariations.keys():
+    #         analysis= analysisVariations[key]
+    #         source= analysis.getSource()
+    #         reco= analysis.getReco()
+    #         cuts= analysis.getCuts()
+    #         analysis= Analysis( source, reco, cuts )
+            
+    
     
 # LEP1 Analysis:
 class LEP1AnalysisObservable( AnalysisObservable ):

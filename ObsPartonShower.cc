@@ -43,7 +43,6 @@ ObsPartonShower::ObsPartonShower( const vector<Double_t>& a14bins,
   }
 }
 
-//void ObsPartonShower::addAnalyses( const vector<Analysis>& variations ) {
 void ObsPartonShower::addAnalysis( const Analysis& analysis ) {
   // A14, C202, AS, MR:
   string tag= analysis.getTag();

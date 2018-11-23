@@ -10,6 +10,8 @@
 #include "ObsPartonShower.hh"
 #include "ObsFastJetDiff.hh"
 
+#include "ObsGroomed.hh"
+
 #include "ObsJetrate.hh"
 #include "LEPYcutCalculator.hh"
 #include "FastJetYcutCalculator.hh"
@@ -58,6 +60,13 @@ ObservableFactory::createObservables( const vector<string> & obsnames,
 				 analyses, 
 				 new LEPThrustCalculator() );
     }
+    
+    else if( nameIs( name, "groomedshapes" ) ) {
+      obsp= new ObsGroomed( sjmConfigs.getPoints( "thrust" ),
+			    sjmConfigs.getPoints( "cpar" ),
+			    analyses );  
+    }
+    
     else if( nameIs( name, "EECnsc" ) ) {
       obsp= new ObsEEC( name,
 			sjmConfigs.getPoints( "EEC" ),

@@ -21,7 +21,8 @@ GLIBS = -L $(GTESTPATH)/lib -l gmock -l gtest -l pthread
 
 FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.3.0/install/bin/fastjet-config
 FASTJETINC = $(shell $(FASTJETCONFIG) --cxxflags )
-FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --plugins )
+# FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --plugins )
+FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --plugins ) -lfastjetcontribfragile
 
 ROOTCONFIG = $(HOME)/Downloads/root/root_v6.12.04/bin/root-config
 ROOTINC = $(shell $(ROOTCONFIG) --noauxcflags --cflags )
@@ -33,20 +34,21 @@ HEPMC2INC = -I$(HEPMC2PATH)/include
 HEPMC2LIBS = -L$(HEPMC2PATH)/lib -lHepMC
 HEPMC2LIBDIR = $(HEPMC2PATH)/lib
 
-# CPPFLAGS = $(ROOTINC) $(FASTJETINC) $(HEPMC2INC)
 CPPFLAGS = $(ROOTINC) $(FASTJETINC)
 
 SRCS = LEPNtupleReader.cc TFastJet.cc Analysis.cc DataStructure.cc \
 JetrateDataStructure.cc DifferentialDataStructure.cc MatrixDataStructure.cc \
 Observable.cc ObsDifferential.cc ObsJetrate.cc ObsFastJetDiff.cc \
-ObsPartonShower.cc ObsEEC.cc ObservableFactory.cc \
+ObsPartonShower.cc ObsEEC.cc ObsGroomed.cc ObservableFactory.cc \
 FilledObservable.cc Unfolder.cc BbbUnfolder.cc MtxUnfolder.cc OutputWriter.cc \
 LEPThrustCalculator.cc LEPYnmCalculator.cc PxThrustCalculator.cc \
 FastJetYcutCalculator.cc FastJetEminCalculator.cc FastJetRCalculator.cc \
 FastJetPxConeRCalculator.cc FastJetPxConeEminCalculator.cc \
 LEPYcutCalculator.cc AnalysisProcessor.cc SjmConfigParser.cc \
 LEP1NtupleReader.cc LEP2NtupleReader.cc NtupleReader.cc
-#HepMC2Reader.cc
+
+HMC2SRCS = HepMC2Reader.cc HepMC2AnalysisProcessor.cc runhepmc2.cc
+
 
 # Fortran stuff for thrust
 FSRCS = pxlth4.f
@@ -72,24 +74,23 @@ $(DEPS): %.d: %.cc
 	$(CXX) $(CPPFLAGS) $(CXXSTD) -MM $< -MF $@
 -include $(DEPS)
 
-# $(LIB): $(SRCS:.cc=.o) $(FSRCS:.f=.o)
-# 	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) $(HEPMC2LIBS) -o $@ $^
+
 $(LIB): $(SRCS:.cc=.o) $(FSRCS:.f=.o)
 	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) -o $@ $^
 
-# testsjmanalysis: testsjmanalysis.cc $(LIB)
-# 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GINCS) -o $@ $^ $(GLIBS) $(ROOTLIBS) $(HEPMC2LIBS) -lboost_program_options
-# 	LD_LIBRARY_PATH=$(PWD):$(ROOTLIBDIR):$(HEPMC2LIBDIR) ./$@
 
 testsjmanalysis: testsjmanalysis.cc $(LIB)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GINCS) -o $@ $^ $(GLIBS) $(ROOTLIBS) -lboost_program_options
 	LD_LIBRARY_PATH=$(PWD):$(ROOTLIBDIR) ./$@
 
 
-# runjob: runjob.cc $(LIB)
-# 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) $(HEPMC2LIBS) -lboost_program_options
 runjob: runjob.cc $(LIB)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) -lboost_program_options
+
+
+runhepmc2: $(HMC2SRCS)
+	$(CXX) $(CXXFLAGS) $(HEPMC2INC) $(ROOTINC) -o $@ $^ $(HEPMC2LIBS) $(ROOTLIBS)
+
 
 $(DICT): $(DICTSRCS:.cc=.hh) $(DICT:Dict.cc=LinkDef.h)
 	$(RC) -f $@ -c $^

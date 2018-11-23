@@ -94,6 +94,7 @@ SjmConfigParser::SjmConfigParser( int argc, const char* argv[] ) {
   generalOptsDescriptionMap["Observables.mtxunfold"]= "Mtx unfolding observables";
   
   generalOptsDescriptionMap["Points.thrust"]= "Thrust bin edges";      
+  generalOptsDescriptionMap["Points.cpar"]= "C-parameter bin edges";      
   generalOptsDescriptionMap["Points.EEC"]= "EEC bin edges";
   
   generalOptsDescriptionMap["Points.y34cut"]= "y34 cut";

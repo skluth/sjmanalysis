@@ -57,6 +57,8 @@ class AnalysisObservable:
         self.sterrs=None
         self.syerrs=None
         self.variationsDelta=None
+        self.events= dict()
+        self.rawEvents= dict()
         return
 
     def setupStandardAnalysis( self, standardAnalysis, tfile ):
@@ -64,13 +66,16 @@ class AnalysisObservable:
         self.points= array( "d", self.aostand.getPoints() )
         self.values= array( "d", self.aostand.getValues() )
         self.sterrs= array( "d", self.aostand.getErrors() )
+        self.events["stand"]= self.aostand.getNEvents()
         return
     
     def subtractVariations( self, analysisVariations, tfile ):
         self.variationsDelta= dict()
         for key in analysisVariations.keys():
-            variationData= array( "d", getAnalysisObjectFromFile( tfile, self.obs, analysisVariations[key] ).getValues() )
+            ao= getAnalysisObjectFromFile( tfile, self.obs, analysisVariations[key] )
+            variationData= array( "d", ao.getValues() )
             self.variationsDelta[key]= np.subtract( variationData, self.values )
+            self.events[key]= ao.getNEvents()
         return
        
     def calcSystSumSq( self, keys ):
@@ -172,15 +177,28 @@ class AnalysisObservable:
         return np.square( np.maximum( np.absolute( self.variationsDelta[errorKey1] ),
                                       np.absolute( self.variationsDelta[errorKey2] ) ) )
     
+    def printEvents( self ):
+        for key in sorted( self.events.keys() ):
+            print key, self.events[key]
+        return
+    def printRawEvents( self ):
+        for key in sorted( self.rawEvents.keys() ):
+            print key, self.rawEvents[key]
+        return
 
-    # def getSelectedEvents( self, analysisVariations ):
-    #     for key in analysisVariations.keys():
-    #         analysis= analysisVariations[key]
-    #         source= analysis.getSource()
-    #         reco= analysis.getReco()
-    #         cuts= analysis.getCuts()
-    #         analysis= Analysis( source, reco, cuts )
-            
+    def readRawEvents( self, standardAnalysis, analysisVariations, tfile, srclist=[] ):
+        allAnalyses= analysisVariations.copy()
+        allAnalyses["stand"]= standardAnalysis
+        for source in [ "data", "py" ]+srclist:
+            for key in allAnalyses.keys():
+                analysis= allAnalyses[key]
+                rawAnalysis= Analysis( source, analysis.getReco(), analysis.getCuts() )
+                ao= getAnalysisObjectFromFile( tfile, self.obs, rawAnalysis )
+                self.rawEvents[rawAnalysis.getTag()]= ao.getNEvents()
+        hwRawAnalysis= Analysis( "hw", "mt", "stand" )
+        ao= getAnalysisObjectFromFile( tfile, self.obs, hwRawAnalysis )
+        self.rawEvents[hwRawAnalysis.getTag()]= ao.getNEvents()
+        return
     
     
 # LEP1 Analysis:
@@ -199,6 +217,7 @@ class LEP1AnalysisObservable( AnalysisObservable ):
         self.setupStandardAnalysis( standardAnalysis, tfile )
         self.subtractVariations( analysisVariations, tfile )
         self.calcSystSumSq( analysisVariations.keys() )
+        self.readRawEvents( standardAnalysis, analysisVariations, tfile )
         return
 
 # LEP1.5 Analysis:
@@ -218,6 +237,7 @@ class LEP15AnalysisObservable( AnalysisObservable ):
         self.setupStandardAnalysis( standardAnalysis, tfile )
         self.subtractVariations( analysisVariations, tfile )
         self.calcSystSumSq( analysisVariations.keys() )
+        self.readRawEvents( standardAnalysis, analysisVariations, tfile )        
         return
     
     def clone( self, values, sterrs, variationsDelta ):
@@ -253,6 +273,8 @@ class LEP2AnalysisObservable( AnalysisObservable ):
             "bkglo": Analysis( "data mt stand none none llqq:qqqq:eeqq:lo py " + unf  ) }
         self.subtractVariations( analysisVariations, tfile )
         self.calcSyst()
+        self.readRawEvents( standardAnalysis, analysisVariations, tfile,
+                                [ "llqq", "qqqq", "eeqq" ] )
         return
 
     def calcSyst( self ):
@@ -318,6 +340,8 @@ def combineAnalysisObservables( *aobs ):
         variationsDelta[key]= np.divide( deltas, sumwgts )
     aocombined= aobs[0].clone( values, sterrs, variationsDelta )        
     return aocombined
+
+
 
 # Check jet rates add up to one:
 def checkJetrates( filename="sjm91_all_test.root", obs="durhamycut" ):

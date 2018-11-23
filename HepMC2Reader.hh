@@ -3,13 +3,13 @@
 
 #include "NtupleReader.hh"
 #include "TLorentzVector.h"
-#include "TString.h"
 #include <vector>
 #include <string>
 #include <map>
 #include <iostream>
 
 #include "HepMC/GenEvent.h"
+#include "HepMC/GenParticle.h"
 #include "HepMC/IO_GenEvent.h"
 
 
@@ -25,18 +25,28 @@ public:
  
   virtual const std::vector<TLorentzVector> GetLorentzVectors( const std::string & opt );
   
-  virtual const std::map<std::string,bool> getSelections( const std::string& ) {
+  virtual const std::map<std::string,bool> getSelections( const std::string & ) {
     return std::map<std::string,bool>();
   }
 
-  virtual bool MCNonRad() { return true; }
+  virtual bool MCNonRad();
   virtual bool isMC() { return true; }
 
 private:
+  
+  void findISRphotons();
+  void getHadron();
+  void getParton();
+  void getIsr();
 
   std::ifstream input;
   HepMC::GenEvent event;
-  
+  std::vector<const HepMC::GenParticle*> ISRphotons;
+
+  std::vector<TLorentzVector> vtlv;
+  std::map<std::string,std::vector<TLorentzVector>> vtlvCache;
+  std::map<std::string,Bool_t> cacheIsValid;
+
 };
 
 #endif

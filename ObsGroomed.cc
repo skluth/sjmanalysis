@@ -24,8 +24,8 @@ ObsGroomed::ObsGroomed( const std::vector<Double_t> & grthbins,
 			bool lprint ) :
   Observable( "groomedshapes" ),
   binedges { { "grthrust", grthbins }, { "grcpar", grcpbins } },
-  betaValues { 1.0, 2.0 },
-  zcutValues { 0.01, 0.02, 0.03, 0.04, 0.05, 0.06 } {
+  betaValues { 0.0, 1.0 },
+  zcutValues { 0.05, 0.10, 0.15 } {
   addAnalyses( variations );
   if( lprint ) {
     std::cout << "ObsGroomed::ObsGroomed: create " << getName() << std::endl;

@@ -9,9 +9,11 @@
 #include "BbbUnfolder.hh"
 #include "MtxUnfolder.hh"
 #include "OutputWriter.hh"
+#include "NtupleReader.hh"
 #include "LEPNtupleReader.hh"
 #include "LEP1NtupleReader.hh"
 #include "LEP2NtupleReader.hh"
+#include "HepMC2Reader.hh"
 #include "VectorHelpers.hh"
 #include "DataStructure.hh"
 #include "fastjet/Error.hh"
@@ -31,46 +33,49 @@ AnalysisProcessor::AnalysisProcessor( const SjmConfigParser& sjmcp ) :
   sjmConfigs( sjmcp ), maxevt( sjmcp.getItem<int>( "General.maxevt" ) ) {
 }  
 
-LEPNtupleReader*
-AnalysisProcessor::createLEPNtupleReader( const string& filename ) {
+NtupleReader*
+AnalysisProcessor::createNtupleReader( const string& filename ) {
   string ecms= sjmConfigs.getItem<string>( "General.energy" );
   vector<string> lep2ecms= { "130", "136", "161", "172", "183", "189", 
 			     "192", "196", "200", "202", "205", "207" };
-  LEPNtupleReader* result= 0;
+  NtupleReader* result= 0;
   if( ecms == "91.2" ) {
-    cout << "AnalysisProcessor::createLEPNtupleReader: LEP1NtupleReader" << endl;
+    cout << "AnalysisProcessor::createNtupleReader: LEP1NtupleReader" << endl;
     result= new LEP1NtupleReader( filename.c_str() );
   }
   else if( std::find( lep2ecms.begin(), lep2ecms.end(), ecms ) != lep2ecms.end() ) {
-    cout << "AnalysisProcessor::createLEPNtupleReader: LEP2NtupleReader" << endl;
+    cout << "AnalysisProcessor::createNtupleReader: LEP2NtupleReader" << endl;
     result= new LEP2NtupleReader( filename.c_str() );
   }
   else {
-    throw std::runtime_error( "AnalysisProcessor::createLEPNtupleReader: wrong ecms "+ecms );
+    throw std::runtime_error( "AnalysisProcessor::createNtupleReader: wrong ecms "+ecms );
   }
   return result;
 }
 
 Int_t
-AnalysisProcessor::processAnalyses( const vector<Analysis>& analyses,
-				    const vector<Observable*>& vobs,
-				    const string& filename ) {
-  cout << "processAnalyses: file " << filename << ", analyses:" << endl;
-  for( const Analysis& analysis : analyses ) {
-    cout << analysis.getTag() << endl;
-  }
-  LEPNtupleReader* ntr= createLEPNtupleReader( filename );
-  Int_t nevnt= ntr->GetNumberEntries();
-  if( nevnt > maxevt ) cout << "processAnalyses: process " 
-			    << maxevt << " events" << endl;
+AnalysisProcessor::processAnalyses( const vector<Analysis> & analyses,
+				    const vector<Observable*> & vobs,
+				    const string & filename ) {
+  cout << "processAnalyses: file " << filename << endl;
+  NtupleReader* ntr= createNtupleReader( filename );
+  Int_t nevents= processAnalysesNtr( analyses, vobs, ntr );
+  delete ntr;
+  return nevents;
+}
+
+
+Int_t
+AnalysisProcessor::processAnalysesNtr( const vector<Analysis> & analyses,
+				       const vector<Observable*> & vobs,
+				       NtupleReader* ntr ) {
+  cout << "processAnalysesNtr: analyses:" << endl;
+  for( const Analysis & analysis : analyses ) cout << analysis.getTag() << endl;
+  if( maxevt > 0 ) cout << "processAnalyses: process " 
+			<< maxevt << " events" << endl;
   string ecms= sjmConfigs.getItem<string>( "General.energy" );
   Int_t ievnt= 0;
-  for( ; ievnt < TMath::Min( nevnt, maxevt ); ievnt++ ) {
-    if( ntr->GetEvent( ievnt ) == 0 ) {
-      ostringstream txt;
-      txt << "processAnalyses: event not found: " << ievnt;
-      throw std::runtime_error( txt.str() );
-    }
+  while( ntr->GetNextEvent( maxevt ) ) {
     const map<string,Bool_t> selections= ntr->getSelections( ecms );
     bool MCnonrad= ntr->MCNonRad();
     for( const Analysis& analysis : analyses ) {
@@ -108,8 +113,8 @@ AnalysisProcessor::processAnalyses( const vector<Analysis>& analyses,
 	     << fe.message() << ", event " << ievnt << endl;
       }
     }
+    ievnt++;
   }
-  delete ntr;
   return ievnt;
 }
 
@@ -274,9 +279,9 @@ AnalysisProcessor::subtractBackground( const vector<FilledObservable*> & vfobs,
 }
 
 
-void AnalysisProcessor::LEP1Analysis() {
+void AnalysisProcessor::LEPAnalysis() {
 
-  cout << "AnalysisProcessor::LEP1Analysis: Welcome" << endl;
+  cout << "AnalysisProcessor::LEPAnalysis: Welcome" << endl;
 
   // Get analysis variations from configuration:
   string LEPAnalyses= sjmConfigs.getItem<string>( "General.analyses" );
@@ -448,5 +453,61 @@ void AnalysisProcessor::LEP1Analysis() {
   // The End:
   return;
 
+}
+
+void AnalysisProcessor::MCAnalysis() {
+
+  cout << "AnalysisProcessor::MCAnalysis: Welcome" << endl;
+
+  // Get analysis variations from configuration:
+  Analysis hadronLevel( "mc hadron none nonrad" );
+  Analysis partonLevel( "mc parton none nonrad" );
+  vector<Analysis> analyses { hadronLevel, partonLevel };
+  
+  // Define observables from configuration:
+  cout << "AnalysisProcessor::MCAnalysis: create observables" << endl;
+  ObservableFactory obsfac( sjmConfigs );
+  vector<Observable*> vobs;
+  try {
+    vector<string> observables { "durhamymergefj" };
+    vobs= obsfac.createObservables( observables, analyses );
+  }
+  catch( const std::exception& e ) {
+    cout << "AnalysisProcessor::MCAnalysis: create observables cought exception: "
+	 << e.what() << endl;
+    return;
+  }
+  
+  // Fill from hepmc2 files:
+  cout << "AnalysisProcessor::MCAnalysis: fill from hepmc files" << endl;
+  try {
+    vector<string> filenames= sjmConfigs.getItem<vector<string>>( "Signal.files" );
+    for( const string & filename : filenames ) {
+      HepMC2Reader hmcr( filename );
+      processAnalysesNtr( analyses, vobs, &hmcr );
+    }
+  }
+  catch( const std::exception& e ) {
+    cout << "AnalysisProcessor::MCAnalysis: filling cought exception: "
+	 << e.what() << endl;
+    return;
+  }
+
+  // Get FilledObservables for further processing:
+  vector<FilledObservable*> vfobs= getFilled( vobs );
+
+  // Normalise and calculate stat errors with full jacobean calculation
+  for( FilledObservable* fobs : vfobs ) {
+    if( sjmConfigs.getItem<bool>( "General.normalise" ) ) fobs->finalise();
+    fobs->Print();
+  }
+
+  // Write root objects (TH1D or TGraphErrors, and TH2D):
+  OutputWriter writer( sjmConfigs.getItem<string>( "General.outfile" ) );
+  writer.write( vfobs );
+
+  // The End:
+  return;
+ 
 }
 

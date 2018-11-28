@@ -19,8 +19,8 @@ using std::string;
 LEPNtupleReader::LEPNtupleReader() : nt_file(0), nt_tree(0), nt_isMC(false), lprint(false) {}
 
 LEPNtupleReader::LEPNtupleReader( const char* filename, const char* ntid, const bool lpr ) :
-  nt_file(0), nt_tree(0), nt_isMC(false),
-  lprint(lpr),
+  nt_file(0), nt_tree(0), nt_isMC(false), nt_vtlvcache{false},
+  nt_nevents(0), lprint(lpr),
   vtlvCache{ { "parton", std::vector<TLorentzVector>() },
     { "hadron", std::vector<TLorentzVector>() },
     { "tracks", std::vector<TLorentzVector>() },
@@ -98,9 +98,14 @@ Int_t LEPNtupleReader::GetNumberEntries() {
   else return -1;
 }
 
-bool LEPNtupleReader::GetEvent( Int_t ievnt ) {
+bool LEPNtupleReader::GetNextEvent( Int_t maxevt ) {
+  bool maxreached= maxevt > 0 and maxevt == nt_nevents;
+  return not maxreached and GetEvent( nt_nevents );
+}
+
+bool LEPNtupleReader::GetEvent( Int_t ievent ) {
   bool result= false;
-  if( nt_tree and nt_tree->GetEvent( ievnt ) > 0 ) {
+  if( nt_tree and nt_tree->GetEvent( ievent ) > 0 ) {
     result= true;
     for( const auto & keyValue : cacheIsValid ) cacheIsValid[keyValue.first]= false;
     nt_nevents++;

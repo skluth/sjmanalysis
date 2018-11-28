@@ -21,7 +21,8 @@ public:
   virtual ~HepMC2Reader() {}
 
   virtual Int_t GetNumberEntries() { return 0; }
-  virtual bool GetEvent( Int_t ievnt=0 );
+  virtual bool GetEvent( Int_t ievent=0 );
+  virtual bool GetNextEvent( Int_t maxevt=0 );
  
   virtual const std::vector<TLorentzVector> GetLorentzVectors( const std::string & opt );
   
@@ -40,6 +41,7 @@ private:
   void getIsr();
 
   std::ifstream input;
+  Int_t nevent;
   HepMC::GenEvent event;
   std::vector<const HepMC::GenParticle*> ISRphotons;
 

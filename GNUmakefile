@@ -34,7 +34,7 @@ HEPMC2INC = -I$(HEPMC2PATH)/include
 HEPMC2LIBS = -L$(HEPMC2PATH)/lib -lHepMC
 HEPMC2LIBDIR = $(HEPMC2PATH)/lib
 
-CPPFLAGS = $(ROOTINC) $(FASTJETINC)
+CPPFLAGS = $(ROOTINC) $(FASTJETINC) $(HEPMC2INC)
 
 SRCS = LEPNtupleReader.cc TFastJet.cc Analysis.cc DataStructure.cc \
 JetrateDataStructure.cc DifferentialDataStructure.cc MatrixDataStructure.cc \
@@ -45,9 +45,10 @@ LEPThrustCalculator.cc LEPYnmCalculator.cc PxThrustCalculator.cc \
 FastJetYcutCalculator.cc FastJetEminCalculator.cc FastJetRCalculator.cc \
 FastJetPxConeRCalculator.cc FastJetPxConeEminCalculator.cc \
 LEPYcutCalculator.cc AnalysisProcessor.cc SjmConfigParser.cc \
-LEP1NtupleReader.cc LEP2NtupleReader.cc NtupleReader.cc
+LEP1NtupleReader.cc LEP2NtupleReader.cc NtupleReader.cc \
+HepMC2Reader.cc
 
-HMC2SRCS = HepMC2Reader.cc HepMC2AnalysisProcessor.cc runhepmc2.cc
+# HMC2SRCS = runhepmc2.cc
 
 
 # Fortran stuff for thrust
@@ -76,20 +77,20 @@ $(DEPS): %.d: %.cc
 
 
 $(LIB): $(SRCS:.cc=.o) $(FSRCS:.f=.o)
-	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) -o $@ $^
+	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) $(HEPMC2LIBS) -o $@ $^
 
 
 testsjmanalysis: testsjmanalysis.cc $(LIB)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GINCS) -o $@ $^ $(GLIBS) $(ROOTLIBS) -lboost_program_options
-	LD_LIBRARY_PATH=$(PWD):$(ROOTLIBDIR) ./$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GINCS) -o $@ $^ $(GLIBS) $(ROOTLIBS) $(HEPMC2LIBS) -lboost_program_options
+	LD_LIBRARY_PATH=$(PWD):$(ROOTLIBDIR):$(HEPMC2LIBDIR) ./$@
 
 
 runjob: runjob.cc $(LIB)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) -lboost_program_options
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) $(HEPMC2LIBS) -lboost_program_options
 
 
-runhepmc2: $(HMC2SRCS)
-	$(CXX) $(CXXFLAGS) $(HEPMC2INC) $(ROOTINC) -o $@ $^ $(HEPMC2LIBS) $(ROOTLIBS)
+runhepmc2: runhepmc2.cc $(LIB)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) $(HEPMC2LIBS) -lboost_program_options
 
 
 $(DICT): $(DICTSRCS:.cc=.hh) $(DICT:Dict.cc=LinkDef.h)

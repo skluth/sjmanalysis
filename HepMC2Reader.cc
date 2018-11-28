@@ -9,17 +9,24 @@
 
 
 HepMC2Reader::HepMC2Reader( const std::string & filename ) :
-  input( filename ) {
+  input( filename ), nevent(0) {
   std::cout << "HepMC2Reader::HepMC2Reader: opened hepmc2 file " << filename << std::endl;
 }
 
+
+bool HepMC2Reader::GetEvent( int ievent ) {
+  return GetNextEvent();
+}
+
 // Read next event:
-bool HepMC2Reader::GetEvent( Int_t ievnt ) {
+bool HepMC2Reader::GetNextEvent( Int_t maxevt ) {
   event.read( input );
-  if( event.is_valid() ) {
+  bool maxreached= maxevt > 0 and maxevt == nevent;
+  if( not maxreached and event.is_valid() ) {
     for( const auto & keyValue : cacheIsValid ) cacheIsValid[keyValue.first]= false;
     //  event.print();
     findISRphotons();
+    nevent++;
     return true;
   }
   return false;

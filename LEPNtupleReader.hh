@@ -21,6 +21,7 @@ public:
 
   virtual Int_t GetNumberEntries();
   virtual bool GetEvent( Int_t ievnt );
+  virtual bool GetNextEvent( Int_t maxevt=0 );
  
   virtual const std::vector<TLorentzVector> GetLorentzVectors( const std::string & opt );
   

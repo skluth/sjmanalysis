@@ -12,15 +12,19 @@
 class Observable;
 class FilledObservable;
 class LEPNtupleReader;
+class NtupleReader;
 
 class AnalysisProcessor {
 
   SjmConfigParser sjmConfigs;
   int maxevt;
 
-  Int_t processAnalyses( const std::vector<Analysis>& analyses,
-			 const std::vector<Observable*>& vobs,
-			 const std::string& filename );
+  Int_t processAnalyses( const std::vector<Analysis> & analyses,
+  			 const std::vector<Observable*> & vobs,
+  			 const std::string & filename );
+  Int_t processAnalysesNtr( const std::vector<Analysis> & analyses,
+			    const std::vector<Observable*> & vobs,
+			    NtupleReader* ntr );
 
   void processUnfolding( const std::vector<Analysis>& measuredAnalyses, 
 			 const std::string& unfoldsource,
@@ -30,7 +34,7 @@ class AnalysisProcessor {
 
   std::vector<Analysis> fillAnalyses( const std::string& tag );
 
-  LEPNtupleReader* createLEPNtupleReader( const std::string& filename );
+  NtupleReader* createNtupleReader( const std::string& filename );
 
   std::vector<Analysis>
   subtractBackground( const std::vector<FilledObservable*> & vfobs,
@@ -43,7 +47,8 @@ public:
 
   ~AnalysisProcessor() {}
 
-  void LEP1Analysis();
+  void LEPAnalysis();
+  void MCAnalysis();
 
 };
 

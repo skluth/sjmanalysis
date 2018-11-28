@@ -78,7 +78,8 @@ SjmConfigParser::SjmConfigParser( int argc, const char* argv[] ) {
   specialOptsDescriptionMap["BkgWWeeqq.files"]= "Bkg WW->eeqq MC file names";      
   
   valuesMap["General.test"]= VS { "bla" };
-  valuesMap["General.maxevt"]= VS { "999999" };
+  // valuesMap["General.maxevt"]= VS { "999999" };
+  valuesMap["General.maxevt"]= VS { "0" };
   valuesMap["General.sjmGeneralOptions"]= VS { "sjmGeneralOptions.cfg" };
 
   declareOptions( getItem<std::string>( "config" ),

@@ -4,6 +4,7 @@
 #include "Observable.hh"
 #include "ObsDifferential.hh"
 #include "ObsEEC.hh"
+#include "PxThrustCalculator.hh"
 #include "LEPThrustCalculator.hh"
 #include "LEPYnmCalculator.hh"
 
@@ -58,15 +59,19 @@ ObservableFactory::createObservables( const vector<string> & obsnames,
       obsp= new ObsDifferential( "thrust", 
 				 sjmConfigs.getPoints( "thrust" ),
 				 analyses, 
+				 new PxThrustCalculator() );
+    }
+    else if( nameIs( name, "lepthrust" ) ) {
+      obsp= new ObsDifferential( "lepthrust", 
+				 sjmConfigs.getPoints( "thrust" ),
+				 analyses, 
 				 new LEPThrustCalculator() );
     }
-    
     else if( nameIs( name, "groomedshapes" ) ) {
       obsp= new ObsGroomed( sjmConfigs.getPoints( "thrust" ),
 			    sjmConfigs.getPoints( "cpar" ),
 			    analyses );  
     }
-    
     else if( nameIs( name, "EECnsc" ) ) {
       obsp= new ObsEEC( name,
 			sjmConfigs.getPoints( "EEC" ),

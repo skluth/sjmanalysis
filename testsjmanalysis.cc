@@ -354,8 +354,7 @@ namespace sjmtests {
   // Helper to fill observables from real ntuple:
   void fillFromNtuple( NtupleReader* ntr, const Analysis analysis, 
 		       Observable & obs, size_t nevnt=100 ) {
-    for( size_t ievnt= 0; ievnt < nevnt; ievnt++ ) {
-      ntr->GetEvent( ievnt );
+    while( ntr->GetNextEvent( nevnt ) ) {
       const map<string,Bool_t> selections= ntr->getSelections( "91.2" );
       bool MCnonrad= ntr->MCNonRad();
       string cuts= analysis.getCuts();
@@ -767,7 +766,7 @@ namespace sjmtests {
   }
   TEST_F( SjmConfigParserTest, testgetItemInt ) {
     int maxevt= sjmcp.getItem<int>( "General.maxevt" );
-    EXPECT_EQ( 999999, maxevt );
+    EXPECT_EQ( 0, maxevt );
   }
   TEST_F( SjmConfigParserTest, testgetItemBool ) {
     bool normalise= sjmcp.getItem<bool>( "General.normalise" );

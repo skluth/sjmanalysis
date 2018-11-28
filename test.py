@@ -1,11 +1,12 @@
 
 from ROOT import TFile, gROOT, gPad, TVectorD, TObject
 
-from ROOT import TGraphErrors, TH1D, TLegend, TCanvas
+from ROOT import TGraphErrors, TH1D, TLegend, TCanvas, TLatex
 TGraphErrors.__init__._creates= False
 TH1D.__init__._creates= False
 TLegend.__init__._creates= False
 TCanvas.__init__._creates= False
+TLatex.__init__._creates= False
 
 gROOT.LoadMacro( "libAnalysisDict.so" )
 
@@ -318,30 +319,143 @@ def createAnalysisObservable( tfile, obs="thrust", unf="bbb" ):
     return ao
 
 # Error weighted average of results of input observables:
-def combineAnalysisObservables( *aobs ):
+def combineAnalysisObservables( aobs ):
+    firstao= aobs[0]
     for ao in aobs:
-        if ao.obs != aobs[0].obs:
-            raise ValueError( "Observables don't match: "+ao[0].obs+" "+ao.obs )
+        if ao.obs != firstao.obs:
+            raise ValueError( "Observables don't match: "+firstao.obs+" "+ao.obs )
     wgts= dict()
-    sumwgts= array( "d", len(aobs[0].values)*[ 0.0 ] )
+    nvalues= len(firstao.values)
+    sumwgts= array( "d", nvalues*[ 0.0 ] )
     for ao in aobs:
         wgts[ao]= np.divide( 1.0, np.square( ao.sterrs ) )
         sumwgts= np.add( wgts[ao], sumwgts )
-    values= array( "d", len(aobs[0].values)*[ 0.0 ] )
+    values= array( "d", nvalues*[ 0.0 ] )
     for ao in aobs:
         values= np.add( np.multiply( ao.values, wgts[ao] ), values )
     values= np.divide( values, sumwgts )
     sterrs= np.divide( 1.0, np.sqrt( sumwgts ) )
     variationsDelta= dict()
-    for key in aobs[0].variationsDelta.keys():
-        deltas= array( "d", len(aobs[0].values)*[ 0.0 ] )
+    for key in firstao.variationsDelta.keys():
+        deltas= array( "d", nvalues*[ 0.0 ] )
         for ao in aobs:
             deltas= np.add( np.multiply( ao.variationsDelta[key], wgts[ao] ), deltas )
         variationsDelta[key]= np.divide( deltas, sumwgts )
-    aocombined= aobs[0].clone( values, sterrs, variationsDelta )        
+    aocombined= firstao.clone( values, sterrs, variationsDelta )        
     return aocombined
 
+# Create combined observable from file list:
+def createCombineAnalysisObservables( filenames, obs="thrust" ):
+    if len(filenames) == 1:
+        f= TFile( filenames[0] )
+        aocomb= createAnalysisObservable( f, obs )
+    else:
+        print "createCombineAnalysisObservables: combine from",
+        aobs= list()
+        for filename in filenames:
+            print filename,
+        print
+        for filename in filenames:
+            f= TFile( filename )
+            ao= createAnalysisObservable( f, obs )
+            aobs.append( ao )
+        aocomb= combineAnalysisObservables( aobs )
+    return aocomb
 
+# Extract ecm from file name:
+def ecmFromFilename( filename ):
+    ecm= ""
+    for character in filename:
+        if character.isdigit():
+            ecm= ecm + character
+    return ecm
+
+# Plot all groomed observables at combined ecms into pdf:
+def plotAllGroomedAveraged():
+    canv= TCanvas( "canv", "All groomed shapes", 1200, 800 )
+    canv.Divide( 3, 2 )
+    observables= [ "grthrust" , "grcpar" ]
+    filenameslists= [ [ "sjm91_all.root" ],
+     [ "sjm130.root", "sjm136.root" ],
+     [ "sjm161.root", "sjm172.root", "sjm183.root", "sjm189.root" ],
+     [  "sjm192.root", "sjm196.root", "sjm200.root","sjm202.root", "sjm205.root", "sjm207.root" ] ]
+    ecms= [ "91", "133", "177", "197" ]
+    for obs in observables:
+        iecm= 0
+        for filenames in filenameslists:
+            postfix=""
+            if filenames == filenameslists[0] and obs == observables[0]:
+                postfix= "("
+            elif filenames == filenameslists[-1] and obs == observables[-1]:
+                postfix= ")"
+            ecm= ecms[iecm]
+            plotGroomed( obs, filenames, ecm, logy=1, canv=canv )
+            title= "Title: "+obs+" "+ecm+" GeV"
+            print title 
+            canv.Print( "plots_averaged.pdf"+postfix, title )
+            iecm= iecm+1
+    return
+   
+# Plot all groomed observables into pdf:
+def plotAllGroomed():
+    filenames= [ "sjm91_all.root",
+                     "sjm130.root",
+                     "sjm136.root",
+                     "sjm161.root",
+                     "sjm172.root",
+                     "sjm183.root",
+                     "sjm189.root",
+                     "sjm192.root",
+                     "sjm196.root",
+                     "sjm200.root",
+                     "sjm202.root",
+                     "sjm205.root",
+                     "sjm207.root" ]
+    canv= TCanvas( "canv", "All groomed shapes", 1200, 800 )
+    canv.Divide( 3, 2 )
+    observables= [ "grthrust" , "grcpar" ]
+    for obs in observables:
+        for filename in filenames:
+            postfix=""
+            if filename == filenames[0] and obs == observables[0]:
+                postfix= "("
+            elif filename == filenames[-1] and obs == observables[-1]:
+                postfix= ")"
+            ecm= ecmFromFilename( filename )
+            plotGroomed( obs, [ filename ], ecm, logy=1, canv=canv )
+            title= "Title: "+obs+" "+ecm+" GeV"
+            print title 
+            canv.Print( "plots.pdf"+postfix, title )    
+    return
+
+# Plot groomed observables: 
+def plotGroomed( obs="grthrust", filenames=[ "sjm136_test.root" ], ecm="136", logy=1, canv=None ):
+    thplotoptions= { "xmin": 0.0, "xmax": 0.5, "ymin": 0.005, "ymax": 50.0, "markerStyle": 20, "markerSize": 0.5, "title": "groomed Thrust", "xlabel": "1-T_{gr}", "ylabel": "1/\sigma d\sigma/d(1-T_{gr})", "logy":logy }
+    cpplotoptions= { "xmin": 0.0, "xmax": 1.0, "ymin": 0.03, "ymax": 30.0, "markerStyle": 20, "markerSize": 0.5, "title": "groomed C-parameter", "xlabel": "C_{gr}", "ylabel": "1/\sigma d\sigma/d(C_{gr})", "logy":logy }
+    plotopts= { "grthrust": thplotoptions, "grcpar": cpplotoptions }
+    if canv == None:
+        canv= TCanvas( "canv", obs+" "+ecm, 1200, 800 )
+    icanv= 0
+    for beta in [ "0.0", "1.0" ]:
+        for zcut in [ "0.05", "0.10", "0.15" ]:
+            icanv= icanv+1
+            canv.cd( icanv )
+            gPad.SetLeftMargin( 0.15 )
+            gPad.SetRightMargin( 0.025 )
+            key= obs + "_" + beta + "_" + zcut
+            print key
+            aogr= createCombineAnalysisObservables( filenames, key )
+            aogr.plot( plotopts[obs] )
+            tl= TLegend( 0.4, 0.8, 0.85, 0.85 )
+            tl.SetTextSize( 0.05 )
+            tl.SetBorderSize( 0 )
+            tl.AddEntry( key, "OPAL "+ecm+" GeV", "ep" )
+            tl.Draw( "same" )
+            txt= TLatex( 0.6, 0.7, "#beta="+beta+ " z_{cut}="+zcut )
+            txt.SetNDC( True )
+            txt.SetTextSize( 0.035 )
+            txt.Draw()            
+    return
 
 # Check jet rates add up to one:
 def checkJetrates( filename="sjm91_all_test.root", obs="durhamycut" ):
@@ -356,41 +470,42 @@ def checkJetrates( filename="sjm91_all_test.root", obs="durhamycut" ):
     print valuessum
     return
 
+# Compare y23 to M.T. Ford:
 def compareY23ds():
     from ROOT import TCanvas
     canv= TCanvas( "canv", "y_{23}(D) comparison 91 - 189", 1000, 1200 )
     canv.Divide( 2, 3 )
     canv.cd( 1 )
-    compareY23d( "sjm91_all.root", "mtford-y23d91.txt" )
+    compareY23d( "sjm91_all.root" )
     canv.cd( 2 )
-    compareY23d( "sjm133.root", "mtford-y23d133.txt" )
+    compareY23d( "sjm133.root" )
     canv.cd( 3 )
-    compareY23d( "sjm161.root", "mtford-y23d161.txt" )
+    compareY23d( "sjm161.root" )
     canv.cd( 4 )
-    compareY23d( "sjm172.root", "mtford-y23d172.txt" )
+    compareY23d( "sjm172.root" )
     canv.cd( 5 )
-    compareY23d( "sjm183.root", "mtford-y23d183.txt" )
+    compareY23d( "sjm183.root" )
     canv.cd( 6 )
-    compareY23d( "sjm189.root", "mtford-y23d189.txt" )
-
+    compareY23d( "sjm189.root" )
     canv2= TCanvas( "canv2", "y_{23}(D) comparison 192 - 207", 1000, 1200 )
     canv2.Divide( 2, 3 )
     canv2.cd( 1 )
-    compareY23d( "sjm192.root", "mtford-y23d192.txt" )
+    compareY23d( "sjm192.root" )
     canv2.cd( 2 )
-    compareY23d( "sjm196.root", "mtford-y23d196.txt" )
+    compareY23d( "sjm196.root" )
     canv2.cd( 3 )
-    compareY23d( "sjm200.root", "mtford-y23d200.txt" )
+    compareY23d( "sjm200.root" )
     canv2.cd( 4 )
-    compareY23d( "sjm202.root", "mtford-y23d202.txt" )
+    compareY23d( "sjm202.root" )
     canv2.cd( 5 )
-    compareY23d( "sjm205.root", "mtford-y23d205.txt" )
+    compareY23d( "sjm205.root" )
     canv2.cd( 6 )
-    compareY23d( "sjm207.root", "mtford-y23d207.txt" )
-
+    compareY23d( "sjm207.root" )
     return
-
-def compareY23d( filename="sjm91_all.root", mtffilename="mtford-y23d91.txt", opt="m" ):
+def compareY23d( filename="sjm91_all.root", mtffilename=None, opt="m" ):
+    if mtffilename == None:
+        ecm= ecmFromFilename( filename )
+        mtffilename= "mtford-y23d"+ecm+".txt" 
     arrays= ascii2arrays( mtffilename )
     mtfordpointsl= arrays[0]
     mtfordpointsr= arrays[1]
@@ -404,10 +519,10 @@ def compareY23d( filename="sjm91_all.root", mtffilename="mtford-y23d91.txt", opt
         ao1= createAnalysisObservable( f1, "durhamymerge23" )
         f2= TFile( "sjm136.root" )
         ao2= createAnalysisObservable( f2, "durhamymerge23" )
-        ao= combineAnalysisObservables( ao1, ao2 )
+        ao= combineAnalysisObservables( [ ao1, ao2 ] )
     else:
         f= TFile( filename )
-        ao= createAnalysisObservable( f, "durhamymergefj23" )
+        ao= createAnalysisObservable( f, "durhamymerge23" )
     npoints= len( mtfordpoints )
     vex= array( "d", npoints*[0.0] )
     tgest= TGraphErrors( npoints, mtfordpoints, mtfordvalues, vex, mtfordsterrs )
@@ -427,50 +542,54 @@ def compareY23d( filename="sjm91_all.root", mtffilename="mtford-y23d91.txt", opt
     tl.Draw()
     return
 
+# Compare thrust to M.T. Ford:
 def compareThrusts():
     from ROOT import TCanvas
-    canv= TCanvas( "canv", "Thrust comparison 91 - 189", 1000, 1200 )
+    canv= TCanvas( "canv", "Thrust comparison to M.T. Ford", 1000, 1200 )
     canv.Divide( 2, 3 )
     canv.cd( 1 )
-    compareThrust( "sjm91_all.root", "mtford-thrust91.txt" )
+    compareThrust( "sjm91_all.root" )
     canv.cd( 2 )
-    compareThrust( "sjm133.root", "mtford-thrust133.txt" )
+    compareThrust( "sjm133.root" )
     canv.cd( 3 )
-    compareThrust( "sjm161.root", "mtford-thrust161.txt" )
+    compareThrust( "sjm161.root" )
     canv.cd( 4 )
-    compareThrust( "sjm172.root", "mtford-thrust172.txt" )
+    compareThrust( "sjm172.root" )
     canv.cd( 5 )
-    compareThrust( "sjm183.root", "mtford-thrust183.txt" )
+    compareThrust( "sjm183.root" )
     canv.cd( 6 )
-    compareThrust( "sjm189.root", "mtford-thrust189.txt" )
-    canv2= TCanvas( "canv2", "Thrust comparison 192 - 207", 1000, 1200 )
-    canv2.Divide( 2, 3 )
-    canv2.cd( 1 )
-    compareThrust( "sjm192.root", "mtford-thrust192.txt" )
-    canv2.cd( 2 )
-    compareThrust( "sjm196.root", "mtford-thrust196.txt" )
-    canv2.cd( 3 )
-    compareThrust( "sjm200.root", "mtford-thrust200.txt" )
-    canv2.cd( 4 )
-    compareThrust( "sjm202.root", "mtford-thrust202.txt" )
-    canv2.cd( 5 )
-    compareThrust( "sjm205.root", "mtford-thrust205.txt" )
-    canv2.cd( 6 )
-    compareThrust( "sjm207.root", "mtford-thrust207.txt" )
+    compareThrust( "sjm189.root" )
+    canv.Print( "thrustplots.pdf(", "Title: 91 - 189 GeV" ) 
+    canv.cd( 1 )
+    compareThrust( "sjm192.root" )
+    canv.cd( 2 )
+    compareThrust( "sjm196.root" )
+    canv.cd( 3 )
+    compareThrust( "sjm200.root" )
+    canv.cd( 4 )
+    compareThrust( "sjm202.root" )
+    canv.cd( 5 )
+    compareThrust( "sjm205.root" )
+    canv.cd( 6 )
+    compareThrust( "sjm207.root" )
+    canv.Print( "thrustplots.pdf)", "Title: 192 - 207 GeV" ) 
     return
-
-def compareThrust( filename="sjm91_all.root", mtffilename="mtford-thrust91.txt" ):
+def compareThrust( filename="sjm91_all.root", mtffilename=None ):
+    if mtffilename == None:
+        ecm= ecmFromFilename( filename )
+        mtffilename= "mtford-thrust"+ecm+".txt" 
     arrays= ascii2arrays( mtffilename )
     mtfordvalues= arrays[2]
     mtfordsterrs= arrays[3]
     mtfordsyerrs= arrays[4]
     mtforderrs= np.sqrt( np.add( np.square( mtfordsterrs ),  np.square( mtfordsyerrs ) ) )
     if filename=="sjm133.root":
-        f1= TFile( "sjm130.root" )
-        aothrust1= createAnalysisObservable( f1, "thrust" )
-        f2= TFile( "sjm136.root" )
-        aothrust2= createAnalysisObservable( f2, "thrust" )
-        aothrust= combineAnalysisObservables( aothrust1, aothrust2 )
+        # f1= TFile( "sjm130.root" )
+        # aothrust1= createAnalysisObservable( f1, "thrust" )
+        # f2= TFile( "sjm136.root" )
+        # aothrust2= createAnalysisObservable( f2, "thrust" )
+        # aothrust= combineAnalysisObservables( [ aothrust1, aothrust2 ] )
+        aothrust= createCombineAnalysisObservables( ( "sjm130.root", "sjm136.root" ), "thrust" )
     else:
         f= TFile( filename )
         aothrust= createAnalysisObservable( f, "thrust" )    
@@ -488,7 +607,7 @@ def compareThrust( filename="sjm91_all.root", mtffilename="mtford-thrust91.txt" 
     tgethrusttot.SetName( "mtford" )
     tgethrusttot.Draw( "psame" )
     tgethrustst.Draw( "psame" )
-    tl= TLegend( 0.7, 0.9, 0.7, 0.9 )
+    tl= TLegend( 0.6, 0.75, 0.85, 0.9 )
     tl.AddEntry( "mtford", "M.T. Ford thesis", "ep" )
     tl.AddEntry( "thrust", "sjmanalysis", "ep" )
     tl.Draw()
@@ -648,7 +767,6 @@ def compareAllDurhamjetrates():
                                "/home/iwsatlas1/skluth/Downloads/JRTMC/share/NEW8/data.dat",
                                "donkers-durhamjets192.txt" )
     return
-
 def compareDurhamjetrates( filename="sjm91_all.root",
                            datafilename="/home/iwsatlas1/skluth/Downloads/JRTMC/share/NEW/data.dat",
                            donkersfilename="donkers-durhamjets91.txt" ):
@@ -723,7 +841,6 @@ def compareDurhamjetrates( filename="sjm91_all.root",
     legend.Draw()
     return
 
-
 # Compare EEC from various sources with own measurements 
 def compareEEC( filename="sjm91_all.root", datafilename="../EECMC/share/OPAL/data.dat" ):
     f= TFile( filename )
@@ -777,6 +894,7 @@ def compareEECs( filename="sjm91_all.root" ):
     compareEEC( filename, datafilename="../EECMC/share/L3/data.dat" )
     canv.SaveAs( "compareEECs.pdf" )
     return
+
 
 def testMigrationMatrix( obs="thrust", filename="sjm91_all.root" ):
     hdetstr= obs+" py mt stand"

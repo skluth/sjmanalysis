@@ -11,7 +11,7 @@ public:
   
   HepMC2AnalysisProcessor( const std::string & );
 
-  void runAnalysis();
+  void runAnalysis( Int_t maxevt=1000 );
 
 private:
 

@@ -7,16 +7,15 @@
 HepMC2AnalysisProcessor::HepMC2AnalysisProcessor( const std::string & filename ) :
   reader( filename ) {}
 
-void HepMC2AnalysisProcessor::runAnalysis() {
+void HepMC2AnalysisProcessor::runAnalysis( Int_t maxevt ) {
 
-  for( int ievent= 0; ievent < 1000; ievent++ ) {
-
-    if( reader.GetEvent() ) {
+  Int_t ievent= 0;
+  while( reader.GetNextEvent( maxevt ) ) {
       
-      const std::vector<TLorentzVector> vtlvisr= reader.GetLorentzVectors( "isr" );
-
-      if( reader.MCNonRad() ) {
-      
+    const std::vector<TLorentzVector> vtlvisr= reader.GetLorentzVectors( "isr" );
+    
+    if( reader.MCNonRad() ) {
+              
       const std::vector<TLorentzVector> vtlvh= reader.GetLorentzVectors( "hadron" );
       std::cout << "HepMC2AnalysisProcessor::runAnalysis: event " << ievent+1 << std::endl;
       std::cout << "Hadron level" << std::endl;
@@ -63,7 +62,7 @@ void HepMC2AnalysisProcessor::runAnalysis() {
 		  << sump.Pz() << " "
 		  << sump.E() << " "
 		  << sump.M() << std::endl;
-      
+        
       for( const TLorentzVector & tlv : vtlvisr ) {
 	sump+= tlv;
       }
@@ -73,21 +72,16 @@ void HepMC2AnalysisProcessor::runAnalysis() {
 		  << sumh.Pz() << " "
 		  << sumh.E() << " "
 		  << sumh.M() << std::endl;
-      }
-      else {
-	std::cout << "HepMC2AnalysisProcessor: MC radiative event " << ievent+1
-		  << std::endl;
-	for( const TLorentzVector & tlv : vtlvisr ) tlv.Print();
-      }
-             
     }
     else {
-      std::cout << "HepMC2AnalysisProcessor::runAnalysis: read " << ievent
-		<< " events" << std::endl;
-      break;
-      //      throw std::runtime_error( "HepMC2Reader::GetEvent() failure" );
+      std::cout << "HepMC2AnalysisProcessor: MC radiative event " << ievent+1
+		<< std::endl;
+      for( const TLorentzVector & tlv : vtlvisr ) tlv.Print();
     }
-  }
-    
   
+    ievent++;
+  }
+  std::cout << "HepMC2AnalysisProcessor::runAnalysis: read " << ievent
+	    << " events" << std::endl;
+
 }

@@ -46,7 +46,7 @@ FastJetYcutCalculator.cc FastJetEminCalculator.cc FastJetRCalculator.cc \
 FastJetPxConeRCalculator.cc FastJetPxConeEminCalculator.cc \
 LEPYcutCalculator.cc AnalysisProcessor.cc SjmConfigParser.cc \
 LEP1NtupleReader.cc LEP2NtupleReader.cc NtupleReader.cc \
-HepMC2Reader.cc
+HepMCRootReader.cc
 
 # HMC2SRCS = runhepmc2.cc
 
@@ -85,13 +85,25 @@ testsjmanalysis: testsjmanalysis.cc $(LIB)
 	LD_LIBRARY_PATH=$(PWD):$(ROOTLIBDIR):$(HEPMC2LIBDIR) ./$@
 
 
+
+GenEventDataDict.cc: GenEventData.hh GenEventDataLinkDef.hh
+	rootcint -f $@ -c $^
+
+testHepMCRootReader: testHepMCRootReader.cc HepMCRootReader.cc GenEventDataDict.cc
+	$(CXX) $(CXXFLAGS) $(GINCS) $(ROOTINC) -o $@ $^ $(GLIBS) $(ROOTLIBS)
+	LD_LIBRARY_PATH=$(ROOTLIBDIR) ./$@
+
+
 runjob: runjob.cc $(LIB)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) $(HEPMC2LIBS) -lboost_program_options
 
 
-runhepmc2: runhepmc2.cc $(LIB)
+runhepmc2: runhepmc2.cc $(LIB) GenEventDataDict.cc
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) $(HEPMC2LIBS) -lboost_program_options
 
+testHepMC2Reader: testHepMC2Reader.cc HepMC2Reader.cc
+	$(CXX) $(CXXFLAGS) $(GINCS) $(HEPMC2INC)  $(ROOTINC) -o $@ $^ $(GLIBS) $(HEPMC2LIBS) $(ROOTLIBS)
+	LD_LIBRARY_PATH=$(ROOTLIBDIR):$(HEPMC2LIBDIR) ./$@
 
 $(DICT): $(DICTSRCS:.cc=.hh) $(DICT:Dict.cc=LinkDef.h)
 	$(RC) -f $@ -c $^

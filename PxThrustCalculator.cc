@@ -13,7 +13,7 @@ extern "C" {
 };
 
 Double_t PxThrustCalculator::getValue( NtupleReader* ntr, 
-				       const std::string& reco ) const {
+				       const std::string & reco ) const {
   const std::vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( reco );
   Int_t ntrak= vtlv.size();
   for( Int_t itrak= 0; itrak < ntrak; itrak++ ) {
@@ -29,7 +29,8 @@ Double_t PxThrustCalculator::getValue( NtupleReader* ntr,
   Int_t ierr;
   pxlth4_( &ntrak, &itkdmpx, ptrak, thrval, thrvec, &ierr );
   if( ierr != 0 ) {
-    throw std::runtime_error( "PxThrustCalculator::getValue: pxlth4 error "+std::to_string( ierr ) );
+    throw std::runtime_error( "PxThrustCalculator::getValue: pxlth4 error " +
+			      std::to_string( ierr ) );
   }
   return 1.0-thrval[2];
 }

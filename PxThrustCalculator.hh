@@ -15,7 +15,7 @@ class PxThrustCalculator: public DifferentialCalculator {
 public:
   PxThrustCalculator() {}
   ~PxThrustCalculator() {}
-  Double_t getValue( NtupleReader*, const std::string& ) const;
+  Double_t getValue( NtupleReader*, const std::string & ) const;
 };
 
 #endif

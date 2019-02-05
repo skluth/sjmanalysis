@@ -61,6 +61,10 @@ SjmConfigParser::SjmConfigParser( int argc, const char* argv[] ) {
   specialOptsDescriptionMap["Signal.xsec"]= "Signal MC xsec";
   specialOptsDescriptionMap["Signal.name"]= "Signal MC name";
   specialOptsDescriptionMap["Signal.files"]= "Signal MC file names";
+
+  specialOptsDescriptionMap["Signal.treename"]= "Signal MC tree name";
+  specialOptsDescriptionMap["Signal.branchname"]= "Signal MC branch name";
+  
   specialOptsDescriptionMap["AltSignal.xsec"]= "Alt. signal MC xsec";
   specialOptsDescriptionMap["AltSignal.name"]= "Alt. signal MC name";
   specialOptsDescriptionMap["AltSignal.files"]= "Alt. signal MC file names";
@@ -82,6 +86,9 @@ SjmConfigParser::SjmConfigParser( int argc, const char* argv[] ) {
   valuesMap["General.maxevt"]= VS { "0" };
   valuesMap["General.sjmGeneralOptions"]= VS { "sjmGeneralOptions.cfg" };
 
+  valuesMap["Signal.treename"]= VS { "h10" };
+  valuesMap["Signal.branchname"]= VS { "h10" };
+
   declareOptions( getItem<std::string>( "config" ),
 		  specialOptsDescriptionMap );
     
@@ -94,6 +101,8 @@ SjmConfigParser::SjmConfigParser( int argc, const char* argv[] ) {
   generalOptsDescriptionMap["Observables.observable"]= "Observable names";
   generalOptsDescriptionMap["Observables.mtxunfold"]= "Mtx unfolding observables";
   
+  generalOptsDescriptionMap["MCObservables.observable"]= "MC Observable names";
+
   generalOptsDescriptionMap["Points.thrust"]= "Thrust bin edges";      
   generalOptsDescriptionMap["Points.cpar"]= "C-parameter bin edges";      
   generalOptsDescriptionMap["Points.EEC"]= "EEC bin edges";

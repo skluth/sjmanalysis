@@ -18,7 +18,7 @@ class HepMC2Reader : public NtupleReader {
 public:
 
   HepMC2Reader( const std::string& filename );
-  virtual ~HepMC2Reader() {}
+  virtual ~HepMC2Reader();
 
   virtual Int_t GetNumberEntries() { return 0; }
   virtual bool GetEvent( Int_t ievent=0 );
@@ -33,6 +33,9 @@ public:
   virtual bool MCNonRad();
   virtual bool isMC() { return true; }
 
+  virtual void printParticlesVertices();
+
+  
 private:
   
   void findISRphotons();

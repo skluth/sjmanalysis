@@ -13,7 +13,10 @@
 #include "LEPNtupleReader.hh"
 #include "LEP1NtupleReader.hh"
 #include "LEP2NtupleReader.hh"
-#include "HepMC2Reader.hh"
+
+// #include "HepMC2Reader.hh"
+#include "HepMCRootReader.hh"
+
 #include "VectorHelpers.hh"
 #include "DataStructure.hh"
 #include "fastjet/Error.hh"
@@ -63,7 +66,6 @@ AnalysisProcessor::processAnalyses( const vector<Analysis> & analyses,
   delete ntr;
   return nevents;
 }
-
 
 Int_t
 AnalysisProcessor::processAnalysesNtr( const vector<Analysis> & analyses,
@@ -459,20 +461,22 @@ void AnalysisProcessor::MCAnalysis() {
 
   cout << "AnalysisProcessor::MCAnalysis: Welcome" << endl;
 
-  // Get analysis variations from configuration:
-  Analysis hadronLevel( "mc hadron none nonrad" );
-  Analysis partonLevel( "mc parton none nonrad" );
+  // Setup analyses for MC:
+  string mcname= sjmConfigs.getItem<string>( "Signal.name" );
+  Analysis hadronLevel( mcname + " hadron none nonrad" );
+  Analysis partonLevel( mcname + " parton none nonrad" );
   vector<Analysis> analyses { hadronLevel, partonLevel };
   
-  // Define observables from configuration:
+  // Get observables from configuration:
   cout << "AnalysisProcessor::MCAnalysis: create observables" << endl;
   ObservableFactory obsfac( sjmConfigs );
   vector<Observable*> vobs;
   try {
-    vector<string> observables { "durhamymergefj" };
+    vector<string> observables= 
+      sjmConfigs.getItem<vector<string>>( "MCObservables.observable" );  
     vobs= obsfac.createObservables( observables, analyses );
   }
-  catch( const std::exception& e ) {
+  catch( const std::exception & e ) {
     cout << "AnalysisProcessor::MCAnalysis: create observables cought exception: "
 	 << e.what() << endl;
     return;
@@ -482,9 +486,12 @@ void AnalysisProcessor::MCAnalysis() {
   cout << "AnalysisProcessor::MCAnalysis: fill from hepmc files" << endl;
   try {
     vector<string> filenames= sjmConfigs.getItem<vector<string>>( "Signal.files" );
+    string treename= sjmConfigs.getItem<string>( "Signal.treename" );
+    string branchname= sjmConfigs.getItem<string>( "Signal.branchname" );
     for( const string & filename : filenames ) {
-      HepMC2Reader hmcr( filename );
-      processAnalysesNtr( analyses, vobs, &hmcr );
+      // HepMC2Reader hmc2r( filename );
+      HepMCRootReader hmcrr( filename, treename, branchname );
+      processAnalysesNtr( analyses, vobs, &hmcrr );
     }
   }
   catch( const std::exception& e ) {

@@ -55,7 +55,7 @@ ObservableFactory::createObservables( const vector<string> & obsnames,
   vector<Double_t> ycutpoints( ynmpoints.begin()+1, ynmpoints.end()-2 );
   for( const string & name : obsnames ) {
     Observable* obsp= 0;
-    if( nameIs( name, "thrust" ) ) {
+    if( nameIs( name, "pxthrust" ) ) {
       obsp= new ObsDifferential( "thrust", 
 				 sjmConfigs.getPoints( "thrust" ),
 				 analyses, 

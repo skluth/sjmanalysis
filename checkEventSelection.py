@@ -1,9 +1,9 @@
 
-import SjmConfigParser
-
 from ROOT import TChain
 
 def checkSelection( cfgfile="sjmconfig_192.cfg" ):
+
+    import SjmConfigParser
 
     configfiles= [ cfgfile, "sjmGeneralOptions.cfg" ]
     config= SjmConfigParser.readConfig( configfiles )
@@ -17,7 +17,6 @@ def checkSelection( cfgfile="sjmconfig_192.cfg" ):
     testSample( config, "BkgWWllqq", ecms )
     testSample( config, "BkgWWqqqq", ecms )
     testSample( config, "BkgWWeeqq", ecms )
-
     
     return
 
@@ -30,7 +29,6 @@ def testSample( config, sample, ecms ):
         print filename
         chain.Add( filename )
     testChain( chain, ecms )
-
     return
 
         
@@ -56,3 +54,37 @@ def testChain( chain, ecms ):
 
     return
 
+
+def countEvents( obs="thrust" ):
+
+    from ROOT import TFile
+    
+    selectionKeys= [ "stand", "costt07", "sprold", "wqqlnhi", "wqqlnlo", "wqqqqhi", "wqqqqlo" ]
+    ecms= [ "91", "130", "136", "161", "172", "183", "189", "192", "196",
+                "200", "202", "205", "207" ]
+
+    print "Number of events for ecm (using "+obs+")"
+    print " ecm",
+    for selectionKey in selectionKeys:
+        print "{:>8s}".format( selectionKey ),
+    print
+
+    for ecm in ecms:
+        filename= "sjm"+ecm+".root"
+        if ecm == "91":
+            filename= "sjm91_all.root"
+        f= TFile( filename )
+        counters= dict()
+        for selectionKey in selectionKeys:
+            hkey= obs+" data mt "+selectionKey
+            hist= f.Get( hkey )
+            if hist:
+                counters[selectionKey]= hist.GetEntries()
+            else:
+                counters[selectionKey]= 0
+        print "{:>4s}".format( ecm ),
+        for selectionKey in selectionKeys:
+            print "{:8.1f}".format( counters.get( selectionKey ) ),
+        print
+        
+    return

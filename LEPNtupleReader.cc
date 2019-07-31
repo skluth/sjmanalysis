@@ -44,7 +44,7 @@ LEPNtupleReader::~LEPNtupleReader() {
 }
 
 void LEPNtupleReader::OpenFileAndLoadNtuple( const char* filename, 
-					  const char* ntid ) {
+					     const char* ntid ) {
   if( lprint ) {
     cout << "LEPNtupleReader::OpenFileAndLoadNtuple: opening file: " 
 	 << filename << endl;
@@ -126,12 +126,12 @@ bool LEPNtupleReader::inRange( Int_t njet, Int_t max ) {
 
 Double_t LEPNtupleReader::getRecoYmergeValue( const std::string& reco, 
 					      Int_t njet,
-					   Int_t maxmt, Float_t* Ymt, 
-					   Int_t maxtc, Float_t* Ytc, 
-					   Int_t maxt, Float_t* Yt, 
-					   Int_t maxc, Float_t* Yc, 
-					   Int_t maxh, Float_t* Yh, 
-					   Int_t maxp, Float_t* Yp ) {
+					      Int_t maxmt, Float_t* Ymt, 
+					      Int_t maxtc, Float_t* Ytc, 
+					      Int_t maxt, Float_t* Yt, 
+					      Int_t maxc, Float_t* Yc, 
+					      Int_t maxh, Float_t* Yh, 
+					      Int_t maxp, Float_t* Yp ) {
   Double_t result= -1.0;
   if( reco == "mt" and inRange( njet, maxmt ) ) result= Ymt[njet-1];
   else if( reco == "tc" and inRange( njet, maxtc ) ) result= Ytc[njet-1];
@@ -139,20 +139,27 @@ Double_t LEPNtupleReader::getRecoYmergeValue( const std::string& reco,
   else if( reco == "cluster" and inRange( njet, maxc ) ) result= Yc[njet-1];
   else if( reco == "hadron" and inRange( njet, maxh ) ) result= Yh[njet-1];
   else if( reco == "parton" and inRange( njet, maxp ) ) result= Yp[njet-1];
-  else {
-    std::cout << "LEPNtupleReader::getRecoYmergeValue: no value found " << reco << " "
-	      << njet << " " << maxmt << std::endl;
-  }
+  // else {
+  //   std::cout << "LEPNtupleReader::getRecoYmergeValue: no value found " << reco << " "
+  // 	      << njet << " ";
+  //   if( reco == "mt" ) std::cout << maxmt;
+  //   else if( reco == "tc" ) std::cout << maxtc;
+  //   else if( reco == "tracks" ) std::cout << maxt;
+  //   else if( reco == "cluster" ) std::cout << maxc;
+  //   else if( reco == "hadron" ) std::cout << maxh;
+  //   else if( reco == "parton" ) std::cout << maxp;
+  //   std::cout << std::endl;
+  // }
   return result;
 }
 
 Double_t LEPNtupleReader::getRecoValue( const std::string& reco, 
-				     Float_t mt,
-				     Float_t tc,
-				     Float_t tracks,
-				     Float_t cluster,
-				     Float_t hadron,
-				     Float_t parton ) {
+					Float_t mt,
+					Float_t tc,
+					Float_t tracks,
+					Float_t cluster,
+					Float_t hadron,
+					Float_t parton ) {
   Double_t value= -1.0;
   if( reco == "mt" ) value= mt;
   else if( reco == "tc" ) value= tc;

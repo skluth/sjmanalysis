@@ -388,51 +388,31 @@ void AnalysisProcessor::LEPAnalysis() {
 
   // Fill from data and MC (PYTHIA and HERWIG) ntuples:
   std::map<string,Double_t> eventCounts;
-  std::map<std::string,int> cutflowCounterData;
-  std::map<std::string,int> cutflowCounterSignal;
-  std::map<std::string,int> cutflowCounterAltSignal;
-  std::map<std::string,int> cutflowCounterWWllqq;
-  std::map<std::string,int> cutflowCounterWWqqqq;
-  std::map<std::string,int> cutflowCounterWWeeqq;
+  std::map<std::string,std::map<std::string,int>> cutflowCounters;
+  cutflowCounters["Data"]= std::map<std::string,int>();
+  cutflowCounters["Signal"]= std::map<std::string,int>();
+  cutflowCounters["AltSignal"]= std::map<std::string,int>();
   cout << "AnalysisProcessor::LEPAnalysis: fill from ntuples" << endl;
   try {
-    eventCounts["Data"]= processFiles( "Data.files", measuredAnalyses, vobs, cutflowCounterData );
-    // eventCounts["Data"]= 0.0;
-    // for( const string& datafilename : sjmConfigs.getFilepath( "Data.files" ) ) {
-    //   eventCounts["Data"]+= processAnalyses( measuredAnalyses, vobs, datafilename );
-    // }
-    eventCounts["Signal"]= processFiles( "Signal.files", pyAnalyses, vobs, cutflowCounterSignal );
-    // eventCounts["Signal"]= 0.0;
-    // for( const string& pyfilename : sjmConfigs.getFilepath( "Signal.files" ) ) {
-    //   eventCounts["Signal"]+= processAnalyses( pyAnalyses, vobs, pyfilename );
-    // }
-    eventCounts["AltSignal"]= processFiles( "AltSignal.files", hwAnalyses, vobs, cutflowCounterAltSignal );
-    // eventCounts["AltSignal"]= 0.0;
-    // for( const string& hwfilename : sjmConfigs.getFilepath( "AltSignal.files" ) ) {
-    //   eventCounts["AltSignal"]+= processAnalyses( hwAnalyses, vobs, hwfilename );
-    // }
+    eventCounts["Data"]= processFiles( "Data.files", measuredAnalyses, vobs,
+				       cutflowCounters["Data"] );
+    eventCounts["Signal"]= processFiles( "Signal.files", pyAnalyses, vobs,
+					 cutflowCounters["Signal"] );
+    eventCounts["AltSignal"]= processFiles( "AltSignal.files", hwAnalyses, vobs,
+					    cutflowCounters["AltSignal"] );
     // And from background if present:
     if( bkgllqqAnalyses.size() > 0 and
 	bkgqqqqAnalyses.size() > 0 and
 	bkgeeqqAnalyses.size() > 0 ) {
+      cutflowCounters["WWllqq"]= std::map<std::string,int>();
+      cutflowCounters["WWqqqq"]= std::map<std::string,int>();
+      cutflowCounters["WWeeqq"]= std::map<std::string,int>();
       eventCounts["BkgWWllqq"]= processFiles( "BkgWWllqq.files", bkgllqqAnalyses, vobs,
-					      cutflowCounterWWllqq );
+					      cutflowCounters["WWllqq"] );
       eventCounts["BkgWWqqqq"]= processFiles( "BkgWWqqqq.files", bkgqqqqAnalyses, vobs,
-					      cutflowCounterWWqqqq );
+					      cutflowCounters["WWqqqq"] );
       eventCounts["BkgWWeeqq"]= processFiles( "BkgWWeeqq.files", bkgeeqqAnalyses, vobs,
-					      cutflowCounterWWeeqq );
-      // eventCounts["BkgWWllqq"]= 0.0;
-      // for( const string& bkgfilename : sjmConfigs.getFilepath( "BkgWWllqq.files" ) ) {
-      // 	eventCounts["BkgWWllqq"]+= processAnalyses( bkgllqqAnalyses, vobs, bkgfilename );
-      // }
-      // eventCounts["BkgWWqqqq"]= 0.0;	  
-      // for( const string& bkgfilename : sjmConfigs.getFilepath( "BkgWWqqqq.files" ) ) {
-      // 	eventCounts["BkgWWqqqq"]+= processAnalyses( bkgqqqqAnalyses, vobs, bkgfilename );
-      // }
-      // eventCounts["BkgWWeeqq"]= 0.0;	  
-      // for( const string& bkgfilename : sjmConfigs.getFilepath( "BkgWWeeqq.files" ) ) {
-      // 	eventCounts["BkgWWeeqq"]+= processAnalyses( bkgeeqqAnalyses, vobs, bkgfilename );
-      // }
+					      cutflowCounters["WWeeqq"] );
     }
   }
   catch( const std::exception& e ) {
@@ -495,17 +475,23 @@ void AnalysisProcessor::LEPAnalysis() {
   // Write root objects (TH1D or TGraphErrors, and TH2D):
   OutputWriter writer( sjmConfigs.getItem<string>( "General.outfile" ) );
   writer.write( vfobs );
+  writer.writeCutflowCounters( cutflowCounters );
 
   // Print event counts and cut flow
   cout << "AnalysisProcessor::LEPAnalysis: Event counts:" << endl;
   for( const auto & keyValue : eventCounts ) {
     cout << keyValue.first << ": " << keyValue.second << endl;
   }
-  cout << "AnalysisProcessor::LEPAnalysis: cut flow" << endl;
-  for( const auto & cut : cutflowCounterData ) {
-    const string cutflowKey= cut.first;
-    int cutflowValue= cut.second;
-    cout << cutflowKey << ": " << cutflowValue << endl;
+  cout << "AnalysisProcessor::LEPAnalysis: cut flows" << endl;
+  for( const auto & keyValue : cutflowCounters ) {
+    const string cutflowCounterKey= keyValue.first;
+    cout << cutflowCounterKey << ":" << endl;
+    std::map<std::string,int> cutflowCounter= keyValue.second;
+    for( const auto & cut : cutflowCounter ) {
+      const string cutflowKey= cut.first;
+      int cutflowValue= cut.second;
+      cout << cutflowKey << ": " << cutflowValue << endl;
+    }
   }
   
   // The End:

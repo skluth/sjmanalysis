@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 class TFile;
 class FilledObservable;
@@ -18,6 +19,8 @@ public:
   ~OutputWriter();
 
   void write( const std::vector<FilledObservable*> & );
+  
+  void writeCutflowCounters( const std::map<std::string,std::map<std::string,int>> & );
 
 private:
 

@@ -1,5 +1,6 @@
 
-from ROOT import TChain
+from ROOT import TChain, TFile
+    
 
 def checkSelection( cfgfile="sjmconfig_192.cfg" ):
 
@@ -57,8 +58,6 @@ def testChain( chain, ecms ):
 
 def countEvents( obs="thrust" ):
 
-    from ROOT import TFile
-    
     selectionKeys= [ "stand", "costt07", "sprold", "wqqlnhi", "wqqlnlo", "wqqqqhi", "wqqqqlo" ]
     ecms= [ "91", "130", "136", "161", "172", "183", "189", "192", "196",
                 "200", "202", "205", "207" ]
@@ -88,3 +87,25 @@ def countEvents( obs="thrust" ):
         print
         
     return
+
+def cutFlow( ecms= [ "130" ] ):
+
+    for ecm in ecms:
+        filename= "sjm"+ecm+"_test.root"
+        f= TFile( filename )
+        keyList= f.GetListOfKeys()
+        countersKeys= [ key.GetTitle() for key in keyList if "Cutflow_" in key.GetTitle() ]
+        for counterskey in countersKeys:
+            print counterskey
+            hist= f.Get( counterskey )
+            if hist:
+                xaxis= hist.GetXaxis()
+                counterKeys= xaxis.GetLabels()
+                for counterKey in counterKeys:
+                    ibin= xaxis.FindBin( counterKey.String().Data() )
+                    counter= hist.GetBinContent( ibin )
+                    print counterKey, counter
+
+    return
+
+    

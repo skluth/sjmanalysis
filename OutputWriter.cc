@@ -50,10 +50,6 @@ OutputWriter::writeJetrate( const JetrateDataStructure* jrds,
   Double_t xerrors[n];
   for( Int_t i= 0; i < n; i++ ) xerrors[i]= 0.0;
   TGraphErrors tge( n, &(points[0]), &(values[0]), xerrors, &(errors[0]) );
-  // if( not jrds->getNormalised() ) {
-  //   tge.SetPoint( n, 99.0, jrds->getNEvents() );
-  //   tge.SetPointError( n, 0.0, 0.0 );
-  // }
   tge.SetMaximum( jrds->getNEvents() );
   tge.SetTitle( txt.c_str() );
   tge.SetMarkerStyle( 20 );
@@ -127,3 +123,25 @@ void OutputWriter::write( const vector<FilledObservable*> & vobs ) {
   }
   return;
 }
+
+void
+OutputWriter::writeCutflowCounters( const map<string,map<string,int>> & cutflowCountersMap ) {
+  for( const auto & keyValue1 : cutflowCountersMap ) {
+    string cutflowCounterskey= keyValue1.first;
+    map<string,int> cutflowCounters= keyValue1.second;
+    int nentries= cutflowCounters.size();
+    string key= "Cutflow_"+cutflowCounterskey;
+    TH1D hist( key.c_str(), key.c_str(), nentries, 0.0, double(nentries) );
+    int ibin= 0;
+    for( const auto & keyValue2 : cutflowCounters ) {
+      ibin++;
+      string cutflowCounterkey= keyValue2.first;
+      int cutflowCounter= keyValue2.second;
+      hist.SetBinContent( ibin, double(cutflowCounter) );
+      hist.GetXaxis()->SetBinLabel( ibin, cutflowCounterkey.c_str() );
+    }
+    hist.Write();
+  }
+  return;
+}
+  

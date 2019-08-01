@@ -21,11 +21,18 @@ class AnalysisProcessor {
 
   Int_t processAnalyses( const std::vector<Analysis> & analyses,
   			 const std::vector<Observable*> & vobs,
+			 std::map<std::string,int> & cutFlow,
   			 const std::string & filename );
   Int_t processAnalysesNtr( const std::vector<Analysis> & analyses,
 			    const std::vector<Observable*> & vobs,
+			    std::map<std::string,int> & cutFlow,
 			    NtupleReader* ntr );
-
+  
+  Double_t processFiles( const std::string & configKey,
+			 const std::vector<Analysis> & analyses,
+			 const std::vector<Observable*> & vobs,
+			 std::map<std::string,int> & cutFlow );
+  
   void processUnfolding( const std::vector<Analysis>& measuredAnalyses, 
 			 const std::string& unfoldsource,
 			 const std::vector<FilledObservable*>& vfobs );

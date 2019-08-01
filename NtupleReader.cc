@@ -1,6 +1,11 @@
 
 #include "NtupleReader.hh"
 #include <algorithm>
+#include <iostream>
+
+const std::map<std::string,bool> NtupleReader::getCutflow() {
+  return cutflow;
+}
 
 Double_t Evis( const std::vector<TLorentzVector> & v ) {
   Double_t evis= std::accumulate( v.begin(), v.end(), 0.0,

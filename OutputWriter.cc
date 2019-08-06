@@ -125,23 +125,29 @@ void OutputWriter::write( const vector<FilledObservable*> & vobs ) {
 }
 
 void
-OutputWriter::writeCutflowCounters( const map<string,map<string,int>> & cutflowCountersMap ) {
-  for( const auto & keyValue1 : cutflowCountersMap ) {
-    string cutflowCounterskey= keyValue1.first;
-    map<string,int> cutflowCounters= keyValue1.second;
-    int nentries= cutflowCounters.size();
-    string key= "Cutflow_"+cutflowCounterskey;
-    TH1D hist( key.c_str(), key.c_str(), nentries, 0.0, double(nentries) );
-    int ibin= 0;
-    for( const auto & keyValue2 : cutflowCounters ) {
-      ibin++;
-      string cutflowCounterkey= keyValue2.first;
-      int cutflowCounter= keyValue2.second;
-      hist.SetBinContent( ibin, double(cutflowCounter) );
-      hist.GetXaxis()->SetBinLabel( ibin, cutflowCounterkey.c_str() );
-    }
-    hist.Write();
+OutputWriter::writeMaps( const map< string, map<string,int> > & maps ) {
+  for( const auto & keyValue : maps ) {
+    writeMap( keyValue.second, keyValue.first );
   }
   return;
 }
-  
+
+template <typename T>
+void OutputWriter::writeMap( const map<string,T> & map, const string & key ) {
+  int nentries= map.size();
+  TH1D hist( key.c_str(), key.c_str(), nentries, 0.0, double(nentries) );
+  int ibin= 0;
+  for( const auto & keyValue : map ) {
+    ibin++;
+    string mapKey= keyValue.first;
+    T value= keyValue.second;
+    hist.SetBinContent( ibin, double(value) );
+    hist.GetXaxis()->SetBinLabel( ibin, mapKey.c_str() );
+  }
+  hist.Write();
+  return;
+}
+
+template 
+void OutputWriter::writeMap( const map<string,double> & map, const string & key );
+

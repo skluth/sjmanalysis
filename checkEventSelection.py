@@ -88,24 +88,90 @@ def countEvents( obs="thrust" ):
         
     return
 
-def cutFlow( ecms= [ "130" ] ):
+def unpackAlphanumericHisto( hist ):
+    values= dict()
+    xaxis= hist.GetXaxis()
+    if xaxis.IsAlphanumeric():
+        keys= xaxis.GetLabels()
+        for key in keys:
+            strKey= key.String().Data()
+            ibin= xaxis.FindBin( strKey )
+            value= hist.GetBinContent( ibin )
+            values[strKey]= value
+    else:
+        print "unpackAlphanumericHisto: not alphanumeric ", hist.GetName()
+    return values
 
-    for ecm in ecms:
-        filename= "sjm"+ecm+"_test.root"
-        f= TFile( filename )
-        keyList= f.GetListOfKeys()
-        countersKeys= [ key.GetTitle() for key in keyList if "Cutflow_" in key.GetTitle() ]
-        for counterskey in countersKeys:
-            print counterskey
-            hist= f.Get( counterskey )
-            if hist:
-                xaxis= hist.GetXaxis()
-                counterKeys= xaxis.GetLabels()
-                for counterKey in counterKeys:
-                    ibin= xaxis.FindBin( counterKey.String().Data() )
-                    counter= hist.GetBinContent( ibin )
-                    print counterKey, counter
+def getCutflow( ecm="161" ):
+    sampleCounters= dict()
+    filename= "sjm"+ecm+".root"
+    if ecm == "91":
+        filename= "sjm"+ecm+"_all.root"
+    f= TFile( filename )
+    eventCountsHisto= f.Get( "Eventcounts" )
+    eventCounts= unpackAlphanumericHisto( eventCountsHisto )
+    keyList= f.GetListOfKeys()
+    MCsamples= [ "Signal", "AltSignal", "BkgWWqqqq", "BkgWWllqq", "BkgWWeeqq" ]
+    samples= [ "Data" ] + MCsamples
+    countersKeys= [ key.GetTitle() for key in keyList if key.GetTitle() in samples ]
+    for counterskey in countersKeys:
+        hist= f.Get( counterskey )
+        if hist:
+            counters= unpackAlphanumericHisto( hist )
+            counters["events"]= eventCounts[counterskey]
+            sampleCounters[counterskey]= counters
+    import SjmConfigParser
+    cfgFilename= "sjmconfig_"+ecm+".cfg"
+    config= SjmConfigParser.readConfig( [ cfgFilename ] )
+    lumi= getFromConfig( config, "Data", "lumi" )
+    sampleCounters["Data"]["lumi"]= lumi
+    for section in MCsamples:
+        xsec= getFromConfig( config, section, "xsec" )
+        if xsec:
+            sampleCounters[section]["xsec"]= xsec
+    return sampleCounters
 
+def getFromConfig( config, section, key ):
+    import ConfigParser
+    result= None
+    try:
+        result= config.getfloat( section, key )
+    except( ConfigParser.NoSectionError, ConfigParser.NoOptionError ):
+        #print "getFromConfig: section or key error", section, key
+        pass
+    return result
+
+def printCutflow( ecm="161" ):
+    sampleCounters= getCutflow( ecm )
+    dataCounter= sampleCounters["Data"]
+    lumi= dataCounter["lumi"]
+    MCsamples= [ "Signal", "AltSignal", "BkgWWqqqq", "BkgWWllqq", "BkgWWeeqq" ]
+    print "Cutflow for ecm=", ecm
+    print "cut    ",
+    for sample in [ "Data" ] + MCsamples:
+        if sample in sampleCounters:
+            print "{:>9}".format( sample ),
+    print "{:>9}".format( "MC sum" )
+    cuts= [ "l2mh", "nch7", "costt09", "sprime", "wqqqq", "wqqln" ]
+    if ecm == "91":
+        cuts= [ "tkmh", "nch7", "costt09" ]
+    for cut in cuts:
+        print "{:7}".format( cut ),
+        print "{:9.1f}".format( dataCounter[cut] ),
+        mcsum= 0.0
+        for sample in MCsamples:
+            if sample in sampleCounters:
+                sampleCounter= sampleCounters[sample]
+                wgt= lumi*sampleCounter["xsec"]/sampleCounter["events"]
+                value= sampleCounter[cut] * wgt
+                if sample != "AltSignal":
+                    mcsum+= value                
+                print "{:9.1f}".format( value ),
+        print "{:9.1f}".format( mcsum )
     return
 
-    
+def printCutflows():
+    for ecm in [ 130, 136, 161, 172, 183, 189, 192, 196, 200, 202, 205, 207 ]:
+        printCutflow( str(ecm) )
+    return
+

@@ -29,7 +29,18 @@ FilledObservable::FilledObservable( const string & obsname,
 }
 
 void FilledObservable::finalise() {
-  for( auto & keyValue : datastructures ) (keyValue.second)->normalise();
+  for( auto & keyValue : datastructures ) {
+    DataStructure* ds= keyValue.second;
+    try {
+      ds->normalise();
+    }
+    catch( const std::runtime_error rte ) {
+      ds->setNormalisedTrue();
+      cout << "FilledObservable::finalise: datastructure::normalise exception "
+	   << getName() << " " << keyValue.first << " " << rte.what() << endl;
+    }
+  }
+  return;
 }
 
 void FilledObservable::Print() const {

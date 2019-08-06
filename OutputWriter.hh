@@ -20,7 +20,9 @@ public:
 
   void write( const std::vector<FilledObservable*> & );
   
-  void writeCutflowCounters( const std::map<std::string,std::map<std::string,int>> & );
+  void writeMaps( const std::map<std::string,std::map<std::string,int>> & );
+  template <typename T>
+  void writeMap( const std::map<std::string,T> &, const std::string & );
 
 private:
 

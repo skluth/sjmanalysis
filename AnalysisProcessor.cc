@@ -404,15 +404,15 @@ void AnalysisProcessor::LEPAnalysis() {
     if( bkgllqqAnalyses.size() > 0 and
 	bkgqqqqAnalyses.size() > 0 and
 	bkgeeqqAnalyses.size() > 0 ) {
-      cutflowCounters["WWllqq"]= std::map<std::string,int>();
-      cutflowCounters["WWqqqq"]= std::map<std::string,int>();
-      cutflowCounters["WWeeqq"]= std::map<std::string,int>();
+      cutflowCounters["BkgWWllqq"]= std::map<std::string,int>();
+      cutflowCounters["BkgWWqqqq"]= std::map<std::string,int>();
+      cutflowCounters["BkgWWeeqq"]= std::map<std::string,int>();
       eventCounts["BkgWWllqq"]= processFiles( "BkgWWllqq.files", bkgllqqAnalyses, vobs,
-					      cutflowCounters["WWllqq"] );
+					      cutflowCounters["BkgWWllqq"] );
       eventCounts["BkgWWqqqq"]= processFiles( "BkgWWqqqq.files", bkgqqqqAnalyses, vobs,
-					      cutflowCounters["WWqqqq"] );
+					      cutflowCounters["BkgWWqqqq"] );
       eventCounts["BkgWWeeqq"]= processFiles( "BkgWWeeqq.files", bkgeeqqAnalyses, vobs,
-					      cutflowCounters["WWeeqq"] );
+					      cutflowCounters["BkgWWeeqq"] );
     }
   }
   catch( const std::exception& e ) {
@@ -475,7 +475,8 @@ void AnalysisProcessor::LEPAnalysis() {
   // Write root objects (TH1D or TGraphErrors, and TH2D):
   OutputWriter writer( sjmConfigs.getItem<string>( "General.outfile" ) );
   writer.write( vfobs );
-  writer.writeCutflowCounters( cutflowCounters );
+  writer.writeMaps( cutflowCounters );
+  writer.writeMap( eventCounts, "Eventcounts" );
 
   // Print event counts and cut flow
   cout << "AnalysisProcessor::LEPAnalysis: Event counts:" << endl;

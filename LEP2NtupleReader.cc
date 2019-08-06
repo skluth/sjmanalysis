@@ -37,7 +37,8 @@ bool LEP2NtupleReader::Preselection( const std::string& ecms ) {
   float ntecms= 2.0*nt_Ebeam;
   range ecmsrange= ecmsranges.at( ecms );
   bool lecms= ntecms > ecmsrange.first and ntecms < ecmsrange.second;
-  bool result= l2mh and lecms;
+  bool costt095= abscostt() < 0.95;
+  bool result= l2mh and lecms and costt095;
   cutflow["l2mh"]= result;
   return result;
 }

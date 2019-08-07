@@ -124,8 +124,8 @@ void OutputWriter::write( const vector<FilledObservable*> & vobs ) {
   return;
 }
 
-void
-OutputWriter::writeMaps( const map< string, map<string,int> > & maps ) {
+template <typename T>
+void OutputWriter::writeMaps( const map< string, map<string,T> > & maps ) {
   for( const auto & keyValue : maps ) {
     writeMap( keyValue.second, keyValue.first );
   }
@@ -144,10 +144,16 @@ void OutputWriter::writeMap( const map<string,T> & map, const string & key ) {
     hist.SetBinContent( ibin, double(value) );
     hist.GetXaxis()->SetBinLabel( ibin, mapKey.c_str() );
   }
+  cout << "OutputWriter::writeMap: write map " << key << " as alphanumeric TH1D"
+       << endl;
   hist.Write();
   return;
 }
 
+template
+void OutputWriter::writeMaps( const map< string, map<string,int> > & maps );
+template 
+void OutputWriter::writeMap( const map<string,int> & map, const string & key );
 template 
 void OutputWriter::writeMap( const map<string,double> & map, const string & key );
 

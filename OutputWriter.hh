@@ -20,7 +20,8 @@ public:
 
   void write( const std::vector<FilledObservable*> & );
   
-  void writeMaps( const std::map<std::string,std::map<std::string,int>> & );
+  template <typename T>
+  void writeMaps( const std::map<std::string,std::map<std::string,T>> & );
   template <typename T>
   void writeMap( const std::map<std::string,T> &, const std::string & );
 
@@ -35,7 +36,5 @@ private:
   TFile* outputfile;
 
 };
-
-
 
 #endif

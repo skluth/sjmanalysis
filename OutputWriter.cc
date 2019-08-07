@@ -153,7 +153,5 @@ void OutputWriter::writeMap( const map<string,T> & map, const string & key ) {
 template
 void OutputWriter::writeMaps( const map< string, map<string,int> > & maps );
 template 
-void OutputWriter::writeMap( const map<string,int> & map, const string & key );
-template 
 void OutputWriter::writeMap( const map<string,double> & map, const string & key );
 

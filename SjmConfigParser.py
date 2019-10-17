@@ -1,9 +1,9 @@
 
 import ConfigParser
-# import os.path
 from collections import OrderedDict
 
 # Support multiple entries for same key:
+# From the net somewhere ...
 class MultiOrderedDict( OrderedDict ):
 
     def __setitem__( self, key, value ):

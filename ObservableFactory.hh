@@ -17,9 +17,9 @@ class ObservableFactory {
 
 public:
 
-  ObservableFactory( const SjmConfigParser & ); 
+  ObservableFactory( const SjmConfigParser & );
   ~ObservableFactory() {}
-  
+
   std::vector<Observable*>
   createObservables( const std::vector<std::string> & obsnames,
 		     const std::vector<Analysis> & analyses );

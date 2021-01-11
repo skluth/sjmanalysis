@@ -660,7 +660,7 @@ namespace sjmtests {
   TEST_F( ObsJetrTest, testfillfjycutj ) {
     fillFromNtuple( ntr, analysis1, obsfjycutj );
     vector<Double_t> n2jets= getObsValues( "jadeycutfjR2", analysis1, obsfjycutj );
-    vector<Double_t> n2jetsexp{ 0, 0, 0, 0, 1, 10, 26, 54, 80, 89, 34 };
+    vector<Double_t> n2jetsexp{ 0, 0, 0, 0, 1, 10, 26, 54, 80, 89, 0 };
     EXPECT_EQ( n2jetsexp, n2jets );
     vector<Double_t> n3jets= getObsValues( "jadeycutfjR3", analysis1, obsfjycutj );
     vector<Double_t> n3jetsexp{ 0, 0, 0, 0, 4, 29, 47, 34, 9, 0, 0 };
@@ -741,15 +741,20 @@ namespace sjmtests {
   }
 
   // SjmConfigParser tests:
+  TEST( SjmConfigParserTestCtor, testSjmConfigParserCtor ) {
+    int argc( 2 );
+    const char* argv[] { "program", "poconfig.cfg" };
+    SjmConfigParser sjmcp( argc, argv );
+    string cfgname= sjmcp.getItem<string>( "config" );
+    EXPECT_EQ( "poconfig.cfg", cfgname );
+    string energy= sjmcp.getItem<string>( "General.energy" );
+    EXPECT_EQ( energy, "91.2" );
+  }  
   class SjmConfigParserTest : public ::testing::Test {
   public:
-    int argc;
-    const char* argv[2];
     SjmConfigParser sjmcp;
-    SjmConfigParserTest() : argc(2), argv{ "program", "poconfig.cfg" }, 
-      sjmcp( argc, argv ) {} 
+    SjmConfigParserTest() : sjmcp( "poconfig.cfg" ) {} 
   };
-
   TEST_F( SjmConfigParserTest, testgetItemString ) {
     string cfgname= sjmcp.getItem<string>( "config" );
     EXPECT_EQ( "poconfig.cfg", cfgname );

@@ -1,6 +1,7 @@
 
 #include "NtupleReader.hh"
 #include <algorithm>
+#include <numeric>
 
 Double_t Evis( const std::vector<TLorentzVector> & v ) {
   Double_t evis= std::accumulate( v.begin(), v.end(), 0.0,

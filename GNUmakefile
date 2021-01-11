@@ -24,7 +24,7 @@ FASTJETINC = $(shell $(FASTJETCONFIG) --cxxflags )
 # FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --plugins )
 FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --plugins ) -lfastjetcontribfragile
 
-ROOTCONFIG = $(HOME)/Downloads/root/root_v6.12.04/bin/root-config
+ROOTCONFIG = $(HOME)/Downloads/root/root_v6.22.06/bin/root-config
 ROOTINC = $(shell $(ROOTCONFIG) --noauxcflags --cflags )
 ROOTLIBS = $(shell $(ROOTCONFIG) --libs )
 ROOTLIBDIR = $(shell $(ROOTCONFIG) --libdir )

@@ -308,7 +308,7 @@ def testSampling( mnevent=1000, nsamples=1000, opt="p" ):
 
 # Sampling tests of error calculation
 def sample( nsample=1000, acc=0.8, resolutionFactor=0.02, mnevent=1000, opt="sme",
-                width=7, precision=4 ):
+            width=7, precision=4 ):
 
     if "s" in opt:
         print "Sample from truth and gaussian smearing"
@@ -347,8 +347,8 @@ def sample( nsample=1000, acc=0.8, resolutionFactor=0.02, mnevent=1000, opt="sme
         histds, histd2s, hisths= fillSampleHistosSmear( fun, nsample, mnevent,
                                                         resolutionFactor, opt )
     elif "d" in opt:
-        histds, hisths= fillSampleHistosDraw( histref, histdet, nsample,
-                                                  mnevent )
+        histds, histd2s, hisths= fillSampleHistosDraw( histref, histdet, histdet2, nsample,
+                                                       mnevent, fun.GetTitle() )
 
     # Error matrices after filling
     errorMatrixhSample= sampleErrorMatrix( hisths )
@@ -357,12 +357,14 @@ def sample( nsample=1000, acc=0.8, resolutionFactor=0.02, mnevent=1000, opt="sme
     # Get results with migration matrix or bin-by-bin correction
     if "b" in opt:
         histcs, errorMatricesCorr= bbbCorrection( histds, cf, eventAcc,
-                                                      histdet, opt )
+                                                  histdet, opt )
+        histc2s, errorMatricesCorr2= bbbCorrection( histd2s, cf2, eventAcc,
+                                                    histdet2, opt )
     elif "m" in opt:
         histcs, errorMatricesCorr= matrixCorrection( histds, cf, CR, eventAcc,
-                                                         histdet, opt )
+                                                     histdet, opt )
         histc2s, errorMatricesCorr2= matrixCorrection( histd2s, cf2, CR2, eventAcc,
-                                                         histdet2, opt )
+                                                       histdet2, opt )
 
     # Error matrices after correction
     errorMatrixCorrAvg= averageMatrix( errorMatricesCorr )
@@ -427,8 +429,8 @@ def sample( nsample=1000, acc=0.8, resolutionFactor=0.02, mnevent=1000, opt="sme
         momentc2= histc2.Integral( 1, nbin )/histc2.GetEntries()
         mmomentc+= momentc
         mmomentc2+= momentc**2
-        # mmomerrc+= np.sqrt( np.sum( errorMatricesCorr[isample] ) )/histc.GetEntries()
-        mmomerrc+= sqrt( ( momentc2 - momentc**2 ) / histc2.GetEntries() )
+        mmomerrc+= np.sqrt( np.sum( errorMatricesCorr[isample] ) )/histc.GetEntries()
+        # mmomerrc+= sqrt( ( momentc2 - momentc**2 ) / histc2.GetEntries() )
         momenth= calcIntegral( histh )
         mmomenth+= momenth
         mmomenth2+= momenth**2
@@ -470,13 +472,13 @@ def sample( nsample=1000, acc=0.8, resolutionFactor=0.02, mnevent=1000, opt="sme
                 pulls[i]+= pull
                 pullsstd[i]+= pull**2
         # Error from covariance matrix or from sampling
-        # pullmerr= np.sqrt( np.sum( errorMatricesCorr[isample] ) )/histc.GetEntries()
+        pullmerr= np.sqrt( np.sum( errorMatricesCorr[isample] ) )/histc.GetEntries()
         # pullmerr= sqrt( mmomentc2 - mmomentc**2 )
         histc2= histc2s[isample]
         moment= calcIntegral( histc )
         nevent= histc2.GetEntries()
         moment2= histc2.Integral( 1, nbin )/nevent
-        pullmerr= sqrt( ( moment2 - moment**2 ) / nevent )
+        # pullmerr= sqrt( ( moment2 - moment**2 ) / nevent )
         pullm= ( moment - calcIntegral( histref ) ) / pullmerr
         pullmom+= pullm
         pullmom2+= pullm**2
@@ -586,20 +588,24 @@ def sample( nsample=1000, acc=0.8, resolutionFactor=0.02, mnevent=1000, opt="sme
     return
 
 # Sample by generating from reference histos
-def fillSampleHistosDraw( histref, histdet, nsample, mnevent ):
+def fillSampleHistosDraw( histref, histdet, histdet2, nsample, mnevent, title ):
     histds= dict()
+    histd2s= dict()
     hisths= dict()
     for isample in range( nsample ):
-        title= fun.GetTitle()
+        # title= fun.GetTitle()
         histh= TH1D( "histh"+str(isample), title+" h", nbin, binEdges )
         histd= TH1D( "histd"+str(isample), title+" d", nbin, binEdges )
+        histd2= TH1D( "histd2"+str(isample), title+" d 2", nbin, binEdges )
         nevent= gRandom.Poisson( mnevent )
         for ievent in range( nevent ):
             histh.Fill( histref.GetRandom() )
             histd.Fill( histdet.GetRandom() )
+            histd2.Fill( histdet2.GetRandom() )
         hisths[isample]= histh
         histds[isample]= histd
-    return histds, hisths
+        histd2s[isample]= histd2
+    return histds, histd2s, hisths
         
 # Sample by generating from "true" function and smearing
 def fillSampleHistosSmear( fun, nsample, mnevent, resolutionFactor, opt ):

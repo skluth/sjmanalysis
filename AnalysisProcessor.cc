@@ -307,7 +307,7 @@ void AnalysisProcessor::LEPAnalysis() {
     allAnalyses.insert( allAnalyses.end(), bkgqqqqAnalyses.begin(), bkgqqqqAnalyses.end() );
     allAnalyses.insert( allAnalyses.end(), bkgeeqqAnalyses.begin(), bkgeeqqAnalyses.end() );
   }
-  catch( const std::exception e ) {
+  catch( const std::exception & e ) {
     cout << "AnalysisProcessor::LEP1Analysis: no background analyses" << endl;
   }
   
@@ -320,7 +320,7 @@ void AnalysisProcessor::LEPAnalysis() {
       sjmConfigs.getItem<vector<string>>( "Observables.observable" );
     vobs= obsfac.createObservables( observables, allAnalyses );
   }
-  catch( const std::exception& e ) {
+  catch( const std::exception & e ) {
     cout << "AnalysisProcessor::LEP1Analysis: create observables cought exception: "
 	 << e.what() << endl;
     return;

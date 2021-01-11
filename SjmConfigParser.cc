@@ -47,7 +47,18 @@ SjmConfigParser::SjmConfigParser( int argc, const char* argv[] ) {
   catch( const po::error & ex ) {
     std::cerr << ex.what() << std::endl;
   }
+  setupOptions();
+  return;
+}
 
+SjmConfigParser::SjmConfigParser( const std::string & cfgFilename ) {
+  valuesMap["config"]= VS{ cfgFilename };
+  descriptionMap["config"]= "Config file";
+  setupOptions();
+}
+
+void SjmConfigParser::setupOptions() {
+  
   // Handle config file from cmd line:
   std::map< std::string, std::string > specialOptsDescriptionMap;
   specialOptsDescriptionMap["General.test"]= "test field";
@@ -231,6 +242,21 @@ std::string SjmConfigParser::getItem( const std::string& tag ) const {
 template bool SjmConfigParser::getItem( const std::string& tag ) const;
 template int SjmConfigParser::getItem( const std::string& tag ) const;
 template float SjmConfigParser::getItem( const std::string& tag ) const;
+
+// Simple methods for pyroot:
+std::string SjmConfigParser::getItemString( const std::string& tag ) const {
+  return getItem<std::string>( tag );
+}
+bool SjmConfigParser::getItemBool( const std::string& tag ) const {
+  return getItem<bool>( tag );
+}
+int SjmConfigParser::getItemInt( const std::string& tag ) const {
+  return getItem<int>( tag );
+}
+float SjmConfigParser::getItemFloat( const std::string& tag ) const {
+  return getItem<float>( tag );
+}
+
 
 // For vector<double> et al define special operator>>:
 template <typename T>

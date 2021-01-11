@@ -10,6 +10,7 @@ using std::endl;
 #include <string>
 using std::string;
 #include <stdexcept>
+#include <numeric>
 
 // Link PXLIB Fortran
 // extern "C" {
@@ -40,7 +41,7 @@ LEPNtupleReader::LEPNtupleReader( const char* filename, const char* ntid, const 
 
 LEPNtupleReader::~LEPNtupleReader() {
   try { CloseFile(); }
-  catch( std::runtime_error e ) {}
+  catch( const std::runtime_error& e ) {}
 }
 
 void LEPNtupleReader::OpenFileAndLoadNtuple( const char* filename, 

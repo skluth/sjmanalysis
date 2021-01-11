@@ -11,7 +11,6 @@
 #include <map>
 
 class NtupleReader;
-//class DataStructure;
 class DifferentialDataStructure;
 
 class ObsEEC : public Observable {

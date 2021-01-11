@@ -13,7 +13,7 @@ namespace hepmcreadertests {
   class HepMCRootReaderTest : public ::testing::Test {
   public:
     //HepMCRootReaderTest() : hmcr( "/mnt/scratch/skluth/sherpablackhatl_91.root" ) {}
-    HepMCRootReaderTest() : hmcr( "/mnt/scratch/skluth/hepmc2gevents.root",
+    HepMCRootReaderTest() : hmcr( "/home/skluth/Downloads/hepmc2gevents.root",
 				  "hepmc3_tree", "hepmc3_event" ) {}
     virtual ~HepMCRootReaderTest() {}
     HepMCRootReader hmcr;

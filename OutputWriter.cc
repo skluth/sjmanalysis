@@ -50,10 +50,6 @@ OutputWriter::writeJetrate( const JetrateDataStructure* jrds,
   Double_t xerrors[n];
   for( Int_t i= 0; i < n; i++ ) xerrors[i]= 0.0;
   TGraphErrors tge( n, &(points[0]), &(values[0]), xerrors, &(errors[0]) );
-  // if( not jrds->getNormalised() ) {
-  //   tge.SetPoint( n, 99.0, jrds->getNEvents() );
-  //   tge.SetPointError( n, 0.0, 0.0 );
-  // }
   tge.SetMaximum( jrds->getNEvents() );
   tge.SetTitle( txt.c_str() );
   tge.SetMarkerStyle( 20 );
@@ -127,3 +123,35 @@ void OutputWriter::write( const vector<FilledObservable*> & vobs ) {
   }
   return;
 }
+
+template <typename T>
+void OutputWriter::writeMaps( const map< string, map<string,T> > & maps ) {
+  for( const auto & keyValue : maps ) {
+    writeMap( keyValue.second, keyValue.first );
+  }
+  return;
+}
+
+template <typename T>
+void OutputWriter::writeMap( const map<string,T> & map, const string & key ) {
+  int nentries= map.size();
+  TH1D hist( key.c_str(), key.c_str(), nentries, 0.0, double(nentries) );
+  int ibin= 0;
+  for( const auto & keyValue : map ) {
+    ibin++;
+    string mapKey= keyValue.first;
+    T value= keyValue.second;
+    hist.SetBinContent( ibin, double(value) );
+    hist.GetXaxis()->SetBinLabel( ibin, mapKey.c_str() );
+  }
+  cout << "OutputWriter::writeMap: write map " << key << " as alphanumeric TH1D"
+       << endl;
+  hist.Write();
+  return;
+}
+
+template
+void OutputWriter::writeMaps( const map< string, map<string,int> > & maps );
+template 
+void OutputWriter::writeMap( const map<string,double> & map, const string & key );
+

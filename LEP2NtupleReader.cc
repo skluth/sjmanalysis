@@ -30,28 +30,31 @@ LEP2NtupleReader::LEP2NtupleReader( const char* filename,
 }
 
 bool LEP2NtupleReader::Preselection( const std::string& ecms ) {
-  bool result= true;
   Int_t icjst= nt_Icjst;
   Int_t iebst= nt_Iebst;
   Int_t il2mh= nt_Il2mh;
-  if( icjst != 3 or iebst != 3 or il2mh != 1 ) result= false;
-  range ecmsrange= ecmsranges.at( ecms );
+  bool l2mh= icjst == 3 and iebst == 3 and il2mh == 1;
   float ntecms= 2.0*nt_Ebeam;
-  if( ( ntecms < ecmsrange.first ) or 
-      ( ntecms > ecmsrange.second ) ) result= false;
+  range ecmsrange= ecmsranges.at( ecms );
+  bool lecms= ntecms > ecmsrange.first and ntecms < ecmsrange.second;
+  bool costt095= abscostt() < 0.95;
+  bool result= l2mh and lecms and costt095;
+  cutflow["l2mh"]= result;
   return result;
 }
 
 bool LEP2NtupleReader::Selection( const std::string& ecms ) {
-  bool result= true;
-  if( not Preselection( ecms ) ) result= false;
-  if( nt_Ntkd02 < 7 ) result= false;
-  if( abscostt() > 0.9 ) result= false;
+  bool preselection= Preselection( ecms );
+  bool nch7= nt_Ntkd02 >= 7;
+  bool costt09= abscostt() < 0.9;
+  cutflow["nch7"]= preselection and nch7;
+  bool result= preselection and nch7 and costt09;
+  cutflow["costt09"]= result;
   return result;
 }
 
 const std::map<std::string,bool> 
-LEP2NtupleReader::getSelections( const std::string& ecms ) {
+LEP2NtupleReader::getSelections( const std::string& ecms ) {  
   std::map<std::string,bool> selections;
   selections["stand"]= false;
   selections["sprold"]= false;
@@ -62,6 +65,10 @@ LEP2NtupleReader::getSelections( const std::string& ecms ) {
     selections["wqqqqhi"]= false;
     selections["wqqqqlo"]= false;
   }
+  cutflow["sprime"]= false;
+  cutflow["sprold"]= false;
+  cutflow["wqqqq"]= false;
+  cutflow["wqqln"]= false;
   if( Selection( ecms ) ) {
     double ecm= 2.0*nt_Ebeam;
     double sprime= sqrt( fabs( nt_Pspr[3]*nt_Pspr[3]-
@@ -75,6 +82,8 @@ LEP2NtupleReader::getSelections( const std::string& ecms ) {
     double sprcut= 10.0;
     bool lsprime= ecm - sprime < sprcut;
     bool lsprold= ecm - sprime_old < sprcut;
+    cutflow["sprime"]= lsprime;
+    cutflow["sprold"]= lsprold;
     if( ecms == "130" or ecms == "136" ) {
       if( lsprime ) selections["stand"]= true;
       if( lsprold ) selections["sprold"]= true;
@@ -100,9 +109,11 @@ LEP2NtupleReader::getSelections( const std::string& ecms ) {
 	if( lwqqlnLo and lwqqqq ) selections["wqqlnlo"]= true;
 	if( lwqqln and lwqqqqHi ) selections["wqqqqhi"]= true;
 	if( lwqqln and lwqqqqLo ) selections["wqqqqlo"]= true;
+	cutflow["wqqqq"]= lwqqqq;
+	cutflow["wqqln"]= lwqqqq and lwqqln;
       }
       if( lsprold and lwqqln and lwqqqq ) selections["sprold"]= true;
     }
-  }
+  }  
   return selections;
 }

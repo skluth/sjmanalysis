@@ -589,10 +589,10 @@ def compareThrust( filename="sjm91_all.root", mtffilename=None ):
         # f2= TFile( "sjm136.root" )
         # aothrust2= createAnalysisObservable( f2, "thrust" )
         # aothrust= combineAnalysisObservables( [ aothrust1, aothrust2 ] )
-        aothrust= createCombineAnalysisObservables( ( "sjm130.root", "sjm136.root" ), "thrust" )
+        aothrust= createCombineAnalysisObservables( ( "sjm130.root", "sjm136.root" ), "lepthrust" )
     else:
         f= TFile( filename )
-        aothrust= createAnalysisObservable( f, "thrust" )    
+        aothrust= createAnalysisObservable( f, "lepthrust" )    
     vx= array( "d", aothrust.aostand.getPointsCenter() )
     npoints= len(vx)-1
     vex= array( "d", npoints*[0.0] )

@@ -12,21 +12,22 @@ def checkFiles( runconfig="sjmconfig_91_96.cfg" ):
     for section in [ "BkgWWllqq", "BkgWWqqqq", "BkgWWeeqq" ]:
         if config.has_section( section ):
             files+= config.get( section, "files" ).split()
-    print files
+    path= config.get( "General", "path" )
     for fname in files:
-        if os.path.isfile( fname ):
-            print fname, "exists"
+        filepath= os.path.join( path, fname )
+        if os.path.isfile( filepath ):
+            print fname, "exists", "in", path
         else:
-            download( fname, config )
+            download( fname, path, config )
     return
 
-def download( fname, config ):
+def download( fname, path, config ):
     import wget
     import ssl
     url= config.get( "General", "url" )+"/"+fname
-    print "Downloading", url
+    print "Downloading", url, "into", path
     ssl._https_verify_certificates( 0 )
-    wget.download( url, fname )
+    wget.download( url, path )
     print
     return
 

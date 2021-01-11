@@ -31,7 +31,7 @@ public:
   virtual bool Preselection( const std::string& ) = 0;
   virtual bool Selection( const std::string& ) = 0;
   virtual const std::map<std::string,bool> getSelections( const std::string& ) = 0;
-
+  
   bool MCNonRad();
   bool isMC() { return nt_isMC; }
 

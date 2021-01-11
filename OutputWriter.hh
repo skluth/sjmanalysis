@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 class TFile;
 class FilledObservable;
@@ -18,6 +19,11 @@ public:
   ~OutputWriter();
 
   void write( const std::vector<FilledObservable*> & );
+  
+  template <typename T>
+  void writeMaps( const std::map<std::string,std::map<std::string,T>> & );
+  template <typename T>
+  void writeMap( const std::map<std::string,T> &, const std::string & );
 
 private:
 
@@ -30,7 +36,5 @@ private:
   TFile* outputfile;
 
 };
-
-
 
 #endif

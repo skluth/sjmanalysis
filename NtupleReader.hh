@@ -23,8 +23,14 @@ public:
     
   virtual const std::map<std::string,bool> getSelections( const std::string & ) = 0;
 
+  virtual const std::map<std::string,bool> getCutflow();
+  
   virtual bool MCNonRad() = 0;
   virtual bool isMC() = 0;
+
+protected:
+
+  std::map<std::string,bool> cutflow;
   
 };
 

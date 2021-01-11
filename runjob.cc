@@ -1,6 +1,7 @@
 
 #include "SjmConfigParser.hh"
 #include "AnalysisProcessor.hh"
+#include <iostream>
 
 int main( int argc, const char *argv[] ) {
 

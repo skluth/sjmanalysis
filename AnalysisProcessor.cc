@@ -32,6 +32,9 @@ using std::endl;
 #include <stdexcept>
 
 
+
+
+
 AnalysisProcessor::AnalysisProcessor( const SjmConfigParser& sjmcp ) :
   sjmConfigs( sjmcp ), maxevt( sjmcp.getItem<int>( "General.maxevt" ) ) {
 }  
@@ -59,17 +62,36 @@ AnalysisProcessor::createNtupleReader( const string& filename ) {
 Int_t
 AnalysisProcessor::processAnalyses( const vector<Analysis> & analyses,
 				    const vector<Observable*> & vobs,
+				    std::map<std::string,int> & cutflowCounter,
 				    const string & filename ) {
   cout << "processAnalyses: file " << filename << endl;
   NtupleReader* ntr= createNtupleReader( filename );
-  Int_t nevents= processAnalysesNtr( analyses, vobs, ntr );
+  Int_t nevents= processAnalysesNtr( analyses, vobs, cutflowCounter, ntr );
   delete ntr;
   return nevents;
+}
+
+void countCutflow( const map<string,Bool_t> & cutStatus,
+		     std::map<std::string,int> & cutflowCounter ) {
+  if( cutflowCounter.empty() ) {
+    std::cout << "countCutflow: initialise cut flow map" << std::endl;
+    for( auto const & keyValue : cutStatus ) {
+      std::cout << keyValue.first << " ";
+      cutflowCounter[keyValue.first]= 0;
+    }
+    std::cout << std::endl;
+  }
+  for( auto const & keyValue : cutStatus ) {
+    const string cutKey= keyValue.first;
+    Bool_t cutValue= keyValue.second;
+    if( cutValue ) cutflowCounter[cutKey]+= 1;
+  }
 }
 
 Int_t
 AnalysisProcessor::processAnalysesNtr( const vector<Analysis> & analyses,
 				       const vector<Observable*> & vobs,
+				       std::map<std::string,int> & cutflowCounter,
 				       NtupleReader* ntr ) {
   cout << "processAnalysesNtr: analyses:" << endl;
   for( const Analysis & analysis : analyses ) cout << analysis.getTag() << endl;
@@ -77,8 +99,10 @@ AnalysisProcessor::processAnalysesNtr( const vector<Analysis> & analyses,
 			<< maxevt << " events" << endl;
   string ecms= sjmConfigs.getItem<string>( "General.energy" );
   Int_t ievnt= 0;
-  while( ntr->GetNextEvent( maxevt ) ) {
+  while( ntr->GetNextEvent( maxevt ) ) {    
     const map<string,Bool_t> selections= ntr->getSelections( ecms );
+    const map<string,Bool_t> cutflow= ntr->getCutflow();
+    countCutflow( cutflow, cutflowCounter );
     bool MCnonrad= ntr->MCNonRad();
     for( const Analysis& analysis : analyses ) {
       string cuts= analysis.getCuts();
@@ -174,7 +198,6 @@ vector<Analysis> AnalysisProcessor::fillAnalyses( const string& tag ) {
   }  
   return result;
 }
-
 
 vector<Analysis>
 AnalysisProcessor::subtractBackground( const vector<FilledObservable*> & vfobs,
@@ -280,6 +303,16 @@ AnalysisProcessor::subtractBackground( const vector<FilledObservable*> & vfobs,
   return subtractedMeasuredAnalyses;
 }
 
+Double_t AnalysisProcessor::processFiles( const string & configKey,
+					  const vector<Analysis> & analyses,
+					  const vector<Observable*> & vobs,
+					  std::map<std::string,int> & cutFlow ) {
+  Double_t eventCount= 0.0;
+  for( const string & filename : sjmConfigs.getFilepath( configKey ) ) {
+    eventCount+= processAnalyses( analyses, vobs, cutFlow, filename );
+  }
+  return eventCount;
+}
 
 void AnalysisProcessor::LEPAnalysis() {
 
@@ -312,7 +345,7 @@ void AnalysisProcessor::LEPAnalysis() {
   }
   
   // Define observables from configuration:
-  cout << "AnalysisProcessor::LEP1Analysis: create observables" << endl;
+  cout << "AnalysisProcessor::LEPAnalysis: create observables" << endl;
   ObservableFactory obsfac( sjmConfigs );
   vector<Observable*> vobs;
   try {
@@ -321,7 +354,7 @@ void AnalysisProcessor::LEPAnalysis() {
     vobs= obsfac.createObservables( observables, allAnalyses );
   }
   catch( const std::exception & e ) {
-    cout << "AnalysisProcessor::LEP1Analysis: create observables cought exception: "
+    cout << "AnalysisProcessor::LEPAnalysis: create observables cought exception: "
 	 << e.what() << endl;
     return;
   }
@@ -355,46 +388,37 @@ void AnalysisProcessor::LEPAnalysis() {
 
   // Fill from data and MC (PYTHIA and HERWIG) ntuples:
   std::map<string,Double_t> eventCounts;
-  cout << "AnalysisProcessor::LEP1Analysis: fill from ntuples" << endl;
+  std::map<std::string,std::map<std::string,int>> cutflowCounters;
+  cutflowCounters["Data"]= std::map<std::string,int>();
+  cutflowCounters["Signal"]= std::map<std::string,int>();
+  cutflowCounters["AltSignal"]= std::map<std::string,int>();
+  cout << "AnalysisProcessor::LEPAnalysis: fill from ntuples" << endl;
   try {
-    eventCounts["Data"]= 0.0;
-    for( const string& datafilename : sjmConfigs.getFilepath( "Data.files" ) ) {
-      eventCounts["Data"]+= processAnalyses( measuredAnalyses, vobs, datafilename );
-    }
-    eventCounts["Signal"]= 0.0;
-    for( const string& pyfilename : sjmConfigs.getFilepath( "Signal.files" ) ) {
-      eventCounts["Signal"]+= processAnalyses( pyAnalyses, vobs, pyfilename );
-    }
-    eventCounts["AltSignal"]= 0.0;
-    for( const string& hwfilename : sjmConfigs.getFilepath( "AltSignal.files" ) ) {
-      eventCounts["AltSignal"]+= processAnalyses( hwAnalyses, vobs, hwfilename );
-    }
+    eventCounts["Data"]= processFiles( "Data.files", measuredAnalyses, vobs,
+				       cutflowCounters["Data"] );
+    eventCounts["Signal"]= processFiles( "Signal.files", pyAnalyses, vobs,
+					 cutflowCounters["Signal"] );
+    eventCounts["AltSignal"]= processFiles( "AltSignal.files", hwAnalyses, vobs,
+					    cutflowCounters["AltSignal"] );
     // And from background if present:
     if( bkgllqqAnalyses.size() > 0 and
 	bkgqqqqAnalyses.size() > 0 and
 	bkgeeqqAnalyses.size() > 0 ) {
-      eventCounts["BkgWWllqq"]= 0.0;	  
-      for( const string& bkgfilename : sjmConfigs.getFilepath( "BkgWWllqq.files" ) ) {
-	eventCounts["BkgWWllqq"]+= processAnalyses( bkgllqqAnalyses, vobs, bkgfilename );
-      }
-      eventCounts["BkgWWqqqq"]= 0.0;	  
-      for( const string& bkgfilename : sjmConfigs.getFilepath( "BkgWWqqqq.files" ) ) {
-	eventCounts["BkgWWqqqq"]+= processAnalyses( bkgqqqqAnalyses, vobs, bkgfilename );
-      }
-      eventCounts["BkgWWeeqq"]= 0.0;	  
-      for( const string& bkgfilename : sjmConfigs.getFilepath( "BkgWWeeqq.files" ) ) {
-	eventCounts["BkgWWeeqq"]+= processAnalyses( bkgeeqqAnalyses, vobs, bkgfilename );
-      }
+      cutflowCounters["BkgWWllqq"]= std::map<std::string,int>();
+      cutflowCounters["BkgWWqqqq"]= std::map<std::string,int>();
+      cutflowCounters["BkgWWeeqq"]= std::map<std::string,int>();
+      eventCounts["BkgWWllqq"]= processFiles( "BkgWWllqq.files", bkgllqqAnalyses, vobs,
+					      cutflowCounters["BkgWWllqq"] );
+      eventCounts["BkgWWqqqq"]= processFiles( "BkgWWqqqq.files", bkgqqqqAnalyses, vobs,
+					      cutflowCounters["BkgWWqqqq"] );
+      eventCounts["BkgWWeeqq"]= processFiles( "BkgWWeeqq.files", bkgeeqqAnalyses, vobs,
+					      cutflowCounters["BkgWWeeqq"] );
     }
   }
   catch( const std::exception& e ) {
-    cout << "AnalysisProcessor::LEP1Analysis: filling cought exception: "
+    cout << "AnalysisProcessor::LEPAnalysis: filling cought exception: "
 	 << e.what() << endl;
     return;
-  }
-  cout << "AnalysisProcessor::LEP1Analysis: Event counts:" << endl;
-  for( const auto & keyValue : eventCounts ) {
-    cout << keyValue.first << ": " << keyValue.second << endl;
   }
   
   // Get FilledObservables for further processing:
@@ -410,7 +434,7 @@ void AnalysisProcessor::LEPAnalysis() {
 						    eventCounts );
   }
   else {
-    cout << "AnalysisProcessor::LEP1Analysis: no background subtraction" << endl;
+    cout << "AnalysisProcessor::LEPAnalysis: no background subtraction" << endl;
   }
 
   // Unfolding bin-by-bin (or Matrix):
@@ -437,7 +461,7 @@ void AnalysisProcessor::LEPAnalysis() {
     processUnfolding( measuredHwAnalyses, "hw", vfobs );
   }
   catch( const std::exception& e ) {
-    cout << "AnalysisProcessor::LEP1Analysis: unfolding cought exception: "
+    cout << "AnalysisProcessor::LEPAnalysis: unfolding cought exception: "
 	 << e.what() << endl;
     return;
   }
@@ -451,7 +475,26 @@ void AnalysisProcessor::LEPAnalysis() {
   // Write root objects (TH1D or TGraphErrors, and TH2D):
   OutputWriter writer( sjmConfigs.getItem<string>( "General.outfile" ) );
   writer.write( vfobs );
+  writer.writeMaps( cutflowCounters );
+  writer.writeMap( eventCounts, "Eventcounts" );
 
+  // Print event counts and cut flow
+  cout << "AnalysisProcessor::LEPAnalysis: Event counts:" << endl;
+  for( const auto & keyValue : eventCounts ) {
+    cout << keyValue.first << ": " << keyValue.second << endl;
+  }
+  cout << "AnalysisProcessor::LEPAnalysis: cut flows" << endl;
+  for( const auto & keyValue : cutflowCounters ) {
+    const string cutflowCounterKey= keyValue.first;
+    cout << cutflowCounterKey << ":" << endl;
+    std::map<std::string,int> cutflowCounter= keyValue.second;
+    for( const auto & cut : cutflowCounter ) {
+      const string cutflowKey= cut.first;
+      int cutflowValue= cut.second;
+      cout << cutflowKey << ": " << cutflowValue << endl;
+    }
+  }
+  
   // The End:
   return;
 
@@ -488,10 +531,11 @@ void AnalysisProcessor::MCAnalysis() {
     vector<string> filenames= sjmConfigs.getItem<vector<string>>( "Signal.files" );
     string treename= sjmConfigs.getItem<string>( "Signal.treename" );
     string branchname= sjmConfigs.getItem<string>( "Signal.branchname" );
+    map<string,int> cutflow;
     for( const string & filename : filenames ) {
       // HepMC2Reader hmc2r( filename );
       HepMCRootReader hmcrr( filename, treename, branchname );
-      processAnalysesNtr( analyses, vobs, &hmcrr );
+      processAnalysesNtr( analyses, vobs, cutflow, &hmcrr );
     }
   }
   catch( const std::exception& e ) {

@@ -34,7 +34,7 @@ void FilledObservable::finalise() {
     try {
       ds->normalise();
     }
-    catch( const std::runtime_error rte ) {
+    catch( const std::runtime_error & rte ) {
       ds->setNormalisedTrue();
       cout << "FilledObservable::finalise: datastructure::normalise exception "
 	   << getName() << " " << keyValue.first << " " << rte.what() << endl;

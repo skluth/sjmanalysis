@@ -2,7 +2,7 @@
 
 from ROOT import *
 
-gROOT.LoadMacro( "libNtupleReader.so" )
+# gROOT.LoadMacro( "libNtupleReader.so" )
 gROOT.LoadMacro( "libNtupleReaderDict.so" )
 
 

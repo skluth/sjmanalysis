@@ -2,6 +2,7 @@
 #include "NtupleReader.hh"
 #include <algorithm>
 #include <iostream>
+#include <numeric>
 
 const std::map<std::string,bool> NtupleReader::getCutflow() {
   return cutflow;

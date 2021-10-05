@@ -65,7 +65,7 @@ def JADEAlgorithm( objects ):
     nynm= len(ymergeValues)
     return ymergeValues[nynm-4:nynm]
 
-def readData( filename="da91_96.pkl", maxevt=10 ):
+def readData( filename="da91_96.pkl", maxevt=100 ):
     with open( filename, "rb" ) as pklFile:
         data= pkl.load( pklFile )
     nevt= 0
@@ -74,8 +74,10 @@ def readData( filename="da91_96.pkl", maxevt=10 ):
             break
         nevt+= 1
         eventRecord= data[key]
+        # Get detector level objects, could be empty if event not selected
         objects= eventRecord["objects"]
         nobjs= len(objects)
+        print( "event number key:", nevt, key )
         
         fobjects= np.zeros( (4,nobjs) )
         for i in range( 4 ):
@@ -83,7 +85,6 @@ def readData( filename="da91_96.pkl", maxevt=10 ):
                 fobjects[i,j]= objects[j][i]
         
         ymergevalues= eventRecord["ynm"]
-        print( "event number key:", nevt, key )
 
         JADEymergevalues= JADEAlgorithm( objects )
         print( "JADE yij values:", JADEymergevalues )

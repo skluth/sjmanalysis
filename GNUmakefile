@@ -26,7 +26,7 @@ FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --plugins ) -lfastjetcontribfragil
 
 ROOTCONFIG = $(HOME)/Downloads/root/root_v6.22.06/bin/root-config
 ROOTINC = $(shell $(ROOTCONFIG) --noauxcflags --cflags )
-ROOTLIBS = $(shell $(ROOTCONFIG) --libs )
+ROOTLIBS = $(shell $(ROOTCONFIG) --libs ) -ltbb
 ROOTLIBDIR = $(shell $(ROOTCONFIG) --libdir )
 
 HEPMC2PATH = $(HOME)/qcd/hepmc/hepmc2.06.09/install

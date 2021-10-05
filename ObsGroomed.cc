@@ -61,7 +61,7 @@ std::string makeKey( const std::string & prefix,
 void ObsGroomed::loop( const LoopFunc & func ) const {
   for( Double_t beta : betaValues ) {
     for( Double_t zcut : zcutValues ) {
-      for( const std::string & key : { "grthrust", "grcpar" } ) {
+      for( const std::string key : { "grthrust", "grcpar" } ) {
 	std::string bzkey= makeKey( key, beta, zcut );
 	func( key, bzkey );
       }

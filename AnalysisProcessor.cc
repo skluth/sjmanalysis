@@ -340,7 +340,7 @@ void AnalysisProcessor::LEPAnalysis() {
     allAnalyses.insert( allAnalyses.end(), bkgqqqqAnalyses.begin(), bkgqqqqAnalyses.end() );
     allAnalyses.insert( allAnalyses.end(), bkgeeqqAnalyses.begin(), bkgeeqqAnalyses.end() );
   }
-  catch( const std::exception e ) {
+  catch( const std::exception & e ) {
     cout << "AnalysisProcessor::LEPAnalysis: no background analyses" << endl;
   }
   

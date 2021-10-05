@@ -271,7 +271,7 @@ void SjmConfigParser::printConfig() const {
       }
       else {
 	cout << endl;
-	for( const std::string line : lines ) cout << line << endl;
+	for( const std::string & line : lines ) cout << line << endl;
       }
     }
     else {

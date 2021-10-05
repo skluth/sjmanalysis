@@ -13,7 +13,8 @@
 #pragma link C++ class map<string,DataStructure*>+;
 #pragma link C++ class map<string,MatrixDataStructure*>+;
 #pragma link C++ class vector<Analysis>+;
-#pragma link C++ class NtupleReader;
+#pragma link C++ class LEP1NtupleReader;
+#pragma link C++ class LEP2NtupleReader;
 #pragma link C++ class Analysis;
 #pragma link C++ class DataStructure;
 #pragma link C++ class MatrixDataStructure;
@@ -27,6 +28,7 @@
 #pragma link C++ class ObsDifferential;
 #pragma link C++ class ObsJetrate;
 #pragma link C++ class TFastJet;
-#pragma link C++ class Unfolder;
+#pragma link C++ class BbbUnfolder;
 #pragma link C++ class OutputWriter;
+#pragma link C++ class SjmConfigParser;
 #endif

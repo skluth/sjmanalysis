@@ -8,7 +8,7 @@ OPT      = -g
 CXXSTD   = -std=c++17
 CXXFLAGS = -Wall -fPIC $(OPT) $(CXXSTD) -Wno-deprecated-declarations
 FC       = gfortran
-FFLAGS   = -fPIC $(OPT) 
+FFLAGS   = -fPIC $(OPT)
 
 #GTESTPATH = $(HOME)/Downloads/googletest/googletest-master/googletest
 #GMOCKPATH = $(HOME)/Downloads/googletest/googletest-master/googlemock
@@ -26,7 +26,7 @@ FASTJETINC = $(shell $(FASTJETCONFIG) --cxxflags )
 # FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --plugins ) -lfastjetcontribfragile
 FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs ) -lfastjetplugins -lsiscone_spherical -lsiscone -lRecursiveTools -lgfortran -lm -lquadmath
 
-ROOTCONFIG = $(HOME)/Downloads/root/install/bin/root-config
+ROOTCONFIG = $(HOME)/Downloads/root/root_v6.22.06/bin/root-config
 ROOTINC = $(shell $(ROOTCONFIG) --noauxcflags --cflags )
 # ROOTLIBS = $(shell $(ROOTCONFIG) --libs )
 # Recent ROOT 6.24/06 root-config emits libraries inconsistent :(

@@ -24,15 +24,16 @@ ROOTLIBDIR = $(shell root-config --libdir )
 
 CPPFLAGS = $(ROOTINC) $(FASTJETINC)
 
-SRCS = NtupleReader.cc TFastJet.cc Analysis.cc \
+SRCS = NtupleReader.cc LEPNtupleReader.cc LEP1NtupleReader.cc LEP2NtupleReader.cc \
+TFastJet.cc Analysis.cc \
 JetrateDataStructure.cc DifferentialDataStructure.cc MatrixDataStructure.cc \
 Observable.cc ObsDifferential.cc ObsJetrate.cc ObsFastJetDiff.cc \
 ObsPartonShower.cc ObservableFactory.cc \
-FilledObservable.cc Unfolder.cc OutputWriter.cc \
-ThrustCalculator.cc YnmdCalculator.cc YnmjCalculator.cc \
+FilledObservable.cc Unfolder.cc BbbUnfolder.cc OutputWriter.cc \
+LEPThrustCalculator.cc LEPYnmCalculator.cc \
 FastJetYcutCalculator.cc FastJetEminCalculator.cc FastJetRCalculator.cc \
 FastJetPxConeRCalculator.cc FastJetPxConeEminCalculator.cc \
-YcutCalculator.cc SjmConfigParser.cc
+LEPYcutCalculator.cc SjmConfigParser.cc
 
 
 DICT = NtupleReaderDict.cc

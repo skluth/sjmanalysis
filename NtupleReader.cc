@@ -1,6 +1,9 @@
 
 #include "NtupleReader.hh"
 #include <algorithm>
+
+#include <numeric>
+
 #include <iostream>
 #include <numeric>
 

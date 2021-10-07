@@ -111,6 +111,9 @@ $(DICT): $(DICTSRCS:.cc=.hh) $(DICT:Dict.cc=LinkDef.h)
 $(DICTLIB): $(DICT:.cc=.o) $(DICTSRCS:.cc=.o)
 	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) -o $@ $^
 
+# Create cpython binding for YKERN for tests, use "import ylcus" in python
+yclus.cpython-38-x86_64-linux-gnu.so: yclus.f
+	f2py3 -c yclus.f -m yclus
 
 clean:
 	rm -f $(SRCS:.cc=.o) $(FSRCS:.f=.o) $(LIB) $(DEPS) testsjmanalysis testsjmanalysis.o runjob $(DICT) $(DICTLIB) $(DICTSRCS:.cc=.o)

@@ -65,7 +65,8 @@ def JADEAlgorithm( objects ):
     nynm= len(ymergeValues)
     return ymergeValues[nynm-4:nynm]
 
-def readData( filename="da91_96.pkl", maxevt=100 ):
+# def readData( filename="da91_96.pkl", maxevt=100 ):
+def readData( filename="mc5025_1_200.pkl", maxevt=100 ):
     with open( filename, "rb" ) as pklFile:
         data= pkl.load( pklFile )
     nevt= 0
@@ -73,38 +74,57 @@ def readData( filename="da91_96.pkl", maxevt=100 ):
         if nevt >= maxevt:
             break
         nevt+= 1
+
+        # Read complete event record
         eventRecord= data[key]
-        # Get detector level objects, could be empty if event not selected
-        objects= eventRecord["objects"]
-        nobjs= len(objects)
-        print( "event number key:", nevt, key )
-        
-        fobjects= np.zeros( (4,nobjs) )
-        for i in range( 4 ):
-            for j in range( nobjs ):
-                fobjects[i,j]= objects[j][i]
-        
-        ymergevalues= eventRecord["ynm"]
+        print( "Event number key:", nevt, key )
 
-        JADEymergevalues= JADEAlgorithm( objects )
-        print( "JADE yij values:", JADEymergevalues )
+        # Print ynm from ntuple, python JADE and fortran JADE
+        # for detector, parton, hadron level
+        printYnm( eventRecord, "objects", "ynm" )
+        printYnm( eventRecord, "partons", "partonynm" )
+        printYnm( eventRecord, "hadrons", "hadronynm" )
         
-        print( "Ynm merge values:", ymergevalues )
+    return
 
-        nt= len(objects)
-        ierryk= yclus.ykern( 1, fobjects )
-        if ierryk == 0:
-            print( "YKERN yij: ", end="" )
-            ptr, ierryt= yclus.ytree( False )
-            if ierryt == 0:
-                for i in range( 4 ):
-                    print( ptr[6,i], " ", end="" )
-                print( "" )
-            else:
-                print( "YTREE: ierr", ierryt )
+
+
+def printYnm( eventRecord, level, ynmkey ):
+
+    # Get detector level objects, could be empty if event not selected
+    objects= eventRecord[level]
+    
+    # Make array for JADE fortran before python JADE alg tramples on objects
+    nobjs= len(objects)
+    fobjects= np.zeros( (4,nobjs) )
+    for i in range( 4 ):
+        for j in range( nobjs ):
+            fobjects[i,j]= objects[j][i]
+
+    print( "Input:", nobjs, level )
+            
+    # Get yij from ntuple
+    ymergevalues= eventRecord[ynmkey]
+    print( "Ynm merge values:", ymergevalues )
+            
+    # Run JADE algorithm on 4-vector objects
+    JADEymergevalues= JADEAlgorithm( objects )
+    print( "JADE yij values:", JADEymergevalues )
+
+    # Run fortran JADE algorithm in YKERN
+    nt= len(objects)
+    ierryk= yclus.ykern( 1, fobjects )
+    if ierryk == 0:
+        print( "YKERN yij: ", end="" )
+        ptr, ierryt= yclus.ytree( False )
+        if ierryt == 0:
+            for i in range( 4 ):
+                print( ptr[6,i], " ", end="" )
+            print( "" )
         else:
-            print( "YKERN ierr", ierryk )
-        
+            print( "YTREE: ierr", ierryt )
+    else:
+        print( "YKERN ierr", ierryk )
     return
 
 

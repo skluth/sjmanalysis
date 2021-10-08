@@ -5,28 +5,32 @@ CXX      = g++
 LD       = $(CXX)
 RC       = rootcint
 OPT      = -g
-CXXSTD   = -std=c++11
+#CXXSTD   = -std=c++11 root 6.24 built with U20.04 standard c++14
+CXXSTD   = -std=c++14
 CXXFLAGS = -Wall -fPIC $(OPT) $(CXXSTD) -Wno-deprecated-declarations
 FC       = gfortran
 FFLAGS   = -fPIC $(OPT) 
 
-#GTESTPATH = $(HOME)/Downloads/googletest/googletest-master/googletest
-#GMOCKPATH = $(HOME)/Downloads/googletest/googletest-master/googlemock
-# GMOCKPATH = $(HOME)/Downloads/googletest/googlemock
-#GINCS = -I $(GMOCKPATH)/include -I $(GTESTPATH)/include
-#GLIBS = -L $(GMOCKPATH) -l gmock -L $(GTESTPATH) -lgtest -lpthread
-GTESTPATH = $(HOME)/Downloads/googletest
+# Googletest
+GTESTPATH = $(HOME)/Downloads/googletest-release/googletest-release-1.11.0
 GINCS = -I $(GTESTPATH)/include
-GLIBS = -L $(GTESTPATH)/lib -l gmock -l gtest -l pthread
+GLIBS = -L $(GTESTPATH)/lib -lgmock -lgtest -lpthread
 
+# Fastjet
 FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.3.0/install/bin/fastjet-config
 FASTJETINC = $(shell $(FASTJETCONFIG) --cxxflags )
 # FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --plugins )
-FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --plugins ) -lfastjetcontribfragile
+# FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --plugins ) -lfastjetcontribfragile
+# FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --rpath=no ) -lfastjetplugins -lsiscone_spherical -lsiscone -lRecursiveTools -lfastjettools -lfastjet -lgfortran -lm -lquadmath
+FASTJETPATH = $(shell $(FASTJETCONFIG) --prefix )
+FASTJETLIBDIR = $(FASTJETPATH)/lib
+FASTJETLIBS = -L$(FASTJETLIBDIR) -lfastjetplugins -lsiscone_spherical -lsiscone -lRecursiveTools -lfastjettools -lfastjet -lgfortran -lm -lquadmath
 
-ROOTCONFIG = $(HOME)/Downloads/root/root_v6.22.06/bin/root-config
+# ROOTCONFIG = $(HOME)/Downloads/root/root_v6.22.06/bin/root-config
+ROOTCONFIG = $(HOME)/Downloads/root/root_v6.24.06/bin/root-config
 ROOTINC = $(shell $(ROOTCONFIG) --noauxcflags --cflags )
-ROOTLIBS = $(shell $(ROOTCONFIG) --libs ) -ltbb
+BADLIBS = -lROOTDataFrame -lROOTTVecObs
+ROOTLIBS = $(filter-out $(BADLIBS), $(shell $(ROOTCONFIG) --libs ) )
 ROOTLIBDIR = $(shell $(ROOTCONFIG) --libdir )
 
 HEPMC2PATH = $(HOME)/qcd/hepmc/hepmc2.06.09/install
@@ -81,8 +85,8 @@ $(LIB): $(SRCS:.cc=.o) $(FSRCS:.f=.o)
 
 
 testsjmanalysis: testsjmanalysis.cc $(LIB)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GINCS) -o $@ $^ $(GLIBS) $(ROOTLIBS) $(HEPMC2LIBS) -lboost_program_options
-	LD_LIBRARY_PATH=$(PWD):$(ROOTLIBDIR):$(HEPMC2LIBDIR) ./$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GINCS) -o $@ $^ $(GLIBS) $(ROOTLIBS) $(FASTJETLIBS) $(HEPMC2LIBS) -lboost_program_options
+	LD_LIBRARY_PATH=$(PWD):$(ROOTLIBDIR):$(HEPMC2LIBDIR):$(FASTJETLIBDIR) ./$@
 
 
 
@@ -95,7 +99,7 @@ testHepMCRootReader: testHepMCRootReader.cc HepMCRootReader.cc GenEventDataDict.
 
 
 runjob: runjob.cc $(LIB)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) $(HEPMC2LIBS) -lboost_program_options
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) $(FASTJETLIBS) $(HEPMC2LIBS) -lboost_program_options
 
 
 runhepmc2: runhepmc2.cc $(LIB) GenEventDataDict.cc

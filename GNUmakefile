@@ -5,35 +5,33 @@ CXX      = g++
 LD       = $(CXX)
 RC       = rootcint
 OPT      = -g
-CXXSTD   = -std=c++17
+#CXXSTD   = -std=c++11 root 6.24 built with U20.04 standard c++14
+CXXSTD   = -std=c++14
 CXXFLAGS = -Wall -fPIC $(OPT) $(CXXSTD) -Wno-deprecated-declarations
 FC       = gfortran
 FFLAGS   = -fPIC $(OPT)
 
-#GTESTPATH = $(HOME)/Downloads/googletest/googletest-master/googletest
-#GMOCKPATH = $(HOME)/Downloads/googletest/googletest-master/googlemock
-# GMOCKPATH = $(HOME)/Downloads/googletest/googlemock
-#GINCS = -I $(GMOCKPATH)/include -I $(GTESTPATH)/include
-#GLIBS = -L $(GMOCKPATH) -l gmock -L $(GTESTPATH) -lgtest -lpthread
+# Googletest
 GTESTPATH = $(HOME)/Downloads/googletest-release/googletest-release-1.11.0
 GINCS = -I $(GTESTPATH)/include
 GLIBS = -L $(GTESTPATH)/lib -lgmock -lgtest -lpthread
 
+# Fastjet
 FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.3.0/install/bin/fastjet-config
 FASTJETINC = $(shell $(FASTJETCONFIG) --cxxflags )
-# FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --plugins )
-# FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --plugins ) -lRecursiveTools
-# FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs --plugins ) -lfastjetcontribfragile
-FASTJETLIBS = $(shell $(FASTJETCONFIG) --libs ) -lfastjetplugins -lsiscone_spherical -lsiscone -lRecursiveTools -lgfortran -lm -lquadmath
+FASTJETPATH = $(shell $(FASTJETCONFIG) --prefix )
+FASTJETLIBDIR = $(FASTJETPATH)/lib
+FASTJETLIBS = -L$(FASTJETLIBDIR) -lfastjetplugins -lsiscone_spherical -lsiscone -lRecursiveTools -lfastjettools -lfastjet -lgfortran -lm -lquadmath
 
+# ROOT
 ROOTCONFIG = $(HOME)/Downloads/root/root_v6.22.06/bin/root-config
 ROOTINC = $(shell $(ROOTCONFIG) --noauxcflags --cflags )
-# ROOTLIBS = $(shell $(ROOTCONFIG) --libs )
 # Recent ROOT 6.24/06 root-config emits libraries inconsistent :(
 BADLIBS = -lROOTDataFrame -lROOTVecOps
 ROOTLIBS = $(filter-out $(BADLIBS), $(shell $(ROOTCONFIG) --libs ))
 ROOTLIBDIR = $(shell $(ROOTCONFIG) --libdir )
 
+# HepMC2
 HEPMC2PATH = $(HOME)/qcd/hepmc/hepmc2.06.09/install
 HEPMC2INC = -I$(HEPMC2PATH)/include
 HEPMC2LIBS = -L$(HEPMC2PATH)/lib -lHepMC
@@ -87,7 +85,7 @@ $(LIB): $(SRCS:.cc=.o) $(FSRCS:.f=.o)
 
 testsjmanalysis: testsjmanalysis.cc $(LIB)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GINCS) -o $@ $^ $(GLIBS) $(ROOTLIBS) $(FASTJETLIBS) $(HEPMC2LIBS) -lboost_program_options
-	LD_LIBRARY_PATH=$(PWD):$(ROOTLIBDIR):$(HEPMC2LIBDIR) ./$@
+	LD_LIBRARY_PATH=$(PWD):$(ROOTLIBDIR):$(HEPMC2LIBDIR):$(FASTJETLIBDIR) ./$@
 
 
 
@@ -116,6 +114,9 @@ $(DICT): $(DICTSRCS:.cc=.hh) $(DICT:Dict.cc=LinkDef.h)
 $(DICTLIB): $(DICT:.cc=.o) $(DICTSRCS:.cc=.o)
 	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) -o $@ $^
 
+# Create cpython binding for YKERN for tests, use "import ylcus" in python
+yclus.cpython-38-x86_64-linux-gnu.so: yclus.f
+	f2py3 -c yclus.f -m yclus
 
 clean:
 	rm -f $(SRCS:.cc=.o) $(FSRCS:.f=.o) $(LIB) $(DEPS) testsjmanalysis testsjmanalysis.o runjob $(DICT) $(DICTLIB) $(DICTSRCS:.cc=.o)

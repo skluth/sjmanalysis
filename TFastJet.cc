@@ -36,8 +36,8 @@ public:
 };
 
 // Wrapper/adapter to fastjet classes:
-TFastJet::TFastJet( const vector<TLorentzVector> & vtl, 
-		    const char* jetalg, 
+TFastJet::TFastJet( const vector<TLorentzVector> & vtl,
+		    const char* jetalg,
 		    const double R,
 		    const double Emin ) : clusseq(0) {
 
@@ -103,11 +103,11 @@ TFastJet::TFastJet( const vector<TLorentzVector> & vtl,
 
   // Run jet algorithm:
   clusseq= new fastjet::ClusterSequence( vtl, jetdef );
-  
+
 }
 
 TFastJet::~TFastJet() {
-  if( clusseq ) delete clusseq;  
+  if( clusseq ) delete clusseq;
 }
 
 // All jets with p_t > p_t,min:
@@ -127,23 +127,8 @@ const vector<TLorentzVector> TFastJet::inclusive_eejets( const double Emin ) {
 // Fixed number of jets (e+e-):
 const vector<TLorentzVector> TFastJet::exclusive_eejets( const int njets ) {
   vector<fastjet::PseudoJet> excljets= clusseq->exclusive_jets( njets );
-
-  std::cout << "TFastJet::exclusive_eejets: excljets " << excljets.size() << std::endl;
-
   vector<fastjet::PseudoJet> pjets= sorted_by_E( excljets );
-
-  std::cout << "TFastJet::exclusive_eejets: pjets " << pjets.size() << std::endl;
-
-  const vector<TLorentzVector> tlv= copyPseudoJetsToLorentzVectors( pjets );
-
-  std::cout << "TFastJet::exclusive_eejets: tlv " << tlv.size() << std::endl;
-  for( const TLorentzVector& lv : tlv ) {
-    lv.Print();
-  }
-  
-  return tlv;
-  
-  //return copyPseudoJetsToLorentzVectors( pjets );
+  return copyPseudoJetsToLorentzVectors( pjets );
 }
 
 // Same with index maps of jets to input 4-vectors:
@@ -223,11 +208,11 @@ double TFastJet::Evis() {
 
 // class EEE0Recombiner implementation to study remobination effects with Jade:
 string EEE0Recombiner::description() const {
-  return "E0 scheme for EE"; 
+  return "E0 scheme for EE";
 }
 
 void EEE0Recombiner::recombine( const fastjet::PseudoJet & pa,
-				const fastjet::PseudoJet & pb, 
+				const fastjet::PseudoJet & pb,
 				fastjet::PseudoJet & pab ) const {
   pab.reset( pa.px() + pb.px(), pa.py() + pb.py(),
 	     pa.pz() + pb.pz(), pa.E() + pb.E() );

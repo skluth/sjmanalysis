@@ -7,6 +7,7 @@ RC       = rootcint
 OPT      = -g
 #CXXSTD   = -std=c++11 root 6.24 built with U20.04 standard c++14
 CXXSTD   = -std=c++14
+#CXXSTD   = -std=c++17
 CXXFLAGS = -Wall -fPIC $(OPT) $(CXXSTD) -Wno-deprecated-declarations
 FC       = gfortran
 FFLAGS   = -fPIC $(OPT)
@@ -17,14 +18,17 @@ GINCS = -I $(GTESTPATH)/include
 GLIBS = -L $(GTESTPATH)/lib -lgmock -lgtest -lpthread
 
 # Fastjet
-FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.3.0/install/bin/fastjet-config
+# FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.3.0/install/bin/fastjet-config
+FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.4.0/install/bin/fastjet-config
 FASTJETINC = $(shell $(FASTJETCONFIG) --cxxflags )
 FASTJETPATH = $(shell $(FASTJETCONFIG) --prefix )
 FASTJETLIBDIR = $(FASTJETPATH)/lib
 FASTJETLIBS = -L$(FASTJETLIBDIR) -lfastjetplugins -lsiscone_spherical -lsiscone -lRecursiveTools -lfastjettools -lfastjet -lgfortran -lm -lquadmath
 
 # ROOT
-ROOTCONFIG = $(HOME)/Downloads/root/root_v6.22.06/bin/root-config
+# ROOTCONFIG = $(HOME)/Downloads/root/root_v6.24.06/bin/root-config
+# ROOTCONFIG = $(HOME)/Downloads/root/install/bin/root-config
+ROOTCONFIG = $(shell which root-config )
 ROOTINC = $(shell $(ROOTCONFIG) --noauxcflags --cflags )
 # Recent ROOT 6.24/06 root-config emits libraries inconsistent :(
 BADLIBS = -lROOTDataFrame -lROOTVecOps

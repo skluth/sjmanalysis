@@ -37,12 +37,12 @@ using std::endl;
 
 AnalysisProcessor::AnalysisProcessor( const SjmConfigParser& sjmcp ) :
   sjmConfigs( sjmcp ), maxevt( sjmcp.getItem<int>( "General.maxevt" ) ) {
-}  
+}
 
 NtupleReader*
 AnalysisProcessor::createNtupleReader( const string& filename ) {
   string ecms= sjmConfigs.getItem<string>( "General.energy" );
-  vector<string> lep2ecms= { "130", "136", "161", "172", "183", "189", 
+  vector<string> lep2ecms= { "130", "136", "161", "172", "183", "189",
 			     "192", "196", "200", "202", "205", "207" };
   NtupleReader* result= 0;
   if( ecms == "91.2" ) {
@@ -95,11 +95,11 @@ AnalysisProcessor::processAnalysesNtr( const vector<Analysis> & analyses,
 				       NtupleReader* ntr ) {
   cout << "processAnalysesNtr: analyses:" << endl;
   for( const Analysis & analysis : analyses ) cout << analysis.getTag() << endl;
-  if( maxevt > 0 ) cout << "processAnalyses: process " 
+  if( maxevt > 0 ) cout << "processAnalyses: process "
 			<< maxevt << " events" << endl;
   string ecms= sjmConfigs.getItem<string>( "General.energy" );
   Int_t ievnt= 0;
-  while( ntr->GetNextEvent( maxevt ) ) {    
+  while( ntr->GetNextEvent( maxevt ) ) {
     const map<string,Bool_t> selections= ntr->getSelections( ecms );
     const map<string,Bool_t> cutflow= ntr->getCutflow();
     countCutflow( cutflow, cutflowCounter );
@@ -118,7 +118,7 @@ AnalysisProcessor::processAnalysesNtr( const vector<Analysis> & analyses,
 		obs->fill( ntr, analysis );
 	      }
 	      catch( const std::out_of_range& oor ) {
-		cout << oor.what() << " " << obs->getName() << " " 
+		cout << oor.what() << " " << obs->getName() << " "
 		     << analysis.getTag() << endl;
 	      }
 	    }
@@ -145,7 +145,7 @@ AnalysisProcessor::processAnalysesNtr( const vector<Analysis> & analyses,
 }
 
 void
-AnalysisProcessor::processUnfolding( const vector<Analysis>& measuredAnalyses, 
+AnalysisProcessor::processUnfolding( const vector<Analysis>& measuredAnalyses,
 				     const string& unfoldsource,
 				     const vector<FilledObservable*>& vfobs ) {
   cout << "processUnfolding: unfolding for analyses:" << endl;
@@ -180,7 +180,7 @@ AnalysisProcessor::processUnfolding( const vector<Analysis>& measuredAnalyses,
   return;
 }
 
-vector<FilledObservable*> 
+vector<FilledObservable*>
 AnalysisProcessor::getFilled( const vector<Observable*>& vobs ) {
   vector<FilledObservable*> vfobs;
   for( Observable* obs : vobs ) {
@@ -195,7 +195,7 @@ vector<Analysis> AnalysisProcessor::fillAnalyses( const string& tag ) {
   vector<string> AnalysisOptions= sjmConfigs.getItem<vector<string>>( tag );
   for( const string& options : AnalysisOptions ) {
     result.push_back( Analysis( options ) );
-  }  
+  }
   return result;
 }
 
@@ -218,7 +218,7 @@ AnalysisProcessor::subtractBackground( const vector<FilledObservable*> & vfobs,
 
   // All analyses
   for( const Analysis & analysis : measuredAnalyses ) {
-      
+
     // Analysis tags for bkgs and subtracted analysis:
     Analysis llqqAnalysis( analysis );
     llqqAnalysis.setSource( "llqq" );
@@ -229,10 +229,10 @@ AnalysisProcessor::subtractBackground( const vector<FilledObservable*> & vfobs,
     Analysis subtractedAnalysis( analysis );
     subtractedAnalysis.setBkgStatus( "llqq:qqqq:eeqq" );
     subtractedMeasuredAnalyses.push_back( subtractedAnalysis );
- 
+
     // All observables:
     for( FilledObservable* obs : vfobs ) {
-    
+
       // Check bkgs are there:
       for( const Analysis & analysisInObs : vector<Analysis> { analysis,
 	    llqqAnalysis, qqqqAnalysis, eeqqAnalysis } ) {
@@ -241,7 +241,7 @@ AnalysisProcessor::subtractBackground( const vector<FilledObservable*> & vfobs,
 				    analysisInObs.getTag() );
 	}
       }
-    
+
       // Get data:
       DataStructure* data= obs->getDataStructure( analysis );
       DataStructure* llqq= obs->getDataStructure( llqqAnalysis );
@@ -297,7 +297,7 @@ AnalysisProcessor::subtractBackground( const vector<FilledObservable*> & vfobs,
     	subtractScaled( 1.05, subtractedAnalysisHi );
 	subtractScaled( 0.95, subtractedAnalysisLo );
       }
-	
+
     }
   }
   return subtractedMeasuredAnalyses;
@@ -341,19 +341,15 @@ void AnalysisProcessor::LEPAnalysis() {
     allAnalyses.insert( allAnalyses.end(), bkgeeqqAnalyses.begin(), bkgeeqqAnalyses.end() );
   }
   catch( const std::exception & e ) {
-<<<<<<< HEAD
     cout << "AnalysisProcessor::LEPAnalysis: no background analyses" << endl;
-=======
-    cout << "AnalysisProcessor::LEP1Analysis: no background analyses" << endl;
->>>>>>> 19be2b6670cf122e20cf38c83908f28c6f731d46
   }
-  
+
   // Define observables from configuration:
   cout << "AnalysisProcessor::LEPAnalysis: create observables" << endl;
   ObservableFactory obsfac( sjmConfigs );
   vector<Observable*> vobs;
   try {
-    vector<string> observables= 
+    vector<string> observables=
       sjmConfigs.getItem<vector<string>>( "Observables.observable" );
     vobs= obsfac.createObservables( observables, allAnalyses );
   }
@@ -498,7 +494,7 @@ void AnalysisProcessor::LEPAnalysis() {
       cout << cutflowKey << ": " << cutflowValue << endl;
     }
   }
-  
+
   // The End:
   return;
 
@@ -513,14 +509,14 @@ void AnalysisProcessor::MCAnalysis() {
   Analysis hadronLevel( mcname + " hadron none nonrad" );
   Analysis partonLevel( mcname + " parton none nonrad" );
   vector<Analysis> analyses { hadronLevel, partonLevel };
-  
+
   // Get observables from configuration:
   cout << "AnalysisProcessor::MCAnalysis: create observables" << endl;
   ObservableFactory obsfac( sjmConfigs );
   vector<Observable*> vobs;
   try {
-    vector<string> observables= 
-      sjmConfigs.getItem<vector<string>>( "MCObservables.observable" );  
+    vector<string> observables=
+      sjmConfigs.getItem<vector<string>>( "MCObservables.observable" );
     vobs= obsfac.createObservables( observables, analyses );
   }
   catch( const std::exception & e ) {
@@ -528,7 +524,7 @@ void AnalysisProcessor::MCAnalysis() {
 	 << e.what() << endl;
     return;
   }
-  
+
   // Fill from hepmc2 files:
   cout << "AnalysisProcessor::MCAnalysis: fill from hepmc files" << endl;
   try {
@@ -563,6 +559,6 @@ void AnalysisProcessor::MCAnalysis() {
 
   // The End:
   return;
- 
+
 }
 

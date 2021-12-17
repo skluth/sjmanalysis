@@ -8,8 +8,8 @@
 #include <vector>
 #include <map>
 #include <functional>
+#include <string>
 
-class string;
 class NtupleReader;
 class TLorentzVector;
 class DifferentialDataStructure;
@@ -28,12 +28,12 @@ public:
   virtual std::vector<FilledObservable*> getFilledObservables() const;
 
 private:
-  
+
   virtual void addAnalysis( const Analysis & );
   const std::map<std::string,Double_t> getValues( NtupleReader*, const std::string & ) const;
   typedef std::function< void ( const std::string &, const std::string & ) > LoopFunc;
   void loop( const LoopFunc & ) const;
-  
+
   std::map<std::string,std::vector<Double_t>> binedges;
   std::vector<Double_t> betaValues;
   std::vector<Double_t> zcutValues;

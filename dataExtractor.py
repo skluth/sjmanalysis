@@ -1,15 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # run with e.g. LD_LIBRARY_PATH=/home/skluth/qcd/sjmanalysis:/home/skluth/Downloads/root/root_v6.22.06/lib:/home/skluth/qcd/hepmc/hepmc2.06.09/install/lib
 
 from ROOT import *
 
+gInterpreter.ProcessLine( '#include "LEP1NtupleReader.hh"' )
+gROOT.LoadMacro( "libNtupleReader.so" )
+
 from array import array
 
 import pickle as pkl
-
-gROOT.LoadMacro( "libNtupleReaderDict.so" )
-
 
 # def writeData( filename="da91_96_200.root", outfilename="da91_96.pkl", maxevt=100 ):
 def writeData( filename="mc5025_1_200.root", outfilename="mc5025_1_200.pkl", maxevt=100 ):
@@ -28,7 +28,8 @@ def writeData( filename="mc5025_1_200.root", outfilename="mc5025_1_200.pkl", max
         partonymergeValues= array( "f" )
         hadronymergeValues= array( "f" )
         # Check if selected at detector level
-        if ntr.Selection( "91.2" ):
+        txt= std.string
+        if ntr.Selection( std.string("91.2") ):
             copyTlvToArrays( datatlvList, ntr, "mt" )
             copyYnm( dataymergeValues, ntr, "mt" )
         # Parton and hadron level for all events
@@ -63,7 +64,7 @@ def copyTlvToArrays( tlvList, ntr, level ):
         a= array( "f" )
         for i in range( 4 ):
             a.append( tlv[i] )
-            tlvList.append( a )
+        tlvList.append( a )
     return
 
 

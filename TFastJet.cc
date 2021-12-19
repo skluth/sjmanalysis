@@ -1,5 +1,6 @@
 
 #include "TFastJet.hh"
+#include "EEE0Recombiner.hh"
 
 #include "fastjet/ClusterSequence.hh"
 #include "fastjet/PseudoJet.hh"
@@ -21,19 +22,7 @@ using std::string;
 using std::cout;
 using std::endl;
 #include <stdexcept>
-
 using std::vector;
-
-// Declare Recombiner class for E0 scheme e+e- algorithms:
-class EEE0Recombiner: public fastjet::JetDefinition::Recombiner {
-public:
-  EEE0Recombiner() {}
-  ~EEE0Recombiner() {}
-  virtual string description() const;
-  virtual void recombine( const fastjet::PseudoJet& pa,
-			  const fastjet::PseudoJet& pb, 
-			  fastjet::PseudoJet& pab ) const;
-};
 
 // Wrapper/adapter to fastjet classes:
 TFastJet::TFastJet( const vector<TLorentzVector> & vtl,
@@ -204,20 +193,5 @@ int TFastJet::njets( double ycut ) {
 // Visible energy a la fastjet:
 double TFastJet::Evis() {
   return clusseq->Q();
-}
-
-// class EEE0Recombiner implementation to study remobination effects with Jade:
-string EEE0Recombiner::description() const {
-  return "E0 scheme for EE";
-}
-
-void EEE0Recombiner::recombine( const fastjet::PseudoJet & pa,
-				const fastjet::PseudoJet & pb,
-				fastjet::PseudoJet & pab ) const {
-  pab.reset( pa.px() + pb.px(), pa.py() + pb.py(),
-	     pa.pz() + pb.pz(), pa.E() + pb.E() );
-  // double rescale= pab.E()/TMath::Sqrt( pab.perp2() + pab.pz()*pab.pz() );
-  // pab.reset_momentum( rescale*pab.px(), rescale*pab.py(), rescale*pab.pz(), pab.E() );
-  return;
 }
 

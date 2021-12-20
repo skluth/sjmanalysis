@@ -6,7 +6,7 @@
 
 # Import ROOT, needed fastjet headers and libs
 import ROOT
-ROOT.gInterpreter.AddIncludePath( "/home/iwsatlas1/skluth/qcd/fastjet/fastjet-3.4.0/install/include/" )
+ROOT.gInterpreter.AddIncludePath( "$HOME/qcd/fastjet/fastjet-3.4.0/install/include/" )
 ROOT.gInterpreter.ProcessLine( '#include "fastjet/JetDefinition.hh"' )
 ROOT.gInterpreter.ProcessLine( '#include "fastjet/ClusterSequence.hh"' )
 ROOT.gInterpreter.ProcessLine( '#include "fastjet/PseudoJet.hh"' )
@@ -19,12 +19,26 @@ ROOT.gSystem.Load( "libfastjettools.so" )
 ROOT.gSystem.Load( "/usr/lib/x86_64-linux-gnu/libgfortran.so.5" )
 
 # Make fastjet symbols available
-from ROOT.fastjet import JetDefinition, ClusterSequence, PseudoJet
-from ROOT.fastjet import ee_kt_algorithm, JadePlugin, SISConeSphericalPlugin, PxConePlugin, sorted_by_E
+from ROOT.fastjet import JetDefinition, ClusterSequence, PseudoJet, sorted_by_E
+from ROOT.fastjet import ee_kt_algorithm, JadePlugin, SISConeSphericalPlugin, PxConePlugin
 
-# Pass a recombiner subclass to fastjet::JetDefinition:
-ROOT.gInterpreter.ProcessLine( '#include "EEE0Recombiner.hh"' )
-from ROOT import EEE0Recombiner
+# Pass a recombiner subclass to fastjet::JetDefinition either from
+# header or as python subclass (will be slower)
+#ROOT.gInterpreter.ProcessLine( '#include "EEE0Recombiner.hh"' )
+#from ROOT import EEE0Recombiner
+# super().__init__() is needed by ROOT/cppyy so corresponding C++ ctor is called
+# or drop python subclass ctor
+class EEE0Recombiner( JetDefinition.Recombiner ):
+    def __init__( self ):
+        super().__init__()
+        print( "EEE0Recombiner.__init__: created" )
+        return
+    def description( self ):
+        return "E0 scheme for e+e-"
+    def recombine( self, pa, pb, pab ):
+        pab.reset( pa.px() + pb.px(), pa.py() + pb.py(),
+                   pa.pz() + pb.pz(), pa.E() + pb.E() )
+        return
 
 def main( algo="jade", njet=3 ):
 
@@ -59,7 +73,8 @@ def main( algo="jade", njet=3 ):
         Emin= 0.01*Evis
         plugin= PxConePlugin( R, Emin, 0.75, True, 1 )
         jetDef= JetDefinition( plugin )
-    print( "jet definition is:", jetDef.description() )
+    print( "Jet definition is:", jetDef.description() )
+    print( "Recombination method is:", jetDef.recombiner().description() )
     
     # cluster it
     clusseq= ClusterSequence( event, jetDef )
@@ -76,7 +91,7 @@ def main( algo="jade", njet=3 ):
     print_jets( jets )
     
     # print internal information about the jets
-    for ijet, jet in enumerate(jets):
+    for ijet, jet in enumerate( jets ):
         print( f"Number of constituents of jet {ijet} is {len( jet.constituents() )}" ) 
 
     # The End
@@ -92,7 +107,7 @@ def print_jets( jets ):
 # Read fastjet example event
 def read_event( filename ):
     f= open( filename, 'r' )
-    event= ROOT.std.vector(PseudoJet)()
+    event= ROOT.std.vector[PseudoJet]()
     for line in f:
         p= line.split()
         event.push_back( PseudoJet( float(p[0]), float(p[1]), float(p[2]), float(p[3]) ) )

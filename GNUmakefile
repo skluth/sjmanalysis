@@ -7,7 +7,6 @@ RC       = rootcint
 OPT      = -g
 #CXXSTD   = -std=c++11 root 6.24 built with U20.04 standard c++14
 CXXSTD   = -std=c++14
-#CXXSTD   = -std=c++17
 CXXFLAGS = -Wall -fPIC $(OPT) $(CXXSTD) -Wno-deprecated-declarations
 FC       = gfortran
 FFLAGS   = -fPIC $(OPT)
@@ -57,16 +56,14 @@ HepMCRootReader.cc
 
 # HMC2SRCS = runhepmc2.cc
 
-
 # Fortran stuff for thrust
 FSRCS = pxlth4.f
 
-
 LIB = libNtupleReader.so
 
-DICT = AnalysisDict.cc
-DICTLIB = lib$(DICT:.cc=.so)
-DICTSRCS = Analysis.cc TH1DAnalysisObject.cc TGEAnalysisObject.cc
+#DICT = AnalysisDict.cc
+#DICTLIB = lib$(DICT:.cc=.so)
+#DICTSRCS = Analysis.cc TH1DAnalysisObject.cc TGEAnalysisObject.cc
 
 DEPS = $(SRCS:.cc=.d) $(filter-out $(SRCS:.cc=.d), $(DICTSRCS:.cc=.d) )
 
@@ -77,21 +74,17 @@ all: testsjmanalysis runjob
 %.o : %.f
 	$(FC) $(FFLAGS) -c -o $@ $<
 
-
+# Dependencies
 $(DEPS): %.d: %.cc
 	$(CXX) $(CPPFLAGS) $(CXXSTD) -MM $< -MF $@
 -include $(DEPS)
 
-
 $(LIB): $(SRCS:.cc=.o) $(FSRCS:.f=.o)
 	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) $(HEPMC2LIBS) -o $@ $^
-
 
 testsjmanalysis: testsjmanalysis.cc $(LIB)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GINCS) -o $@ $^ $(GLIBS) $(ROOTLIBS) $(FASTJETLIBS) $(HEPMC2LIBS) -lboost_program_options
 	LD_LIBRARY_PATH=$(PWD):$(ROOTLIBDIR):$(HEPMC2LIBDIR):$(FASTJETLIBDIR) ./$@
-
-
 
 GenEventDataDict.cc: GenEventData.hh GenEventDataLinkDef.hh
 	rootcint -f $@ -c $^
@@ -100,10 +93,8 @@ testHepMCRootReader: testHepMCRootReader.cc HepMCRootReader.cc GenEventDataDict.
 	$(CXX) $(CXXFLAGS) $(GINCS) $(ROOTINC) -o $@ $^ $(GLIBS) $(ROOTLIBS)
 	LD_LIBRARY_PATH=$(ROOTLIBDIR) ./$@
 
-
 runjob: runjob.cc $(LIB)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) $(FASTJETLIBS) $(HEPMC2LIBS) -lboost_program_options
-
 
 runhepmc2: runhepmc2.cc $(LIB) GenEventDataDict.cc
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) $(HEPMC2LIBS) -lboost_program_options
@@ -112,11 +103,10 @@ testHepMC2Reader: testHepMC2Reader.cc HepMC2Reader.cc
 	$(CXX) $(CXXFLAGS) $(GINCS) $(HEPMC2INC)  $(ROOTINC) -o $@ $^ $(GLIBS) $(HEPMC2LIBS) $(ROOTLIBS)
 	LD_LIBRARY_PATH=$(ROOTLIBDIR):$(HEPMC2LIBDIR) ./$@
 
-$(DICT): $(DICTSRCS:.cc=.hh) $(DICT:Dict.cc=LinkDef.h)
-	$(RC) -f $@ -c $^
-
-$(DICTLIB): $(DICT:.cc=.o) $(DICTSRCS:.cc=.o)
-	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) -o $@ $^
+#$(DICT): $(DICTSRCS:.cc=.hh) $(DICT:Dict.cc=LinkDef.h)
+#	$(RC) -f $@ -c $^
+#$(DICTLIB): $(DICT:.cc=.o) $(DICTSRCS:.cc=.o)
+#	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) -o $@ $^
 
 # Create cpython binding for YKERN for tests, use "import ylcus" in python
 yclus.cpython-38-x86_64-linux-gnu.so: yclus.f

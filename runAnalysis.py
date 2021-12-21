@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 
 from ROOT import *
-
-# gROOT.LoadMacro( "libNtupleReader.so" )
-gROOT.LoadMacro( "libNtupleReaderDict.so" )
-
+gInterpreter.ProcessLine( '#include "LEP1NtupleReader.hh"' )
+gInterpreter.ProcessLine( '#include "LEP2NtupleReader.hh"' )
+gInterpreter.ProcessLine( '#include "SjmConfigParser.hh"' )
+gInterpreter.ProcessLine( '#include "Analysis.hh"' )
+gInterpreter.ProcessLine( '#include "ObservableFactory.hh"' )
+gInterpreter.ProcessLine( '#include "FilledObservable.hh"' )
+gInterpreter.ProcessLine( '#include "OutputWriter.hh"' )
+gROOT.LoadMacro( "libNtupleReader.so" )
 
 def createNtupleReader( filename, ecms ):
     lep2ecms= [ "130", "136", "161", "172", "183", "189", 
@@ -20,7 +24,7 @@ def createNtupleReader( filename, ecms ):
     return result
 
 def processAnalyses( analyses, vobs, filename, ecm, maxevt ):
-    print( "processAnalyses: file", filename, ", analyses:" )
+    print( "processAnalyses: file "+filename+", analyses:" )
     for analysis in analyses:
         print( analysis.getTag() )
     ntr= createNtupleReader( filename, ecm )

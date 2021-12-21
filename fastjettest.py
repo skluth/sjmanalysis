@@ -23,7 +23,7 @@ from ROOT.fastjet import JetDefinition, ClusterSequence, PseudoJet, sorted_by_E
 from ROOT.fastjet import ee_kt_algorithm, JadePlugin, SISConeSphericalPlugin, PxConePlugin
 
 # Pass a recombiner subclass to fastjet::JetDefinition either from
-# header or as python subclass (will be slower)
+# C++ header or as python subclass (will be slower)
 #ROOT.gInterpreter.ProcessLine( '#include "EEE0Recombiner.hh"' )
 #from ROOT import EEE0Recombiner
 # super().__init__() is needed by ROOT/cppyy so corresponding C++ ctor is called

@@ -4,6 +4,9 @@
 
 """
 
+# Example with root and fastjet not installed in system locations
+# LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/root/lib:/home/iwsatlas1/skluth/qcd/fastjet/fastjet-3.4.0/install/lib python3
+
 # Import ROOT, needed fastjet headers and libs
 import ROOT
 ROOT.gInterpreter.AddIncludePath( "$HOME/qcd/fastjet/fastjet-3.4.0/install/include/" )
@@ -13,14 +16,14 @@ ROOT.gInterpreter.ProcessLine( '#include "fastjet/PseudoJet.hh"' )
 ROOT.gInterpreter.ProcessLine( '#include "fastjet/JadePlugin.hh"' )
 ROOT.gInterpreter.ProcessLine( '#include "fastjet/SISConeSphericalPlugin.hh"' )
 ROOT.gInterpreter.ProcessLine( '#include "fastjet/PxConePlugin.hh"' )
+ROOT.gSystem.Load( "libgfortran.so.5" )
 ROOT.gSystem.Load( "libfastjet.so" )
 ROOT.gSystem.Load( "libfastjetplugins.so" )
 ROOT.gSystem.Load( "libfastjettools.so" )
-ROOT.gSystem.Load( "/usr/lib/x86_64-linux-gnu/libgfortran.so.5" )
 
 # Make fastjet symbols available
 from ROOT.fastjet import JetDefinition, ClusterSequence, PseudoJet, sorted_by_E
-from ROOT.fastjet import ee_kt_algorithm, JadePlugin, SISConeSphericalPlugin, PxConePlugin
+from ROOT.fastjet import ee_kt_algorithm, ee_genkt_algorithm, JadePlugin, SISConeSphericalPlugin, PxConePlugin
 
 # Pass a recombiner subclass to fastjet::JetDefinition either from
 # C++ header or as python subclass (will be slower)
@@ -68,6 +71,10 @@ def main( algo="jade", njet=3 ):
         Emin= 0.0
         plugin= SISConeSphericalPlugin( R, 0.75 )
         jetDef= JetDefinition( plugin )
+    elif "eeantikt" in algo:
+        R= 0.6
+        Emin= 0.0
+        jetDef= JetDefinition( ee_genkt_algorithm, R, -1.0 )
     elif "pxcone" in algo:
         R= 0.6
         Emin= 0.01*Evis
@@ -83,7 +90,7 @@ def main( algo="jade", njet=3 ):
     print( "Event has {0} particles".format( len(event) ) )
     if "durham" in algo or "jade" in algo:
         clusseqjets= clusseq.exclusive_jets( njet )
-    elif "eesiscone" or "pxcone" in algo:
+    elif "eesiscone" in algo or "pxcone" in algo or "eeantikt" in algo:
         clusseqjets= clusseq.inclusive_jets( Emin )
     jets= sorted_by_E( clusseqjets )
         

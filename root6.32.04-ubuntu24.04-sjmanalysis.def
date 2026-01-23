@@ -1,0 +1,90 @@
+
+Bootstrap: docker
+From: rootproject/root:6.32.04-ubuntu24.04
+
+%help
+
+ROOT Data Analysis Framework from official docker image
+with addons: boost libs, less, nano, git
+
+%post
+
+    echo "Installing the packages inside the container"
+    apt update
+    apt -y install less nano git lsb-release wget cmake
+    apt -y install build-essential
+    apt -y install libboost-all-dev
+    apt -y install libzip-dev
+    # apt -y install cernlib-base cernlib-core cernlib-core-dev libpdflib804-2-dev
+    # apt -y install 
+
+    # clean out package cache
+    apt-get clean
+
+    # googletest
+    mkdir /opt/googletest
+    cd /opt/googletest
+    wget https://github.com/google/googletest/releases/download/v1.16.0/googletest-1.16.0.tar.gz
+    tar -xvzf googletest-1.16.0.tar.gz
+    cd googletest-1.16.0
+    cmake CMakeLists.txt
+    make
+
+    # fastjet
+    mkdir /opt/fastjet
+    cd /opt/fastjet
+    wget https://fastjet.fr/repo/fastjet-3.5.1.tar.gz
+    tar -xvzf fastjet-3.5.1.tar.gz
+    cd fastjet-3.5.1
+    cmake -DCMAKE_INSTALL_PREFIX=. -DFASTJET_ENABLE_PLUGIN_PXCONE=ON CMakeLists.txt
+    make
+    make install
+
+    # hepmc3
+    mkdir /opt/hepmc
+    cd /opt/hepmc
+    wget http://hepmc.web.cern.ch/hepmc/releases/HepMC3-3.3.1.tar.gz
+    tar -xvzf HepMC3-3.3.1.tar.gz
+    cd HepMC3-3.3.1
+    cmake -DCMAKE_INSTALL_PREFIX=. \
+          -DHEPMC3_ENABLE_ROOTIO:BOOL=ON \
+          -DHEPMC3_ENABLE_PROTOBUFIO:BOOL=OFF \
+          -DHEPMC3_ENABLE_TEST:BOOL=OFF \
+          -DHEPMC3_INSTALL_INTERFACES:BOOL=ON \
+          -DHEPMC3_BUILD_STATIC_LIBS:BOOL=OFF \
+          -DHEPMC3_BUILD_DOCS:BOOL=OFF \
+          -DHEPMC3_ENABLE_PYTHON:BOOL=OFF \
+	  CMakeLists.txt
+    make
+    make install
+
+    # LHAPDF (for Sherpa)
+    mkdir /opt/LHAPDF
+    cd /opt/LHAPDF
+    wget https://lhapdf.hepforge.org/downloads/LHAPDF-6.5.3.tar.gz
+    tar -xvzf LHAPDF-6.5.3.tar.gz
+    cd LHAPDF-6.5.3
+    mkdir install
+    ./configure --prefix=$PWD/install
+    make
+    make install
+
+    # Sherpa MC (needs libzip-dev)
+    mkdir /opt/sherpa
+    cd /opt/sherpa
+    wget https://gitlab.com/sherpa-team/sherpa/-/archive/v3.0.3/sherpa-v3.0.3.tar.gz
+    tar -xvzf sherpa-v3.0.3.tar.gz
+    cd sherpa-v3.0.3
+    cmake -DLHAPDF_DIR=/opt/LHAPDF/LHAPDF-6.5.3/install/ \
+          -DHepMC3_DIR=/opt/hepmc/HepMC3-3.3.1/ \
+	  -DSHERPA_ENABLE_ROOT=ON \
+	  -DSHERPA_ENABLE_HEPMC3=ON \
+	  -DSHERPA_ENABLE_HEPMC3_ROOT=ON \
+	  -DSHERPA_ENABLE_TESTING=ON \
+	  CMakeLists.txt
+    cmake --build .
+    cmake --install .
+
+    # unminimize for login use
+    yes | unminimize
+

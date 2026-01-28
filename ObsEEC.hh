@@ -12,6 +12,7 @@
 
 class NtupleReader;
 class DifferentialDataStructure;
+class TLorentzVector;
 
 class ObsEEC : public Observable {
 
@@ -26,14 +27,20 @@ public:
   virtual std::vector<FilledObservable*> getFilledObservables() const;
   virtual void fill( NtupleReader* ntr, const Analysis & variation );
 
-private:  
+protected:
+    
+  virtual void calcWeight( const TLorentzVector&, const TLorentzVector&,
+			   Double_t& , Double_t& );
+
+  bool selfCorrelation;
+
+private:
 
   virtual void addAnalysis( const Analysis & );
 
   std::vector<Double_t> binedges;
-  bool selfCorrelation;
   std::map<std::string,DifferentialDataStructure*> data;
-
+  
 };
 
 #endif

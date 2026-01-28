@@ -20,7 +20,7 @@ ObsEEC::ObsEEC( const string & name,
 		const vector<Analysis> & variations,
 		const bool scOpt,
 		const bool lprint ) :
-  Observable( name ), binedges( bins ), selfCorrelation(scOpt) {
+  Observable( name ), selfCorrelation(scOpt), binedges( bins ) {
   addAnalyses( variations );
   if( lprint ) {
     cout << "ObsEEC::ObsEEC: Energy-Energy Correlation for " << name;
@@ -40,6 +40,7 @@ void ObsEEC::addAnalysis( const Analysis & analysis ) {
 
 // Calculuate EEC as 1/sigma*dEEC/dchi with chi in radian
 // incl. self-correlation or not
+// weight calculation can be overidden in subclasses
 void ObsEEC::fill( NtupleReader* ntr, const Analysis & variation ) {
   const vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( variation.getReco() );
   Double_t evis= Evis( vtlv );
@@ -50,15 +51,22 @@ void ObsEEC::fill( NtupleReader* ntr, const Analysis & variation ) {
   for( const TLorentzVector& tlv1 : vtlv ) {
     for( const TLorentzVector& tlv2 : vtlv ) {
       if( not selfCorrelation and ( &tlv1 == &tlv2 ) ) continue;
-      TVector3 v1= tlv1.Vect();
-      TVector3 v2= tlv2.Vect();
-      Double_t angle= v1.Angle( v2 );
-      Double_t eecvalue= tlv1.E()*tlv2.E()/evis2;
+      Double_t angle, eecweight;
+      calcWeight( tlv1, tlv2, angle, eecweight );
+      Double_t eecvalue= eecweight/evis2;
       dds->fill( angle, eecvalue );
     }
   }
   nevents+= 1.0;
   dds->setNEvents( nevents );
+  return;
+}
+void ObsEEC::calcWeight( const TLorentzVector& tlv1, const TLorentzVector& tlv2,
+			 Double_t& angle, Double_t& weight ) {
+  TVector3 v1= tlv1.Vect();
+  TVector3 v2= tlv2.Vect();
+  angle= v1.Angle( v2 );
+  weight= tlv1.E()*tlv2.E();
   return;
 }
 

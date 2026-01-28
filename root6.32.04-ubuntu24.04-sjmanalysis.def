@@ -7,6 +7,9 @@ From: rootproject/root:6.32.04-ubuntu24.04
 ROOT Data Analysis Framework from official docker image
 with addons: boost libs, less, nano, git
 
+%files
+    $PWD/LHAPDF-6.5.3.tar.gz /opt/LHAPDF/LHAPDF-6.5.3.tar.gz
+
 %post
 
     echo "Installing the packages inside the container"
@@ -21,6 +24,17 @@ with addons: boost libs, less, nano, git
     # clean out package cache
     apt-get clean
 
+    # LHAPDF (for Sherpa)
+    # This server is unstable so get tar.gz from local
+    # wget --no-check-certificate https://lhapdf.hepforge.org/downloads/LHAPDF-6.5.3.tar.gz
+    cd /opt/LHAPDF
+    tar -xvzf LHAPDF-6.5.3.tar.gz
+    cd LHAPDF-6.5.3
+    mkdir install
+    ./configure --prefix=$PWD/install
+    make
+    make install
+
     # googletest
     mkdir /opt/googletest
     cd /opt/googletest
@@ -30,13 +44,21 @@ with addons: boost libs, less, nano, git
     cmake CMakeLists.txt
     make
 
-    # fastjet
+    # fastjet & Co
     mkdir /opt/fastjet
     cd /opt/fastjet
     wget https://fastjet.fr/repo/fastjet-3.5.1.tar.gz
     tar -xvzf fastjet-3.5.1.tar.gz
     cd fastjet-3.5.1
     cmake -DCMAKE_INSTALL_PREFIX=. -DFASTJET_ENABLE_PLUGIN_PXCONE=ON CMakeLists.txt
+    make
+    make install
+    mkdir /opt/fastjetcontrib
+    cd /opt/fastjetcontrib
+    wget https://fastjet.fr/contrib/downloads/fjcontrib-1.101.tar.gz
+    tar -xvzf fjcontrib-1.101.tar.gz
+    cd fjcontrib-1.101
+    ./configure --fastjet-config=/opt/fastjet/fastjet-3.5.1/bin/fastjet-config
     make
     make install
 
@@ -55,17 +77,6 @@ with addons: boost libs, less, nano, git
           -DHEPMC3_BUILD_DOCS:BOOL=OFF \
           -DHEPMC3_ENABLE_PYTHON:BOOL=OFF \
 	  CMakeLists.txt
-    make
-    make install
-
-    # LHAPDF (for Sherpa)
-    mkdir /opt/LHAPDF
-    cd /opt/LHAPDF
-    wget https://lhapdf.hepforge.org/downloads/LHAPDF-6.5.3.tar.gz
-    tar -xvzf LHAPDF-6.5.3.tar.gz
-    cd LHAPDF-6.5.3
-    mkdir install
-    ./configure --prefix=$PWD/install
     make
     make install
 

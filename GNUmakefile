@@ -5,47 +5,44 @@ CXX      = g++
 LD       = $(CXX)
 RC       = rootcint
 OPT      = -g
-#CXXSTD   = -std=c++11 root 6.24 built with U20.04 standard c++14
-CXXSTD   = -std=c++14
+CXXSTD   = -std=c++17
 CXXFLAGS = -Wall -fPIC $(OPT) $(CXXSTD) -Wno-deprecated-declarations
 FC       = gfortran
 FFLAGS   = -fPIC $(OPT)
 
 # Googletest
-GTESTPATH = $(HOME)/Downloads/googletest-release/googletest-release-1.11.0
-GINCS = -I $(GTESTPATH)/include
+GTESTPATH = /opt/googletest/googletest-1.16.0
+GINCS = -I $(GTESTPATH)/googletest/include -I $(GTESTPATH)/googlemock/include
 GLIBS = -L $(GTESTPATH)/lib -lgmock -lgtest -lpthread
 
 # Fastjet
-# FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.3.0/install/bin/fastjet-config
-FASTJETCONFIG = $(HOME)/qcd/fastjet/fastjet-3.4.0/install/bin/fastjet-config
+FASTJETCONFIG = /opt/fastjet/fastjet-3.5.1/bin/fastjet-config
 FASTJETINC = $(shell $(FASTJETCONFIG) --cxxflags )
 FASTJETPATH = $(shell $(FASTJETCONFIG) --prefix )
 FASTJETLIBDIR = $(FASTJETPATH)/lib
 FASTJETLIBS = -L$(FASTJETLIBDIR) -lfastjetplugins -lsiscone_spherical -lsiscone -lRecursiveTools -lfastjettools -lfastjet -lgfortran -lm -lquadmath
 
 # ROOT
-# ROOTCONFIG = $(HOME)/Downloads/root/root_v6.24.06/bin/root-config
-# ROOTCONFIG = $(HOME)/Downloads/root/install/bin/root-config
 ROOTCONFIG = $(shell which root-config )
 ROOTINC = $(shell $(ROOTCONFIG) --noauxcflags --cflags )
-# Recent ROOT 6.24/06 root-config emits libraries inconsistent :(
+# Recent ROOT >= 6.24/06 root-config emits libraries inconsistent :(
 BADLIBS = -lROOTDataFrame -lROOTVecOps
 ROOTLIBS = $(filter-out $(BADLIBS), $(shell $(ROOTCONFIG) --libs ))
 ROOTLIBDIR = $(shell $(ROOTCONFIG) --libdir )
 
-# HepMC2
-HEPMC2PATH = $(HOME)/qcd/hepmc/hepmc2.06.09/install
-HEPMC2INC = -I$(HEPMC2PATH)/include
-HEPMC2LIBS = -L$(HEPMC2PATH)/lib -lHepMC
-HEPMC2LIBDIR = $(HEPMC2PATH)/lib
+## HepMC2
+#HEPMC2PATH = $(HOME)/qcd/hepmc/hepmc2.06.09/install
+#HEPMC2INC = -I$(HEPMC2PATH)/include
+#HEPMC2LIBS = -L$(HEPMC2PATH)/lib -lHepMC
+#HEPMC2LIBDIR = $(HEPMC2PATH)/lib
+# CPPFLAGS = $(ROOTINC) $(FASTJETINC) $(HEPMC2INC)
 
-CPPFLAGS = $(ROOTINC) $(FASTJETINC) $(HEPMC2INC)
+CPPFLAGS = $(ROOTINC) $(FASTJETINC)
 
 SRCS = LEPNtupleReader.cc TFastJet.cc Analysis.cc DataStructure.cc \
 JetrateDataStructure.cc DifferentialDataStructure.cc MatrixDataStructure.cc \
 Observable.cc ObsDifferential.cc ObsJetrate.cc ObsFastJetDiff.cc \
-ObsPartonShower.cc ObsEEC.cc ObsGroomed.cc ObservableFactory.cc \
+ObsPartonShower.cc ObsEEC.cc ObsJEEC.cc ObsDEEC.cc ObsGroomed.cc ObservableFactory.cc \
 FilledObservable.cc Unfolder.cc BbbUnfolder.cc MtxUnfolder.cc OutputWriter.cc \
 LEPThrustCalculator.cc LEPYnmCalculator.cc PxThrustCalculator.cc \
 FastJetYcutCalculator.cc FastJetEminCalculator.cc FastJetRCalculator.cc \
@@ -83,25 +80,25 @@ $(LIB): $(SRCS:.cc=.o) $(FSRCS:.f=.o)
 	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) $(HEPMC2LIBS) -o $@ $^
 
 testsjmanalysis: testsjmanalysis.cc $(LIB)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GINCS) -o $@ $^ $(GLIBS) $(ROOTLIBS) $(FASTJETLIBS) $(HEPMC2LIBS) -lboost_program_options
-	LD_LIBRARY_PATH=$(PWD):$(ROOTLIBDIR):$(HEPMC2LIBDIR):$(FASTJETLIBDIR) ./$@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GINCS) -o $@ $^ $(GLIBS) $(ROOTLIBS) $(FASTJETLIBS) -lboost_program_options
+	LD_LIBRARY_PATH=$(PWD):$(ROOTLIBDIR):$(FASTJETLIBDIR) ./$@
 
 GenEventDataDict.cc: GenEventData.hh GenEventDataLinkDef.hh
 	rootcint -f $@ -c $^
 
-testHepMCRootReader: testHepMCRootReader.cc HepMCRootReader.cc GenEventDataDict.cc
-	$(CXX) $(CXXFLAGS) $(GINCS) $(ROOTINC) -o $@ $^ $(GLIBS) $(ROOTLIBS)
-	LD_LIBRARY_PATH=$(ROOTLIBDIR) ./$@
+testHepMCRootReader: testHepMCRootReader.cc HepMCRootReader.cc GenEventDataDict.cc $(LIB)
+	$(CXX) $(CXXFLAGS) $(GINCS) $(ROOTINC) -o $@ $^ $(GLIBS) $(ROOTLIBS) $(FASTJETLIBS) -lboost_program_options
+	LD_LIBRARY_PATH=$(PWD):$(ROOTLIBDIR):$(FASTJETLIBDIR) ./$@
 
 runjob: runjob.cc $(LIB)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) $(FASTJETLIBS) $(HEPMC2LIBS) -lboost_program_options
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) $(FASTJETLIBS) -lboost_program_options
 
 runhepmc2: runhepmc2.cc $(LIB) GenEventDataDict.cc
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) $(HEPMC2LIBS) -lboost_program_options
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) $(FASTJETLIBS) -lboost_program_options
 
-testHepMC2Reader: testHepMC2Reader.cc HepMC2Reader.cc
-	$(CXX) $(CXXFLAGS) $(GINCS) $(HEPMC2INC)  $(ROOTINC) -o $@ $^ $(GLIBS) $(HEPMC2LIBS) $(ROOTLIBS)
-	LD_LIBRARY_PATH=$(ROOTLIBDIR):$(HEPMC2LIBDIR) ./$@
+#testHepMC2Reader: testHepMC2Reader.cc HepMC2Reader.cc
+#	$(CXX) $(CXXFLAGS) $(GINCS) $(HEPMC2INC)  $(ROOTINC) -o $@ $^ $(GLIBS) $(HEPMC2LIBS) $(ROOTLIBS)
+#	LD_LIBRARY_PATH=$(ROOTLIBDIR):$(HEPMC2LIBDIR) ./$@
 
 #$(DICT): $(DICTSRCS:.cc=.hh) $(DICT:Dict.cc=LinkDef.h)
 #	$(RC) -f $@ -c $^

@@ -13,7 +13,7 @@ namespace hepmcreadertests {
   class HepMCRootReaderTest : public ::testing::Test {
   public:
     //HepMCRootReaderTest() : hmcr( "/mnt/scratch/skluth/sherpablackhatl_91.root" ) {}
-    HepMCRootReaderTest() : hmcr( "/home/skluth/Downloads/hepmc2gevents.root",
+    HepMCRootReaderTest() : hmcr( "/mnt/scratch/skluth/Sherpa91.hepmc3.root",
 				  "hepmc3_tree", "hepmc3_event" ) {}
     virtual ~HepMCRootReaderTest() {}
     HepMCRootReader hmcr;
@@ -26,19 +26,21 @@ namespace hepmcreadertests {
  
   TEST_F( HepMCRootReaderTest, testGetEvent ) {
     bool status= hmcr.GetEvent( 0 );
-    //status= hmcr.GetEvent( 1 );
     EXPECT_EQ( status, true );
+    
     hmcr.printParticlesVertices();
+    
   }
 
   TEST_F( HepMCRootReaderTest, testGetHadron ) {
     bool status= hmcr.GetEvent( 0 );
     EXPECT_EQ( status, true );
     const std::vector<TLorentzVector> vtlv= hmcr.GetLorentzVectors( "hadron" );
-    EXPECT_EQ( vtlv.size(), 55u );
+    EXPECT_EQ( vtlv.size(), 32u );
   }
   TEST_F( HepMCRootReaderTest, testGetParton ) {
-    bool status= hmcr.GetEvent( 0 );
+    // bool status= hmcr.GetEvent( 0 );
+    bool status= hmcr.GetEvent( 100 );
     EXPECT_EQ( status, true );
     const std::vector<TLorentzVector> vtlv= hmcr.GetLorentzVectors( "parton" );
     EXPECT_EQ( vtlv.size(), 6u );

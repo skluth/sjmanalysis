@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 
-namespace HepMC {
+namespace HepMC3 {
 
   namespace Units {
     enum MomentumUnit { MEV, GEV };
@@ -59,6 +59,6 @@ namespace HepMC {
     std::vector<std::string> attribute_string;
   };
   
-} // namespace HepMC
+} // namespace HepMC3
 
 #endif

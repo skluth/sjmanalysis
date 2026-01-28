@@ -13,7 +13,7 @@
 
 class TFile;
 class TTree;
-namespace HepMC {
+namespace HepMC3 {
   class GenEventData;
   class GenRunInfoData;
   class GenParticleData;
@@ -41,8 +41,8 @@ public:
   virtual bool isMC();
   virtual void printParticlesVertices();
 
-  typedef HepMC::GenParticleData Particle;
-  typedef HepMC::GenVertexData Vertex;
+  typedef HepMC3::GenParticleData Particle;
+  typedef HepMC3::GenVertexData Vertex;
   typedef std::vector<const Particle*> ParticleVector;
   typedef std::map<const Vertex*,ParticleVector> VertexParticlesMap;
   typedef std::map<const Particle*,const Vertex*> ParticleVertexMap;
@@ -52,6 +52,10 @@ private:
   void getHadron();
   void getParton();
   void getIsr();
+  
+  std::vector<size_t> getIndices( const ParticleVector& );
+  ParticleVector getParents( const Particle* particle );
+  ParticleVector getDaughters( const Particle* particle );
 
   Double_t event_scale();
   ParticleVector getBeamParticles();
@@ -61,8 +65,8 @@ private:
   Int_t nevents;
   TFile* hepmcrootfile;
   TTree* hepmctree;
-  HepMC::GenEventData* eventData;
-  HepMC::GenRunInfoData* runInfoData;
+  HepMC3::GenEventData* eventData;
+  HepMC3::GenRunInfoData* runInfoData;
   VertexParticlesMap incomingParticles;
   VertexParticlesMap outgoingParticles;
   ParticleVertexMap beginVertexMap;

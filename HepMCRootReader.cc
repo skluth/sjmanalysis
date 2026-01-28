@@ -38,12 +38,12 @@ HepMCRootReader::HepMCRootReader( const std::string & filename,
   }
   std::cout << "HepMCRootReader::HepMCRootReader: " 
 	    << GetNumberEntries() << " events on file" << std::endl;
-  eventData= new HepMC::GenEventData();
+  eventData= new HepMC3::GenEventData();
   Int_t status= hepmctree->SetBranchAddress( branchname.c_str(), &eventData );
   if( status < 0 ) {
     throw std::runtime_error( "HepMCRootReader::HepMCRootReader: can't create event branch hepmc3_event" );
   }
-  runInfoData= reinterpret_cast<HepMC::GenRunInfoData*>( hepmcrootfile->Get( "GenRunInfoData" ) );
+  runInfoData= reinterpret_cast<HepMC3::GenRunInfoData*>( hepmcrootfile->Get( "GenRunInfoData" ) );
   if( runInfoData == nullptr ) {
     std::cout << "HepMCRootReader::HepMCRootReader: no GenRunInfoData" << std::endl;
   }
@@ -63,7 +63,8 @@ Int_t HepMCRootReader::GetNumberEntries() {
   else throw std::runtime_error( "HepMCRootReader::GetNumberEntries: nullptr" );
 }
 
-// Helpers to navigate event record: compare object addresses for object quality
+// Helpers to navigate event record
+// Compare object addresses for object quality
 template <typename T>
 class CompareObjectAddress {
   const T* ref;
@@ -73,6 +74,7 @@ public:
     return &obj == ref;
   }
 };
+// Find position (index) in vector
 template <typename T>
 size_t findInVector( const std::vector<T> & v, const T* obj ) {
   CompareObjectAddress<T> coa( obj );
@@ -84,6 +86,9 @@ size_t findInVector( const std::vector<T> & v, const T* obj ) {
 bool HepMCRootReader::GetEvent( Int_t ievent ) {  
   bool result= false;
   if( hepmctree and hepmctree->GetEvent( ievent ) > 0 ) {
+
+    std::cout << "HepMCRootReader::GetEvent: event " << ievent << std::endl;
+    
     result= true;
     for( const auto & keyValue : cacheIsValid ) cacheIsValid[keyValue.first]= false;
     nevents++;
@@ -129,6 +134,7 @@ class ParticleSelector {
 public:
   virtual bool operator()( const HepMCRootReader::Particle* ) const { return true; }
 };
+
 class EventIterator {
   const HepMCRootReader::Particle* particle;
   const HepMCRootReader::ParticleVertexMap vertexMap;
@@ -167,6 +173,7 @@ public:
   }
 };
 void HepMCRootReader::findISRphotons() {
+  // Photons from initial beam particles
   ISRphotons.clear();
   for( const Particle* beamParticle : getBeamParticles() ) {
     IdenticalParticleSelector ips( beamParticle );
@@ -186,6 +193,7 @@ void HepMCRootReader::findISRphotons() {
 }
 
 HepMCRootReader::ParticleVector HepMCRootReader::getBeamParticles() {
+  // Initial beam particles "status 4"
   ParticleVector beamParticles;
   for( const Particle & particle : eventData->particles ) {
     if( particle.status == 4 ) beamParticles.push_back( &particle );
@@ -227,6 +235,7 @@ HepMCRootReader::GetLorentzVectors( const std::string & opt ) {
 
 void HepMCRootReader::getIsr() {
   vtlv.clear();
+  // assumes ISRphotons filled
   for( const Particle* photon : ISRphotons ) {
     TLorentzVector tlv( photon->momentum.m_v1,
 			photon->momentum.m_v2,
@@ -238,6 +247,7 @@ void HepMCRootReader::getIsr() {
 }
 
 bool isParton( const HepMCRootReader::Particle* particle ) {
+  // Quarks, leptons, photon, gluon, W, Z
   bool result= false;
   Int_t abspid= abs( particle->pid );
   if( abspid <= 6 or
@@ -254,17 +264,27 @@ void HepMCRootReader::getParton() {
   Int_t ip= -1;
   std::vector<Int_t> selected;
 
-
-  printParticlesVertices();
-  
+  //std::cout << "HepMCRootReader::getParton: print event record" << std::endl;
+  //printParticlesVertices();
+  //std::cout << "HepMCRootReader::getParton: before particles loop" << std::endl;
   
   for( const Particle & particle : eventData->particles ) {
     ip++;
-    if( not isParton( &particle ) ) continue;
-    // Detect decays to partons:
-    if( endVertexMap.count( &particle ) == 0 ) continue;
-    const Vertex* endVertex= endVertexMap.at( &particle );
-    const ParticleVector & decayProducts= outgoingParticles.at( endVertex );
+
+    //std::cout << "HepMCRootReader::getParton: in particles loop ip= " << ip << std::endl;
+    
+    if( not isParton( &particle ) ) {
+      //std::cout << "HepMCRootReader::getParton: not a parton ip= " << ip << std::endl;
+      continue;
+    }
+    // Detect decays of partons to partons:
+    if( endVertexMap.count( &particle ) == 0 ) {
+      //std::cout << "HepMCRootReader::getParton: not in endVertexMap ip= " << ip << std::endl;
+      continue;
+    }
+    // const Vertex* endVertex= endVertexMap.at( &particle );
+    // const ParticleVector & decayProducts= outgoingParticles.at( endVertex );
+    ParticleVector decayProducts= getDaughters( &particle );
     bool partonDecay= true;
     for( const Particle* decayParticle : decayProducts ) {
       if( not isParton( decayParticle ) ) {
@@ -272,20 +292,25 @@ void HepMCRootReader::getParton() {
 	break;
       }
     }
-    if( partonDecay ) continue;
+    if( partonDecay ) {
+      //std::cout << "HepMCRootReader::getParton: decay to partons ip= " << ip << std::endl;
+      continue;
+    }
     // Check the parton does not come from a partonic hadron decay
+    ParticleVector parents= getParents( &particle );
     bool partonicHadronDecay= false;
-    EventIterator eventIter( &particle,
-			     beginVertexMap,
-			     incomingParticles );
-    while( eventIter.next() ) {
-      const HepMCRootReader::Particle* nextParticle= eventIter.getParticle();
-      if( abs( nextParticle->pid ) > 100 ) {
+    for( const Particle* parent : parents ) {
+      if( abs( parent->pid ) > 100 ) {
 	partonicHadronDecay= true;
 	break;
       }
-    }    
-    if( partonicHadronDecay ) continue;
+    }
+    if( partonicHadronDecay ) {
+      std::cout << "HepMCRootReader::getParton: from partonic hadron decay ip= " << ip
+		<< std::endl;
+      continue;
+    }
+    // Selected parton
     selected.push_back( ip );
     TLorentzVector tlv( particle.momentum.m_v1,
 			particle.momentum.m_v2,
@@ -294,6 +319,7 @@ void HepMCRootReader::getParton() {
     vtlv.push_back( tlv );
     sum+= tlv;
   }
+  // Check 4-momentum conservation
   for( const Particle* isrphoton : ISRphotons ) {
     TLorentzVector tlv( isrphoton->momentum.m_v1,
 			isrphoton->momentum.m_v2,
@@ -305,7 +331,7 @@ void HepMCRootReader::getParton() {
       fabs( sum.Py() ) > 1.0e-6 or
       fabs( sum.Pz() ) > 1.0e-6 or
       fabs( sum.E() - event_scale() ) > 1.0e-6 ) {
-    printParticlesVertices();
+    std::cout << "HepMCRootReader::getParton: 4-vector sum mismatch" << std::endl;
     std::cout << "4-momentum sum: "
 	      << sum.Px() << " "
 	      << sum.Py() << " "
@@ -315,7 +341,7 @@ void HepMCRootReader::getParton() {
     std::cout << "Selected: ";
     for( Int_t ip : selected ) std::cout << ip << " ";
     std::cout << std::endl;
-    std::cout << "HepMCRootReader::getParton2: 4-vector sum mismatch" << std::endl;
+    printParticlesVertices();
   }
   return;
 }
@@ -324,6 +350,7 @@ void HepMCRootReader::getHadron() {
   vtlv.clear();
   TLorentzVector sum;
   for( const Particle & particle : eventData->particles ) {
+    // Stable particle and not tagged as ISR
     if( particle.status == 1 and
 	std::find( ISRphotons.begin(), ISRphotons.end(),
 		   &particle ) == ISRphotons.end() ) {
@@ -335,6 +362,7 @@ void HepMCRootReader::getHadron() {
       sum+= tlv;
     }
   }
+  // Check 4-momentum conservation
   for( const Particle* isrphoton : ISRphotons ) {
     TLorentzVector tlv( isrphoton->momentum.m_v1,
 			isrphoton->momentum.m_v2,
@@ -346,7 +374,9 @@ void HepMCRootReader::getHadron() {
       fabs( sum.Py() ) > 1.0e-6 or
       fabs( sum.Pz() ) > 1.0e-6 or
       fabs( sum.E() - event_scale() ) > 1.0e-6 ) {
-    printParticlesVertices();
+    std::cout << "HepMCRootReader::getHadron: 4-vector sum mismatch event "
+	      << eventData->event_number
+	      << std::endl;
     std::cout << "4-momentum sum: "
 	      << sum.Px() << " "
 	      << sum.Py() << " "
@@ -355,9 +385,7 @@ void HepMCRootReader::getHadron() {
 	      << event_scale() << ", difference: "
 	      << sum.E() - event_scale()
 	      << std::endl;
-    std::cout << "HepMCRootReader::getHadron: 4-vector sum mismatch event "
-	      << eventData->event_number
-	      << std::endl;
+    printParticlesVertices();
   }
   return;
 }
@@ -379,17 +407,26 @@ bool HepMCRootReader::isMC() {
 
 void HepMCRootReader::printParticlesVertices() {
   Int_t ip= 0;
+  std::cout << "HepMCRootReader::printParticlesVertices: GenEvent particles" << std::endl;
   for( const Particle & particle : eventData->particles ) {
     std::cout << ip << " " << particle.pid << " " << particle.status << " "
 	      << particle.mass << " "
 	      << particle.momentum.m_v1 << " "
 	      << particle.momentum.m_v2 << " "
 	      << particle.momentum.m_v3 << " "
-	      << particle.momentum.m_v4 << " "
-	      << std::endl;
+	      << particle.momentum.m_v4 << " ";
+    std::cout << "parents ";
+    ParticleVector parents= getParents( &particle );
+    std::vector<size_t> parentIDs= getIndices( parents );
+    for( const size_t index : parentIDs ) std::cout << index << " ";
+    std::cout << "daughters ";
+    ParticleVector daughters= getDaughters(  &particle );
+    std::vector<size_t> daughterIDs= getIndices( daughters );
+    for( const size_t index : daughterIDs ) std::cout << index << " ";
+    std::cout << std::endl;
     ip++;
   }
-  std::cout << "ISR photons" << std::endl;
+  std::cout << "HepMCRootReader::printParticlesVertices: GenEvent ISR photons" << std::endl;
   for( const Particle* particle : ISRphotons ) {
     size_t index= findInVector<Particle>( eventData->particles, particle );
     std::cout << index << " " << particle->pid << " " << particle->status << " "
@@ -397,9 +434,18 @@ void HepMCRootReader::printParticlesVertices() {
 	      << particle->momentum.m_v1 << " "
 	      << particle->momentum.m_v2 << " "
 	      << particle->momentum.m_v3 << " "
-	      << particle->momentum.m_v4 << " "
-	      << std::endl;
+	      << particle->momentum.m_v4 << " ";
+    std::cout << "parents ";
+    ParticleVector parents= getParents( particle );
+    std::vector<size_t> parentIDs= getIndices( parents );
+    for( const size_t index : parentIDs ) std::cout << index << " ";
+    std::cout << "daughters ";
+    ParticleVector daughters= getDaughters( particle );
+    std::vector<size_t> daughterIDs= getIndices( daughters );
+    for( const size_t index : daughterIDs ) std::cout << index << " ";
+    std::cout << std::endl;
   }
+  std::cout << "HepMCRootReader::printParticlesVertices: GenEvent vertices" << std::endl;
   for( size_t iv= 0; iv < eventData->vertices.size(); iv++ ) {
     const Vertex* vertex= &(eventData->vertices[iv]);
     std::cout << "vertex " << iv;
@@ -437,3 +483,29 @@ void HepMCRootReader::printParticlesVertices() {
   return;
 }
 
+// Particle parents and daughters
+std::vector<size_t>
+HepMCRootReader::getIndices( const ParticleVector& particles ) {
+  std::vector<size_t> result;
+  for( const Particle* particle : particles ) {
+    size_t index= findInVector<Particle>( eventData->particles, particle );
+    result.push_back( index );
+  }
+  return result;
+}
+HepMCRootReader::ParticleVector HepMCRootReader::getParents( const Particle* particle ) {
+  const Vertex* beginVertex= beginVertexMap[ particle ];
+  if( beginVertex ) {
+    const ParticleVector& parents= incomingParticles.at( beginVertex );
+    return parents;
+  }
+  return ParticleVector();
+}
+HepMCRootReader::ParticleVector HepMCRootReader::getDaughters( const Particle* particle ) {
+  const Vertex* endVertex= endVertexMap[ particle ];
+  if( endVertex ) {
+    const ParticleVector& daughters= outgoingParticles.at( endVertex );
+    return daughters;
+  }
+  return ParticleVector();
+}

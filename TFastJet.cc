@@ -1,6 +1,6 @@
 
 #include "TFastJet.hh"
-#include "EEE0Recombiner.hh"
+//#include "EEE0Recombiner.hh"
 
 #include "fastjet/ClusterSequence.hh"
 #include "fastjet/PseudoJet.hh"
@@ -64,7 +64,7 @@ TFastJet::TFastJet( const vector<TLorentzVector> & vtl,
     }
     else if( jetalgString == "jade" ) {
       plugin= new fastjet::JadePlugin();
-      recombiner= new EEE0Recombiner();
+      // recombiner= new EEE0Recombiner();
     }
     else if( jetalgString == "pxcone" ) {
       plugin= new fastjet::PxConePlugin( R, Emin, 0.75, true, 1 );

@@ -6,10 +6,6 @@
 #include <stdexcept>
 #include <math.h>
 
-template <typename T>
-std::vector<T> multiplyVectors( std::vector<T> lhs, const std::vector<T>& rhs ) {
-  return lhs*rhs;
-}
 
 // Default behaviour appropriate for calculation of bin-by-bin correction factors
 template <typename T>
@@ -34,13 +30,7 @@ std::vector<T> divideChecked( std::vector<T> lhs, const std::vector<T>& rhs,
   return lhs;
 }
 
-template <typename T>
-std::vector<T> subtractVectors( const std::vector<T>& lhs,
-				const std::vector<T>& rhs ) {
-  return lhs-rhs;
-}
-
-
+// Operators for std::vector<T>
 template <typename T>
 std::vector<T> operator+( std::vector<T> lhs,
 			  const std::vector<T>& rhs ) {
@@ -93,6 +83,17 @@ std::vector<T> square( std::vector<T> in ) {
   std::transform( in.begin(), in.end(), in.begin(),
 		  []( T in ) { return in*in; } );
   return in;
+}
+
+// Must be placed after template operator definitions
+template <typename T>
+std::vector<T> multiplyVectors( std::vector<T> lhs, const std::vector<T>& rhs ) {
+  return lhs*rhs;
+}
+template <typename T>
+std::vector<T> subtractVectors( const std::vector<T>& lhs,
+				const std::vector<T>& rhs ) {
+  return lhs-rhs;
 }
 
 #endif

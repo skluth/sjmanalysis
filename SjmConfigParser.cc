@@ -16,6 +16,9 @@ using std::endl;
 
 typedef std::vector<std::string> VS;
 
+// typedef std::vector<double> VD;
+
+
 template <>
 std::string SjmConfigParser::getItem( const std::string& tag ) const;
 
@@ -201,8 +204,17 @@ declareOptions( const std::string & filename,
 
 // Declare vector<string> specialisation so we can use it in
 // generic template below:
-template <>
-VS SjmConfigParser::getItem( const std::string& tag ) const;
+// not needed with c++17
+//template <>
+//VS SjmConfigParser::getItem( const std::string& tag ) const;
+
+// For vector<double> et al define special operator>>:
+template <typename T>
+std::istream& operator>>( std::istream& input, std::vector<T>& vt ) {
+  T t;
+  while( input >> t ) vt.push_back( t );
+  return input;
+}
 
 // For generic type convert lines via (special) operator>>:
 template <typename T>
@@ -257,16 +269,6 @@ float SjmConfigParser::getItemFloat( const std::string& tag ) const {
   return getItem<float>( tag );
 }
 
-
-// For vector<double> et al define special operator>>:
-template <typename T>
-std::istream& operator>>( std::istream& input, std::vector<T>& vt ) {
-  T t;
-  while( input >> t ) vt.push_back( t );
-  return input;
-}
-template std::vector<double> SjmConfigParser::getItem( const std::string& tag ) const;
-
 // Filepath from path and file name:
 VS SjmConfigParser::getFilepath( const std::string & tag ) const {
   VS files= getItem<VS>( tag );
@@ -305,5 +307,4 @@ void SjmConfigParser::printConfig() const {
     }
   }
 }
-
 

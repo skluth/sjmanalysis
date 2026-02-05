@@ -13,9 +13,7 @@ class MultiOrderedDict( OrderedDict ):
         if key in self and isinstance( value, list ):
             self[key].extend( value )
         else:
-#            super( MultiOrderedDict, self ).__setitem__( key, value )
             super().__setitem__( key, value )
-
 
 def readConfig( name="test.cfg" ):
     config= configparser.RawConfigParser( dict_type=MultiOrderedDict, strict=False )

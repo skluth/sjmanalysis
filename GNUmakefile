@@ -30,13 +30,6 @@ BADLIBS = -lROOTDataFrame -lROOTVecOps
 ROOTLIBS = $(filter-out $(BADLIBS), $(shell $(ROOTCONFIG) --libs ))
 ROOTLIBDIR = $(shell $(ROOTCONFIG) --libdir )
 
-## HepMC2
-#HEPMC2PATH = $(HOME)/qcd/hepmc/hepmc2.06.09/install
-#HEPMC2INC = -I$(HEPMC2PATH)/include
-#HEPMC2LIBS = -L$(HEPMC2PATH)/lib -lHepMC
-#HEPMC2LIBDIR = $(HEPMC2PATH)/lib
-# CPPFLAGS = $(ROOTINC) $(FASTJETINC) $(HEPMC2INC)
-
 CPPFLAGS = $(ROOTINC) $(FASTJETINC)
 
 SRCS = LEPNtupleReader.cc TFastJet.cc Analysis.cc DataStructure.cc \
@@ -51,16 +44,14 @@ LEPYcutCalculator.cc AnalysisProcessor.cc SjmConfigParser.cc \
 LEP1NtupleReader.cc LEP2NtupleReader.cc NtupleReader.cc \
 HepMCRootReader.cc
 
-# HMC2SRCS = runhepmc2.cc
-
 # Fortran stuff for thrust
 FSRCS = pxlth4.f
 
 LIB = libNtupleReader.so
 
-#DICT = AnalysisDict.cc
-#DICTLIB = lib$(DICT:.cc=.so)
-#DICTSRCS = Analysis.cc TH1DAnalysisObject.cc TGEAnalysisObject.cc
+DICT = AnalysisDict.cc
+DICTLIB = lib$(DICT:.cc=.so)
+DICTSRCS = Analysis.cc TH1DAnalysisObject.cc TGEAnalysisObject.cc
 
 DEPS = $(SRCS:.cc=.d) $(filter-out $(SRCS:.cc=.d), $(DICTSRCS:.cc=.d) )
 
@@ -96,14 +87,12 @@ runjob: runjob.cc $(LIB)
 runhepmc2: runhepmc2.cc $(LIB) GenEventDataDict.cc
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) $(FASTJETLIBS) -lboost_program_options
 
-#testHepMC2Reader: testHepMC2Reader.cc HepMC2Reader.cc
-#	$(CXX) $(CXXFLAGS) $(GINCS) $(HEPMC2INC)  $(ROOTINC) -o $@ $^ $(GLIBS) $(HEPMC2LIBS) $(ROOTLIBS)
-#	LD_LIBRARY_PATH=$(ROOTLIBDIR):$(HEPMC2LIBDIR) ./$@
 
-#$(DICT): $(DICTSRCS:.cc=.hh) $(DICT:Dict.cc=LinkDef.h)
-#	$(RC) -f $@ -c $^
-#$(DICTLIB): $(DICT:.cc=.o) $(DICTSRCS:.cc=.o)
-#	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) -o $@ $^
+$(DICT): $(DICTSRCS:.cc=.hh) $(DICT:Dict.cc=LinkDef.h)
+	$(RC) -f $@ -c $^
+$(DICTLIB): $(DICT:.cc=.o) $(DICTSRCS:.cc=.o)
+	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) -o $@ $^
+
 
 # Create cpython binding for YKERN for tests, use "import ylcus" in python
 yclus.cpython-38-x86_64-linux-gnu.so: yclus.f

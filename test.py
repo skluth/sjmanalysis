@@ -1,15 +1,46 @@
 
 from ROOT import TFile, gROOT, gPad, TVectorD, TObject
 
-from ROOT import TGraphErrors, TH1D, TLegend, TCanvas, TLatex
-TGraphErrors.__init__._creates= False
-TH1D.__init__._creates= False
-TLegend.__init__._creates= False
-TCanvas.__init__._creates= False
-TLatex.__init__._creates= False
+from ROOT import TGraphErrors, TH1D, TLegend, TCanvas, TLatex, SetOwnership
+
+# From aholzner.wordpress.com/tag/pyroot/
+# T* subclasses to handle (disable!) python ownership
+oldTGraphErrorsinit= TGraphErrors.__init__
+class GarbageCollectionResistentTGraphErrors( TGraphErrors ):
+  def __init__( self, *args ):
+    oldTGraphErrorsinit( self, *args )
+    SetOwnership( self, False )
+TGraphErrors= GarbageCollectionResistentTGraphErrors
+
+oldTH1Dinit= TH1D.__init__
+class GarbageCollectionResistentTH1D( TH1D ):
+  def __init__( self, *args ):
+    oldTH1Dinit( self, *args )
+    SetOwnership( self, False )
+TH1D= GarbageCollectionResistentTH1D
+
+oldTLegendinit= TLegend.__init__
+class GarbageCollectionResistentTLegend( TLegend ):
+  def __init__( self, *args ):
+    oldTLegendinit( self, *args )
+    SetOwnership( self, False )
+TLegend= GarbageCollectionResistentTLegend
+
+oldTCanvasinit= TCanvas.__init__
+class GarbageCollectionResistentTCanvas( TCanvas ):
+  def __init__( self, *args ):
+    oldTCanvasinit( self, *args )
+    SetOwnership( self, False )
+TCanvas= GarbageCollectionResistentTCanvas
+
+oldTLatexinit= TLatex.__init__
+class GarbageCollectionResistentTLatex( TLatex ):
+  def __init__( self, *args ):
+    oldTLatexinit( self, *args )
+    SetOwnership( self, False )
+TLatex= GarbageCollectionResistentTLatex
 
 gROOT.LoadMacro( "libAnalysisDict.so" )
-
 from ROOT import Analysis, TH1DAnalysisObject, TGEAnalysisObject
 
 from array import array
@@ -87,15 +118,15 @@ class AnalysisObservable:
         return
     
     def printResults( self, width=7, precision=3, pointwidth=4, pointprec=2, opt="?" ):
-        print "Results for", self.obs
-        print self.aostand.getPointLabel( pointwidth ),
+        print( "Results for", self.obs )
+        print( self.aostand.getPointLabel( pointwidth ), end="" )
         fmt= "{:>"+str(width)+"}"
         for key in [ "val", "stat", "sys" ]:
-            print fmt.format( key ),
+            print( fmt.format( key ), end="" )
         if "d" in opt:
             for key in sorted( self.variationsDelta.keys() ):
-                print fmt.format( key ),
-        print
+                print( fmt.format( key ), end="" )
+        print()
         if "m" in opt:
             sterrs= self.aostand.getErrors( "m" )
         else:
@@ -106,16 +137,16 @@ class AnalysisObservable:
                 rad2grad= 180.0/3.14159
                 leftedge= self.points[i]*rad2grad
                 rightedge= self.points[i+1]*rad2grad
-                print "{0:3.0f} {1:3.0f}  ".format( leftedge, rightedge ),
+                print( "{0:3.0f} {1:3.0f}  ".format( leftedge, rightedge ), end="" )
             else:
-                print self.aostand.getPointStr( i, pointwidth, pointprec ),
-            print fmt.format( self.values[i] ),
-            print fmt.format( sterrs[i] ),
-            print fmt.format( self.syerrs[i] ),
+                print( self.aostand.getPointStr( i, pointwidth, pointprec ), end="" )
+            print( fmt.format( self.values[i] ), end="" )
+            print( fmt.format( sterrs[i] ), end="" )
+            print( fmt.format( self.syerrs[i] ), end="" )
             if "d" in opt:
                 for key in sorted( self.variationsDelta.keys() ):
-                    print fmt.format( self.variationsDelta[key][i] ),
-            print
+                    print( fmt.format( self.variationsDelta[key][i] ), end="" )
+            print()
         return
 
     def printErrors( self, width=7, precision=4 ):
@@ -125,7 +156,7 @@ class AnalysisObservable:
         for i in range( len( self.sterrs )-1 ):
             binw= self.points[i+1]-self.points[i]
             diagError= sqrt( errorMatrix(i,i) )/binw
-            print fmt.format( self.sterrs[i] ), fmt.format( diagError )
+            print( fmt.format( self.sterrs[i] ), fmt.format( diagError ) )
         return
 
     def plot( self, plotoptions, opt="?" ):
@@ -133,7 +164,7 @@ class AnalysisObservable:
         values= self.values
         sterrs= self.sterrs
         if "m" in opt:
-            print "AnalysisObservable::plot: use errors from error matrix"
+            print( "AnalysisObservable::plot: use errors from error matrix" )
             sterrs= array( "d", self.aostand.getErrors( "m" ) )
         syerrs= self.syerrs
         npoints= len(vx)
@@ -142,8 +173,10 @@ class AnalysisObservable:
                 vx[i]+= plotoptions["xshift"]
         vex= array( "d", npoints*[0.0] )
         tgest= TGraphErrors( npoints, vx, values, vex, sterrs )
+        #SetOwnership( tgest, False )
         toterrs= np.sqrt( np.add( np.square( sterrs ),  np.square( syerrs ) ) )
         tgesy= TGraphErrors( npoints, vx, values, vex, toterrs )
+        #SetOwnership( tgesy, False )
         tgesy.SetMarkerStyle( plotoptions["markerStyle"] )
         tgesy.SetMarkerSize( plotoptions["markerSize"] )
         drawas= plotoptions["drawas"] if "drawas" in plotoptions else "p"
@@ -180,11 +213,11 @@ class AnalysisObservable:
     
     def printEvents( self ):
         for key in sorted( self.events.keys() ):
-            print key, self.events[key]
+            print( key, self.events[key] )
         return
     def printRawEvents( self ):
         for key in sorted( self.rawEvents.keys() ):
-            print key, self.rawEvents[key]
+            print( key, self.rawEvents[key] )
         return
 
     def readRawEvents( self, standardAnalysis, analysisVariations, tfile, srclist=[] ):
@@ -300,21 +333,21 @@ class LEP2AnalysisObservable( AnalysisObservable ):
 def createAnalysisObservable( tfile, obs="thrust", unf="bbb" ):
     filename= tfile.GetName()
     ao= None
-    print "createAnalysisObservable: create for", obs, "from", filename,
+    print( "createAnalysisObservable: create for", obs, "from", filename, end="" )
     if "sjm91" in filename:
-        print "LEP1AnalysisObservable"
+        print( "LEP1AnalysisObservable" )
         ao= LEP1AnalysisObservable( obs )
     elif( "sjm130" in filename or "sjm136" in filename ):
-        print "LEP15AnalysisObservable"
+        print( "LEP15AnalysisObservable" )
         ao= LEP15AnalysisObservable( obs )
     elif( "sjm161" in filename or "sjm172" in filename or "sjm183" in filename or
           "sjm189" in filename or "sjm192" in filename or "sjm196" in filename or
           "sjm200" in filename or "sjm202" in filename or "sjm205" in filename or
           "sjm207" in filename ):
-        print "LEP2AnalysisObservable"
+        print( "LEP2AnalysisObservable" )
         ao= LEP2AnalysisObservable( obs )
     else:
-        print "no matching AnalysisObservable"
+        print( "no matching AnalysisObservable" )
     ao.setupFromFile( tfile, unf )
     return ao
 
@@ -350,11 +383,11 @@ def createCombineAnalysisObservables( filenames, obs="thrust" ):
         f= TFile( filenames[0] )
         aocomb= createAnalysisObservable( f, obs )
     else:
-        print "createCombineAnalysisObservables: combine from",
+        print( "createCombineAnalysisObservables: combine from", end="" )
         aobs= list()
         for filename in filenames:
-            print filename,
-        print
+            print( filename, end="" )
+        print()
         for filename in filenames:
             f= TFile( filename )
             ao= createAnalysisObservable( f, obs )
@@ -391,7 +424,7 @@ def plotAllGroomedAveraged():
             ecm= ecms[iecm]
             plotGroomed( obs, filenames, ecm, logy=1, canv=canv )
             title= "Title: "+obs+" "+ecm+" GeV"
-            print title 
+            print( title )
             canv.Print( "plots_averaged.pdf"+postfix, title )
             iecm= iecm+1
     return
@@ -424,14 +457,23 @@ def plotAllGroomed():
             ecm= ecmFromFilename( filename )
             plotGroomed( obs, [ filename ], ecm, logy=1, canv=canv )
             title= "Title: "+obs+" "+ecm+" GeV"
-            print title 
+            print( title )
             canv.Print( "plots.pdf"+postfix, title )    
     return
 
 # Plot groomed observables: 
-def plotGroomed( obs="grthrust", filenames=[ "sjm136_test.root" ], ecm="136", logy=1, canv=None ):
-    thplotoptions= { "xmin": 0.0, "xmax": 0.5, "ymin": 0.005, "ymax": 50.0, "markerStyle": 20, "markerSize": 0.5, "title": "groomed Thrust", "xlabel": "1-T_{gr}", "ylabel": "1/\sigma d\sigma/d(1-T_{gr})", "logy":logy }
-    cpplotoptions= { "xmin": 0.0, "xmax": 1.0, "ymin": 0.03, "ymax": 30.0, "markerStyle": 20, "markerSize": 0.5, "title": "groomed C-parameter", "xlabel": "C_{gr}", "ylabel": "1/\sigma d\sigma/d(C_{gr})", "logy":logy }
+def plotGroomed( obs="grthrust", filenames=[ "sjm136_test.root" ], ecm="136",
+                 logy=1, canv=None ):
+    thplotoptions= { "xmin": 0.0, "xmax": 0.5, "ymin": 0.005, "ymax": 50.0,
+                     "markerStyle": 20, "markerSize": 0.5,
+                     "title": "groomed Thrust",
+                     "xlabel": "1-T_{gr}", "ylabel": "1/\\sigma d\\sigma/d(1-T_{gr})",
+                     "logy":logy }
+    cpplotoptions= { "xmin": 0.0, "xmax": 1.0, "ymin": 0.03, "ymax": 30.0,
+                     "markerStyle": 20, "markerSize": 0.5,
+                     "title": "groomed C-parameter",
+                     "xlabel": "C_{gr}", "ylabel": '1/\\sigma d\\sigma/d(C_{gr})',
+                     "logy":logy }
     plotopts= { "grthrust": thplotoptions, "grcpar": cpplotoptions }
     if canv == None:
         canv= TCanvas( "canv", obs+" "+ecm, 1200, 800 )
@@ -443,7 +485,7 @@ def plotGroomed( obs="grthrust", filenames=[ "sjm136_test.root" ], ecm="136", lo
             gPad.SetLeftMargin( 0.15 )
             gPad.SetRightMargin( 0.025 )
             key= obs + "_" + beta + "_" + zcut
-            print key
+            print( key )
             aogr= createCombineAnalysisObservables( filenames, key )
             aogr.plot( plotopts[obs] )
             tl= TLegend( 0.4, 0.8, 0.85, 0.85 )
@@ -458,7 +500,7 @@ def plotGroomed( obs="grthrust", filenames=[ "sjm136_test.root" ], ecm="136", lo
     return
 
 # Check jet rates add up to one:
-def checkJetrates( filename="sjm91_all_test.root", obs="durhamycut" ):
+def checkJetrates( filename="sjm91_all.root", obs="durhamycut" ):
     f= TFile( filename )
     valuesmap= dict()
     for rate in [ "R2", "R3", "R4", "R5", "R6" ]:
@@ -467,12 +509,11 @@ def checkJetrates( filename="sjm91_all_test.root", obs="durhamycut" ):
     valuessum= valuesmap["R2"]
     for rate in [ "R3", "R4", "R5", "R6" ]:
         valuessum= np.add( valuessum, valuesmap[rate] )
-    print valuessum
+    print( valuessum )
     return
 
 # Compare y23 to M.T. Ford:
 def compareY23ds():
-    from ROOT import TCanvas
     canv= TCanvas( "canv", "y_{23}(D) comparison 91 - 189", 1000, 1200 )
     canv.Divide( 2, 3 )
     canv.cd( 1 )
@@ -527,9 +568,11 @@ def compareY23d( filename="sjm91_all.root", mtffilename=None, opt="m" ):
     vex= array( "d", npoints*[0.0] )
     tgest= TGraphErrors( npoints, mtfordpoints, mtfordvalues, vex, mtfordsterrs )
     tgetot= TGraphErrors( npoints, mtfordpoints, mtfordvalues, vex, mtforderrs )
-    plotoptions= { "xmin": 0.0003, "xmax": 0.5, "ymin": 0.5, "ymax": 500.0, "markerStyle": 20,
-                       "markerSize": 0.75, "title": "Durham y23 "+filename, "xlabel": "y_{23}",
-                       "ylabel": "1/\sigma d\sigma/dy_{23}", "logx":1, "logy":1 }
+    plotoptions= { "xmin": 0.0003, "xmax": 0.5, "ymin": 0.5, "ymax": 500.0,
+                   "markerStyle": 20, "markerSize": 0.75,
+                   "title": "Durham y23 "+filename,
+                   "xlabel": "y_{23}", "ylabel": "1/\\sigma d\\sigma/dy_{23}",
+                   "logx":1, "logy":1 }
     ao.plot( plotoptions, opt )
     tgetot.SetMarkerStyle( 24 )
     tgetot.SetMarkerSize( 1.25 )
@@ -544,7 +587,6 @@ def compareY23d( filename="sjm91_all.root", mtffilename=None, opt="m" ):
 
 # Compare thrust to M.T. Ford:
 def compareThrusts():
-    from ROOT import TCanvas
     canv= TCanvas( "canv", "Thrust comparison to M.T. Ford", 1000, 1200 )
     canv.Divide( 2, 3 )
     canv.cd( 1 )
@@ -584,12 +626,8 @@ def compareThrust( filename="sjm91_all.root", mtffilename=None ):
     mtfordsyerrs= arrays[4]
     mtforderrs= np.sqrt( np.add( np.square( mtfordsterrs ),  np.square( mtfordsyerrs ) ) )
     if filename=="sjm133.root":
-        # f1= TFile( "sjm130.root" )
-        # aothrust1= createAnalysisObservable( f1, "thrust" )
-        # f2= TFile( "sjm136.root" )
-        # aothrust2= createAnalysisObservable( f2, "thrust" )
-        # aothrust= combineAnalysisObservables( [ aothrust1, aothrust2 ] )
-        aothrust= createCombineAnalysisObservables( ( "sjm130.root", "sjm136.root" ), "lepthrust" )
+        aothrust= createCombineAnalysisObservables( ( "sjm130.root", "sjm136.root" ),
+                                                    "lepthrust" )
     else:
         f= TFile( filename )
         aothrust= createAnalysisObservable( f, "lepthrust" )    
@@ -598,9 +636,11 @@ def compareThrust( filename="sjm91_all.root", mtffilename=None ):
     vex= array( "d", npoints*[0.0] )
     tgethrustst= TGraphErrors( npoints, vx, mtfordvalues, vex, mtfordsterrs )
     tgethrusttot= TGraphErrors( npoints, vx, mtfordvalues, vex, mtforderrs )
-    plotoptions= { "xmin": 0.0, "xmax": 0.5, "ymin": 0.2, "ymax": 30, "markerStyle": 20,
-                       "markerSize": 0.8, "title": "Thrust "+filename, "logy": 1,
-                       "xlabel": "1-T", "ylabel": "1/\sigma d\sigma/d(1-T)" }
+    plotoptions= { "xmin": 0.0, "xmax": 0.5, "ymin": 0.2, "ymax": 30,
+                   "markerStyle": 20, "markerSize": 0.8,
+                   "title": "Thrust "+filename,
+                   "xlabel": "1-T", "ylabel": "1/\\sigma d\\sigma/d(1-T)",
+                   "logy": 1 }
     aothrust.plot( plotoptions )
     tgethrusttot.SetMarkerStyle( 24 )
     tgethrusttot.SetMarkerSize( 1.25 )
@@ -691,7 +731,6 @@ def comparePxcone( filename="sjm91_all.root", optKind="emin", optRate="R2" ):
 
 # Compare OPAL PXCONE results:
 def comparePxcones( filename="sjm91_all.root" ):
-    from ROOT import TCanvas
     canv= TCanvas( "canv", "PXCONE comparison", 1000, 1200 )
     canv.Divide(2,3)
     canv.cd(1)
@@ -712,15 +751,19 @@ def comparePxcones( filename="sjm91_all.root" ):
 # Compare antikt, siscone and PXCONE jets in same plot        
 def compareConejets( filename="sjm91_all.root", optKind="R", optR="R3" ):
     f= TFile( filename )
+    canv= TCanvas( "canv", "Cone jets", 800, 800 )
     algantikt= "antikt"+optKind
     algsiscone= "siscone"+optKind
+    # PXCONE with "2" on same points as other cone jet algs
     algpxcone= "pxcone"+optKind+"2"
     aktao= createAnalysisObservable( f, algantikt+optR )
-    ymax= { "R2":1.0, "R3":0.5, "R4":0.3, "R5":0.3, "R6":0.3 }
-    xmax= { "R":1.0, "emin":0.15 }
+    ymax= { "R2": 1.0, "R3": 0.5, "R4": 0.3, "R5": 0.3, "R6": 0.3 }
+    xmax= { "R": 1.0, "emin": 0.15 }
+    xlabel= { "R": "R [rad]", "emin": "Emin fraction" }
     plotoptions= { "xmin": 0.0, "xmax": xmax[optKind], "ymin": 0.0, "ymax": ymax[optR],
-                       "markerStyle": 20, "markerSize": 0.8,
-                       "title": "Cone "+optKind+" "+optR+" "+filename }
+                   "markerStyle": 20, "markerSize": 1.0,
+                   "title": "Cone "+optKind+" "+optR+" "+filename,
+                   "xlabel": xlabel[optKind], "ylabel": optR }
     akttgest, akttgesy= aktao.plot( plotoptions )
     sisao= createAnalysisObservable( f, algsiscone+optR )
     plotoptions["markerStyle"]= 21
@@ -739,7 +782,6 @@ def compareConejets( filename="sjm91_all.root", optKind="R", optR="R3" ):
 
 # Compare Andrii's Durham jet rates 
 def compareAllDurhamjetrates():
-    from ROOT import TCanvas
     canv= TCanvas( "canv", "Durham jetrates comparison", 1000, 1200 )
     canv.Divide(2,3)
     canv.cd( 1 )
@@ -847,9 +889,11 @@ def compareEEC( filename="sjm91_all.root", datafilename="../EECMC/share/OPAL/dat
     ao= createAnalysisObservable( f, "EEC" )
     tokens= datafilename.split( "/" )
     exp= tokens[3]
-    plotoptions= { "xmin": 0.0, "xmax": 3.14159, "ymin": 0.05, "ymax": 5.0, "markerStyle": 20,
-                       "markerSize": 0.5, "drawas": "3", "fillcolor": 6, "title": "EEC "+exp,
-                       "xlabel": "\chi\ [rad.]", "ylabel": "1/\sigma d\Sigma/d\chi", "logy": 1 }
+    plotoptions= { "xmin": 0.0, "xmax": 3.14159, "ymin": 0.05, "ymax": 5.0,
+                   "markerStyle": 20, "markerSize": 0.5, "drawas": "3", "fillcolor": 6,
+                   "title": "EEC "+exp,
+                   "xlabel": "\\chi\\ [rad.]", "ylabel": "1/\\sigma d\\Sigma/d\\chi",
+                   "logy": 1 }
     tgest, tgesy= ao.plot( plotoptions )
     lines= [ line.rstrip( '\n' ) for line in open( datafilename ) ]
     n= len( lines )
@@ -877,7 +921,6 @@ def compareEEC( filename="sjm91_all.root", datafilename="../EECMC/share/OPAL/dat
     return 
 
 def compareEECs( filename="sjm91_all.root" ):
-    from ROOT import TCanvas
     canv= TCanvas( "canv", "EEC comparison", 1000, 1200 )
     canv.Divide(2,3)
     canv.cd(1)
@@ -931,15 +974,15 @@ def testMigrationMatrix( obs="thrust", filename="sjm91_all.root" ):
     width, precision= 7, 3
     fmt= "{:"+str(width)+"."+str(precision)+"f}"
     for i in range( nbin ):
-        print fmt.format( valueshnr[i] ),
-        print fmt.format( valuesh[i] ),
+        print( fmt.format( valueshnr[i] ), end="" )
+        print( fmt.format( valuesh[i] ), end="" )
         for j in range( nbin ):
-            print fmt.format( R[i,j] ),
-        print
-    print "               ",
+            print( fmt.format( R[i,j] ), end="" )
+        print()
+    print( "               ", end="" )
     for i in range( nbin ):
-        print fmt.format( valuesd[i] ),
-    print
+        print( fmt.format( valuesd[i] ), end="" )
+    print()
 
     for i in range( nbin ):
         sumcol= sum( R[:,i] )
@@ -948,8 +991,8 @@ def testMigrationMatrix( obs="thrust", filename="sjm91_all.root" ):
     C= np.diag( cacc )
     CR= np.dot( C, R )
     valuesc= np.dot( CR, valuesd )
-    print valueshnr
-    print valuesc
+    print( valueshnr )
+    print( valuesc )
 
     return
 

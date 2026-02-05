@@ -14,7 +14,6 @@
 #include "LEP1NtupleReader.hh"
 #include "LEP2NtupleReader.hh"
 
-// #include "HepMC2Reader.hh"
 #include "HepMCRootReader.hh"
 
 #include "VectorHelpers.hh"
@@ -30,9 +29,6 @@ using std::ostringstream;
 using std::cout;
 using std::endl;
 #include <stdexcept>
-
-
-
 
 
 AnalysisProcessor::AnalysisProcessor( const SjmConfigParser& sjmcp ) :
@@ -72,7 +68,7 @@ AnalysisProcessor::processAnalyses( const vector<Analysis> & analyses,
 }
 
 void countCutflow( const map<string,Bool_t> & cutStatus,
-		     std::map<std::string,int> & cutflowCounter ) {
+		   std::map<std::string,int> & cutflowCounter ) {
   if( cutflowCounter.empty() ) {
     std::cout << "countCutflow: initialise cut flow map" << std::endl;
     for( auto const & keyValue : cutStatus ) {
@@ -509,6 +505,8 @@ void AnalysisProcessor::MCAnalysis() {
   Analysis hadronLevel( mcname + " hadron none nonrad" );
   Analysis partonLevel( mcname + " parton none nonrad" );
   vector<Analysis> analyses { hadronLevel, partonLevel };
+  std::map<std::string,std::map<std::string,int>> cutflowCounters;
+  std::map<string,Double_t> eventCounts;
 
   // Get observables from configuration:
   cout << "AnalysisProcessor::MCAnalysis: create observables" << endl;
@@ -525,18 +523,23 @@ void AnalysisProcessor::MCAnalysis() {
     return;
   }
 
-  // Fill from hepmc2 files:
-  cout << "AnalysisProcessor::MCAnalysis: fill from hepmc files" << endl;
+  // Fill from hepmc3 files:
+  cout << "AnalysisProcessor::MCAnalysis: fill from hepmc3 files" << endl;
   try {
     vector<string> filenames= sjmConfigs.getItem<vector<string>>( "Signal.files" );
     string treename= sjmConfigs.getItem<string>( "Signal.treename" );
     string branchname= sjmConfigs.getItem<string>( "Signal.branchname" );
-    map<string,int> cutflow;
+    Double_t mcnonradcut= sjmConfigs.getItem<float>( "General.mcnonradcut" );
+    
+    cutflowCounters["Signal"]= std::map<std::string,int>();
+    eventCounts["Signal"]= 0;
+
     for( const string & filename : filenames ) {
-      // HepMC2Reader hmc2r( filename );
-      HepMCRootReader hmcrr( filename, treename, branchname );
-      processAnalysesNtr( analyses, vobs, cutflow, &hmcrr );
+      HepMCRootReader hmcrr( filename, treename, branchname, mcnonradcut );
+      eventCounts["Signal"]+= processAnalysesNtr( analyses, vobs,
+						  cutflowCounters["Signal"], &hmcrr );
     }
+
   }
   catch( const std::exception& e ) {
     cout << "AnalysisProcessor::MCAnalysis: filling cought exception: "
@@ -556,6 +559,8 @@ void AnalysisProcessor::MCAnalysis() {
   // Write root objects (TH1D or TGraphErrors, and TH2D):
   OutputWriter writer( sjmConfigs.getItem<string>( "General.outfile" ) );
   writer.write( vfobs );
+  writer.writeMaps( cutflowCounters );
+  writer.writeMap( eventCounts, "Eventcounts" );
 
   // The End:
   return;

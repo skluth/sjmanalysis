@@ -25,8 +25,9 @@ class HepMCRootReader : public NtupleReader {
 public:
 
   HepMCRootReader( const std::string & filename,
-		   const std::string & treename="h10",
-		   const std::string & branchname="h10" );
+		   const std::string & treename,
+		   const std::string & branchname,
+		   const Double_t mcnonradcutin=1.0 );
   virtual ~HepMCRootReader();
 
   virtual Int_t GetNumberEntries();
@@ -53,9 +54,9 @@ private:
   void getParton();
   void getIsr();
   
-  std::vector<size_t> getIndices( const ParticleVector& );
-  ParticleVector getParents( const Particle* particle );
-  ParticleVector getDaughters( const Particle* particle );
+  std::vector<size_t> getIndices( const ParticleVector& ) const;
+  ParticleVector getParents( const Particle* particle ) const;
+  ParticleVector getDaughters( const Particle* particle ) const;
 
   Double_t event_scale();
   ParticleVector getBeamParticles();
@@ -65,10 +66,11 @@ private:
   Int_t nevents;
   TFile* hepmcrootfile;
   TTree* hepmctree;
+  Double_t mcnonradcut;
   HepMC3::GenEventData* eventData;
   HepMC3::GenRunInfoData* runInfoData;
-  VertexParticlesMap incomingParticles;
-  VertexParticlesMap outgoingParticles;
+  VertexParticlesMap incomingParticlesMap;
+  VertexParticlesMap outgoingParticlesMap;
   ParticleVertexMap beginVertexMap;
   ParticleVertexMap endVertexMap;
   

@@ -12,8 +12,9 @@
 
 HepMCRootReader::HepMCRootReader( const std::string & filename,
 				  const std::string & treename,
-				  const std::string & branchname ) :
-  nevents(0), hepmcrootfile(nullptr), hepmctree(nullptr),
+				  const std::string & branchname,
+				  const Double_t mcnonradcutin ) :
+  nevents(0), hepmcrootfile(nullptr), hepmctree(nullptr), mcnonradcut(mcnonradcutin),
   eventData(nullptr), runInfoData(nullptr),
   vtlvCache{ { "parton", std::vector<TLorentzVector>() },
     { "hadron", std::vector<TLorentzVector>() } },
@@ -86,14 +87,14 @@ size_t findInVector( const std::vector<T> & v, const T* obj ) {
 bool HepMCRootReader::GetEvent( Int_t ievent ) {  
   bool result= false;
   if( hepmctree and hepmctree->GetEvent( ievent ) > 0 ) {
-
-    std::cout << "HepMCRootReader::GetEvent: event " << ievent << std::endl;
-    
+    if( ievent % 100 == 0 ) {
+	std::cout << "HepMCRootReader::GetEvent: event " << ievent << std::endl;
+    }
     result= true;
     for( const auto & keyValue : cacheIsValid ) cacheIsValid[keyValue.first]= false;
     nevents++;
-    incomingParticles.clear();
-    outgoingParticles.clear();
+    incomingParticlesMap.clear();
+    outgoingParticlesMap.clear();
     beginVertexMap.clear();
     endVertexMap.clear();
     // Setup links between particles and vertices in maps:
@@ -102,14 +103,14 @@ bool HepMCRootReader::GetEvent( Int_t ievent ) {
       Int_t id2= eventData->links2[i];
       if( id1 > 0 ) {
 	const Vertex & vertex= eventData->vertices[ -id2-1 ];
-	ParticleVector & incoming= incomingParticles[ &vertex ];
+	ParticleVector & incoming= incomingParticlesMap[ &vertex ];
 	const Particle & particle= eventData->particles[ id1-1 ];
 	incoming.push_back( &particle );
 	endVertexMap[ &particle ]= &vertex;
       }
       else {
 	const Vertex & vertex= eventData->vertices[ -id1-1 ];
-	ParticleVector & outgoing= outgoingParticles[ &vertex ];
+	ParticleVector & outgoing= outgoingParticlesMap[ &vertex ];
 	const Particle & particle= eventData->particles[ id2-1 ];
 	outgoing.push_back( &particle );
 	beginVertexMap[ &particle ]= &vertex;
@@ -130,11 +131,26 @@ bool HepMCRootReader::GetNextEvent( Int_t maxevt ) {
   return not maxreached and GetEvent( nevents );
 }
 
+// Get connected particles from a vertex
+HepMCRootReader::ParticleVector
+getParticles( const HepMCRootReader::Particle* particle,
+	      const HepMCRootReader::ParticleVertexMap & pvm,
+	      const HepMCRootReader::VertexParticlesMap & vpm ) {
+  if( not ( pvm.count( particle ) == 0 ) ) {
+    const HepMCRootReader::Vertex* vertex= pvm.at( particle );
+    if( vertex ) {
+      const HepMCRootReader::ParticleVector& particles= vpm.at( vertex );
+      return particles;
+    }
+  }
+  return HepMCRootReader::ParticleVector();
+}
+// Selector interface for event iterator
 class ParticleSelector {
 public:
   virtual bool operator()( const HepMCRootReader::Particle* ) const { return true; }
 };
-
+// Event iterator to move down or up event history
 class EventIterator {
   const HepMCRootReader::Particle* particle;
   const HepMCRootReader::ParticleVertexMap vertexMap;
@@ -147,10 +163,8 @@ public:
 		 const ParticleSelector & ps=ParticleSelector() ) :
     particle(p), vertexMap(pvm), particlesMap(vpm), selector(ps) {}
   bool next() {
-    if( vertexMap.count( particle ) == 0 ) return false;
-    const HepMCRootReader::Vertex* vertex= vertexMap.at( particle );
-    if( particlesMap.count( vertex ) == 0 ) return false;
-    const HepMCRootReader::ParticleVector & vertexParticles= particlesMap.at( vertex );
+    const HepMCRootReader::ParticleVector& vertexParticles=
+      getParticles( particle, vertexMap, particlesMap );
     for( const HepMCRootReader::Particle* vertexParticle : vertexParticles ) {
       if( selector( vertexParticle ) ) {
 	particle= vertexParticle;
@@ -162,7 +176,7 @@ public:
   const HepMCRootReader::Particle* getParticle() { return particle; }
   const HepMCRootReader::Vertex* getVertex() { return vertexMap.at( particle ); }
 };
-
+// Select identical particles with same PID
 class IdenticalParticleSelector : public ParticleSelector {
   const HepMCRootReader::Particle* particle;
 public:
@@ -172,16 +186,17 @@ public:
     return ( particle->pid == p->pid and p->status != 3 );
   }
 };
+
+// Photons from initial beam particles
 void HepMCRootReader::findISRphotons() {
-  // Photons from initial beam particles
   ISRphotons.clear();
   for( const Particle* beamParticle : getBeamParticles() ) {
+    // for each beam particle go down history and find photons
     IdenticalParticleSelector ips( beamParticle );
-    EventIterator eventIter( beamParticle, endVertexMap, outgoingParticles,
+    EventIterator eventIter( beamParticle, endVertexMap, outgoingParticlesMap,
 			     ips );
-    while( eventIter.next() ) {      
-      const Vertex* vertex= eventIter.getVertex();
-      const ParticleVector & outgoing= outgoingParticles.at( vertex );
+    while( eventIter.next() ) {
+      const ParticleVector outgoing= getDaughters( eventIter.getParticle() );
       for( const Particle* outparticle : outgoing ) {
 	if( outparticle->pid == 22 and outparticle->status == 1 ) {
 	  ISRphotons.push_back( outparticle );
@@ -235,7 +250,7 @@ HepMCRootReader::GetLorentzVectors( const std::string & opt ) {
 
 void HepMCRootReader::getIsr() {
   vtlv.clear();
-  // assumes ISRphotons filled
+  // ISRphotons filled in getEvent()
   for( const Particle* photon : ISRphotons ) {
     TLorentzVector tlv( photon->momentum.m_v1,
 			photon->momentum.m_v2,
@@ -306,8 +321,8 @@ void HepMCRootReader::getParton() {
       }
     }
     if( partonicHadronDecay ) {
-      std::cout << "HepMCRootReader::getParton: from partonic hadron decay ip= " << ip
-		<< std::endl;
+      //std::cout << "HepMCRootReader::getParton: from partonic hadron decay ip= " << ip
+      //	<< std::endl;
       continue;
     }
     // Selected parton
@@ -397,9 +412,15 @@ HepMCRootReader::getSelections( const std::string & opt ) {
 }
 
 bool HepMCRootReader::MCNonRad() {
-  return true;
+  Double_t sumE= 0.0;
+  for( const Particle* isrphoton : ISRphotons ) {
+    sumE+= isrphoton->momentum.m_v4;
+  }
+  bool result= true;
+  if( sumE > mcnonradcut ) result= false;
+  cutflow["mcnonrad"]= result;
+  return result;
 }
-
 
 bool HepMCRootReader::isMC() {
   return true;
@@ -449,9 +470,9 @@ void HepMCRootReader::printParticlesVertices() {
   for( size_t iv= 0; iv < eventData->vertices.size(); iv++ ) {
     const Vertex* vertex= &(eventData->vertices[iv]);
     std::cout << "vertex " << iv;
-    if( incomingParticles.count( vertex ) != 0 ) {
+    if( incomingParticlesMap.count( vertex ) != 0 ) {
       std::cout << " incoming";
-      const ParticleVector & incoming= incomingParticles.at( vertex );
+      const ParticleVector & incoming= incomingParticlesMap.at( vertex );
       for( const Particle* particle : incoming ) {
 	size_t index= findInVector<Particle>( eventData->particles, particle );
 	if( index == eventData->particles.size() ) {
@@ -465,9 +486,9 @@ void HepMCRootReader::printParticlesVertices() {
     else {
       std::cout << " not in incoming";
     }
-    if( outgoingParticles.count( vertex ) != 0 ) {
+    if( outgoingParticlesMap.count( vertex ) != 0 ) {
       std::cout << " outgoing ";
-      const ParticleVector & outgoing= outgoingParticles.at( vertex );
+      const ParticleVector & outgoing= outgoingParticlesMap.at( vertex );
       for( const Particle* particle : outgoing ) {
 	size_t index= findInVector<Particle>( eventData->particles, particle );
 	if( index == eventData->particles.size() ) {
@@ -485,7 +506,7 @@ void HepMCRootReader::printParticlesVertices() {
 
 // Particle parents and daughters
 std::vector<size_t>
-HepMCRootReader::getIndices( const ParticleVector& particles ) {
+HepMCRootReader::getIndices( const ParticleVector& particles ) const {
   std::vector<size_t> result;
   for( const Particle* particle : particles ) {
     size_t index= findInVector<Particle>( eventData->particles, particle );
@@ -493,19 +514,19 @@ HepMCRootReader::getIndices( const ParticleVector& particles ) {
   }
   return result;
 }
-HepMCRootReader::ParticleVector HepMCRootReader::getParents( const Particle* particle ) {
-  const Vertex* beginVertex= beginVertexMap[ particle ];
-  if( beginVertex ) {
-    const ParticleVector& parents= incomingParticles.at( beginVertex );
-    return parents;
-  }
-  return ParticleVector();
+HepMCRootReader::ParticleVector
+HepMCRootReader::getParents( const HepMCRootReader::Particle* particle ) const {
+  const HepMCRootReader::ParticleVector& parents= getParticles( particle,
+								beginVertexMap,
+								incomingParticlesMap );
+  return parents;
 }
-HepMCRootReader::ParticleVector HepMCRootReader::getDaughters( const Particle* particle ) {
-  const Vertex* endVertex= endVertexMap[ particle ];
-  if( endVertex ) {
-    const ParticleVector& daughters= outgoingParticles.at( endVertex );
-    return daughters;
-  }
-  return ParticleVector();
+HepMCRootReader::ParticleVector
+HepMCRootReader::getDaughters( const HepMCRootReader::Particle* particle ) const {
+  const HepMCRootReader::ParticleVector& daughters= getParticles( particle,
+								  endVertexMap,
+								  outgoingParticlesMap );
+  return daughters;
 }
+
+

@@ -112,6 +112,8 @@ void SjmConfigParser::setupOptions() {
   generalOptsDescriptionMap["General.normalise"]= "Normalise";
   generalOptsDescriptionMap["General.path"]= "Data path";
   
+  specialOptsDescriptionMap["General.mcnonradcut"]= "MC non-rad cut [GeV]";
+
   generalOptsDescriptionMap["Observables.observable"]= "Observable names";
   generalOptsDescriptionMap["Observables.mtxunfold"]= "Mtx unfolding observables";
   
@@ -158,6 +160,9 @@ void SjmConfigParser::setupOptions() {
   valuesMap["General.url"]= VS { "" };
   valuesMap["General.normalise"]= VS {"1" };
   valuesMap["General.path"]= VS { "." };
+
+  valuesMap["General.mcnonradcut"]= VS { "1.0" };
+  
   valuesMap["Observables.mtxunfold"]= VS { "none" };
   valuesMap["Points.y34cut"]= VS { "0.0045" };
   valuesMap["Points.y34y23cut"]= VS { "0.5" };

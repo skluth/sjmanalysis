@@ -1,0 +1,898 @@
+Sender: LSF System <lsfadmin@lxbatch401>
+Subject: Job 550437: <lu172> Done
+
+Job <lu172> was submitted from host <lxplus029> by user <skluth>.
+Job was executed on host(s) <lxbatch401>, in queue <8nh>, as user <skluth>.
+</afs/cern.ch/user/s/skluth> was used as the home directory.
+</afs/cern.ch/user/s/skluth/w0/qcd/qcdntuple> was used as the working directory.
+Started at Tue Oct 29 13:37:07 2002
+Results reported at Tue Oct 29 15:01:21 2002
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time   :   3352.08 sec.
+    Max Memory :        14 MB
+    Max Swap   :        34 MB
+
+    Max Processes  :         6
+
+The output (if any) follows:
+
+@(#)CERN job starter 2.15 29/08/2002
+Working directory is </pool/lsf/skluth/550437> on <lxbatch401>
+
+job starts: Tue Oct 29 13:37:14 CET 2002
+Using executeable /afs/cern.ch/user/s/skluth/w0/qcd/qcdntuple/bin/qqlumi.run
+ CUINIT-   1- W      Dummy version of CUINIT called.
+ FBKEY -   1- I      FFREAD cards initialised for FB Vn 423 / 1995
+ FBINIT-   2- I      Pi = 3.141593 1./Sqrt(2.) = 0.707107
+ FBINIT-   1- I      FB processor Vn 415.4  initialised
+ FDLSTA-   1- I      Initialised
+ ODFDIN-   1- I      Initialised
+ ODDDAR-   2- I      Removing ECON from  CTRK block  data definition
+ ODDDAR-   2- I      Removing ECO2 from  CTRK block  data definition
+ ODDDAR-   2- I      Removing FMOM from  CTRK block  data definition
+ ODDDAR-   2- I      Removing DIST from  CTRK block  data definition
+ ODDDAR-   2- I      Removing ECOR from  CTRK block  data definition
+ ODDDAI-   2- I      Removing NBEC from  CTRK block  data definition
+ ODDDAR-   2- I      Removing CDST from  ECAL block  data definition
+ ODDDAR-   2- I      Removing DFSB from  ECAL block  data definition
+ DCDEFI-   2- I      Redefining OD pointers for version 420
+ BTINIT-   1- W      Dummy version of BTINIT  called
+ MTINIT-   1- I      Dummy was called
+
+ ------------------------------------------------------------------------------
+ -----                                                                    -----
+ -----                  ROPE Version 420 sub-version   3                  -----
+ -----      Library was created on  21022, Modifications dated  21021     -----
+ -----                                                                    -----
+ -----             The overall ROPE code version is :    2897             -----
+ -----                                                                    -----
+ -----       It is now 1337 on  21029, The processors available are:      -----
+ -----     FD433/01 ; Library dated  20626, Modification dated  20626     -----
+ -----     OD420/01 ; Library dated  20626, Modification dated  20626     -----
+ -----     OU225/01 ; Library dated  20627, Modification dated  20626     -----
+ -----     OC520/01 ; Library dated  20626, Modification dated  20626     -----
+ -----     TR217/01 ; Library dated  20627, Modification dated  20626     -----
+ -----     SU213/01 ; Library dated  20627, Modification dated  20626     -----
+ -----     DC420/01 ; Library dated  20627, Modification dated  20626     -----
+ -----     SW115/01 ; Library dated  20627, Modification dated  20626     -----
+ -----     PX116/01 ; Library dated  20627, Modification dated  20626     -----
+ -----                                                                    -----
+ ------------------------------------------------------------------------------
+
+ ROPINI-   1- I      Dummies called for  GR ON TT FI SC CV JC CZ CT DX CX SI
+ ROPINI-   1- I      Dummies called for  CS TB PB EB PE TE EE EM HB HE HP HM
+ ROPINI-   1- I      Dummies called for  MB ME MM LM CE DD LL LA OP ID GC HI
+ ROPINI-   1- I      Dummies called for  WW
+1           USER'S DIRECTIVES TO RUN THIS JOB
+            ----------------------------------
+
+
+ ***** DATA CARD CONTENT     LIST                                                                            
+ ***** DATA CARD CONTENT     C Input file definitions:                                                       
+ ***** DATA CARD CONTENT    *CATFILE 'CDST' 'IN  ' 31 8100 'LI  ' 7='CSDST/PASS7/FYZ1/P81'                  
+ RSCATA-   3- I      Read catalog on default unit 51
+                             1 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07575c01
+                             2 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07577c01
+                             3 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07579c01
+                             4 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07581c01
+                             5 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07584c01
+                             6 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07586c01
+                             7 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07588c01
+                             8 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07590c01
+                             9 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07592c01
+                            10 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07594c01
+                            11 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07596c01
+                            12 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07599c01
+                            13 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07601c01
+                            14 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07602c01
+                            15 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07603c01
+                            16 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07604c01
+                            17 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07606c01
+                            18 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07608c01
+                            19 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07610c01
+                            20 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07614c01
+                            21 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07620c01
+                            22 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07622c01
+                            23 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07624c01
+                            24 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07626c01
+                            25 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07629c01
+                            26 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07631c01
+                            27 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07633c01
+                            28 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07635c01
+                            29 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07637c01
+                            30 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07639c01
+                            31 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07641c01
+                            32 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07646c01
+                            33 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07648c01
+                            34 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07650c01
+                            35 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07652c01
+                            36 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07655c01
+                            37 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07658c01
+                            38 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07660c01
+                            39 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07662c01
+                            40 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07664c01
+                            41 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07666c01
+                            42 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07668c01
+                            43 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07670c01
+                            44 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07672c01
+ ***** DATA CARD CONTENT    *CATFILE 'CDST' 'IN  ' 31 8100 'LI  ' 7='CSDST/PASS7/FYZ1/P82'                  
+                             1 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07674c01
+                             2 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07690c01
+                             3 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07693c01
+                             4 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07695c01
+                             5 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07704c01
+                             6 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07706c01
+                             7 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07708c01
+                             8 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07710c01
+                             9 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07714c01
+                            10 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07716c01
+                            11 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07718c01
+                            12 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07720c01
+                            13 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07725c01
+                            14 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07729c01
+                            15 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07733c01
+                            16 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07735c01
+                            17 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07737c01
+                            18 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07739c01
+                            19 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07742c01
+                            20 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07757c01
+                            21 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07761c01
+                            22 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07763c01
+                            23 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07766c01
+                            24 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07768c01
+                            25 --> /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07769c01
+ ***** DATA CARD CONTENT    *EVENT 7575 1 7672 9999999                                                      
+ ***** DATA CARD CONTENT    *EVENT 7693 1 7720 9999999                                                      
+ ***** DATA CARD CONTENT    *EVENT 7729 1 7766 9999999                                                      
+ ***** DATA CARD CONTENT     C Calibration file definitions:                                                 
+ ***** DATA CARD CONTENT    *FILE 'CAL ' 'IN  ' 90 0 '    ' 'EX13'                                          
+ ***** DATA CARD CONTENT      '/afs/cern.ch/opal/opcal/db/opalcal.rzexp13'                                   
+ ***** DATA CARD CONTENT    *FILE 'CAL ' 'IN  ' 89 0 '    ' 'EX12'                                          
+ ***** DATA CARD CONTENT      '/afs/cern.ch/opal/opcal/db/opalcal.rzexp12'                                   
+ ***** DATA CARD CONTENT    *FILE 'CAL ' 'IN  ' 88 0 '    ' 'EX11'                                          
+ ***** DATA CARD CONTENT      '/afs/cern.ch/opal/opcal/db/opalcal.rzexp11'                                   
+ ***** DATA CARD CONTENT    *FILE 'CAL ' 'IN  ' 87 0 '    ' 'EX10'                                          
+ ***** DATA CARD CONTENT      '/afs/cern.ch/opal/opcal/db/opalcal.rzexp10'                                   
+ ***** DATA CARD CONTENT    *FILE 'CAL ' 'IN  ' 86 0 '    ' 'EX09'                                          
+ ***** DATA CARD CONTENT      '/afs/cern.ch/opal/opcal/db/opalcal.rzexp9'                                    
+ ***** DATA CARD CONTENT    *FILE 'CAL ' 'IN  ' 85 0 '    ' 'EX08'                                          
+ ***** DATA CARD CONTENT      '/afs/cern.ch/opal/opcal/db/opalcal.rzexp8'                                    
+ ***** DATA CARD CONTENT    *FILE 'CAL ' 'IN  ' 84 0 '    ' 'EX07'                                          
+ ***** DATA CARD CONTENT      '/afs/cern.ch/opal/opcal/db/opalcal.rzexp7'                                    
+ ***** DATA CARD CONTENT    *FILE 'CAL ' 'IN  ' 83 0 '    ' 'EX06'                                          
+ ***** DATA CARD CONTENT      '/afs/cern.ch/opal/opcal/db/opalcal.rzexp6'                                    
+ ***** DATA CARD CONTENT    *FILE 'CAL ' 'IN  ' 82 0 '    ' 'EX05'                                          
+ ***** DATA CARD CONTENT      '/afs/cern.ch/opal/opcal/db/opalcal.rzexp5'                                    
+ ***** DATA CARD CONTENT    *FILE 'CAL ' 'IN  ' 81 0 '    ' 'EX04'                                          
+ ***** DATA CARD CONTENT      '/afs/cern.ch/opal/opcal/db/opalcal.rzexp4'                                    
+ ***** DATA CARD CONTENT    *FILE 'CAL ' 'IN  ' 80 0 '    ' 'EX03'                                          
+ ***** DATA CARD CONTENT      '/afs/cern.ch/opal/opcal/db/opalcal.rzexp3'                                    
+ ***** DATA CARD CONTENT     C Other file definitions:                                                       
+ ***** DATA CARD CONTENT    *FILE 'HIST' 'OUT ' 44 7='./lu172.histo'                                        
+ ***** DATA CARD CONTENT     C QL private cards:                                                             
+ ***** DATA CARD CONTENT     QLELOW 129000 135000 160000 170000 180000 188000                                
+ ***** DATA CARD CONTENT     QLEHIG 131000 137000 162000 173000 184500 190000                                
+ ***** DATA CARD CONTENT     C Rope cards:                                                                   
+ ***** DATA CARD CONTENT     NOEBUPDT 1                                                                      
+ ***** DATA CARD CONTENT     TRIGGER   1  999999999                                                          
+ ***** DATA CARD CONTENT     TSAFE 20.                                                                       
+ ***** DATA CARD CONTENT     C Last card:                                                                    
+ ***** DATA CARD CONTENT     STOP                                                                            
+ RIOSET-   1- I      Set environment variable STAGE_HOST to opal001d
+ RIOSET-   3- I      Set environment variable STAGE_POOL to opalstage
+ ROCAPS-   2- I      Prestaging   36 castor files
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07575c01 on unit 31 as OLD
+ ROOFLX: Processing file /afs/cern.ch/opal/opcal/db/opalcal.rzexp13 on unit 90 as OLD
+ ROOFLX: Processing file /afs/cern.ch/opal/opcal/db/opalcal.rzexp12 on unit 89 as OLD
+ ROOFLX: Processing file /afs/cern.ch/opal/opcal/db/opalcal.rzexp11 on unit 88 as OLD
+ ROOFLX: Processing file /afs/cern.ch/opal/opcal/db/opalcal.rzexp10 on unit 87 as OLD
+ ROOFLX: Processing file /afs/cern.ch/opal/opcal/db/opalcal.rzexp9 on unit 86 as OLD
+ ROOFLX: Processing file /afs/cern.ch/opal/opcal/db/opalcal.rzexp8 on unit 85 as OLD
+ ROOFLX: Processing file /afs/cern.ch/opal/opcal/db/opalcal.rzexp7 on unit 84 as OLD
+ ROOFLX: Processing file /afs/cern.ch/opal/opcal/db/opalcal.rzexp6 on unit 83 as OLD
+ ROOFLX: Processing file /afs/cern.ch/opal/opcal/db/opalcal.rzexp5 on unit 82 as OLD
+ ROOFLX: Processing file /afs/cern.ch/opal/opcal/db/opalcal.rzexp4 on unit 81 as OLD
+ ROOFLX: Processing file /afs/cern.ch/opal/opcal/db/opalcal.rzexp3 on unit 80 as OLD
+ ROOFLX: Processing file /afs/cern.ch/opal/offline/db/sudb.rzdata on unit 55 as OLD
+ ROOPEN-  15- I       SUDB database last updated 20010409 154700
+ ROOPEN-  12- I      Trying to delete the histogram file: ./lu172.histo
+ ROOPEN-  11- I      Opening the histogram file: ./lu172.histo
+ FBSETR-   1- I      FB processor Vn 419.1  setup
+ DCSETR-   8- I      Loading all dictionaries in/afs/cern.ch/opal/offline/db/dicts
+ Looking for all dictionaries in directory /afs/cern.ch/opal/offline/db/dicts                                              
+ Found 16 of them
+ DCSETR-  10- I      DD package is NOT loaded. No DD unpack
+ USSETR: energy bins in MeV:
+ Bin  1:  129000 -  131000
+ Bin  2:  135000 -  137000
+ Bin  3:  160000 -  162000
+ Bin  4:  170000 -  173000
+ Bin  5:  180000 -  184500
+ Bin  6:  188000 -  190000
+ ROCRST-   1- I      SW-lumi selection will be done from header bit data
+
+ ------------------------------------------------------------------------------
+ -----                                                                    -----
+ -----                          ROPE Event loop                           -----
+ -----                          ---------------                           -----
+ -----                                                                    -----
+ -----  |->|- Read a new event: call USHEAD for user selection.           -----
+ -----  |->|- (unpack the compressed data if necessary)                   -----
+ -----  |  |                                                              -----
+ -----  |  |- Call user routine USBAT with argument -2                    -----
+ -----  |  |- Call user routine USBAT with argument IIFDAC                -----
+ -----  |  |                                                              -----
+ -----  |  |- Call OD processor                                           -----
+ -----  |  |                                                              -----
+ -----  |  |- Call user routine USBAT with argument IIFODC                -----
+ -----  |  |                                                              -----
+ -----  |  |- Call ODTOSI Phi only                                        -----
+ -----  |  |                                                              -----
+ -----  |  |- Call user routine USBAT with argument 0 (Zero)              -----
+ -----  |  |                                                              -----
+ -----  |  |                                                              -----
+ -----  |<-|- Write event structure to output streams.                    -----
+ -----                                                                    -----
+ ------------------------------------------------------------------------------
+ RGETDA-   7- W      Junk event on input, skip it
+ RGETDA-   7- W      Junk event on input, skip it
+ RGETDA-   7- W      Junk event on input, skip it
+ RGETDA-   7- W      Junk event on input, skip it
+ RGETDA-   7- W      Junk event on input, skip it
+ RGETDA-   7- W      Junk event on input, skip it
+ RGETDA-   7- W      Junk event on input, skip it
+ RGETDA-   7- W      Junk event on input, skip it
+ RGETDA-   7- W      Junk event on input, skip it
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ RGETDA-   7- W      Junk event on input, skip it
+ RGETDA-   3- I      Constants record found on input
+ RGETCN-   1- I      Calibration constants read on data stream.
+ DCREAD-   1- I      Automatically loading dictionary /afs/cern.ch/opal/offline/db/dicts/dc413.dict
+ DCRDIC-   8- I      Reading first  dictionary (OD413 version  2)
+ DCDEFI-   2- I      Redefining OD pointers for version 413
+ ODDDAR-   2- I      Removing ECON from  CTRK block  data definition
+ ODDDAR-   2- I      Removing ECO2 from  CTRK block  data definition
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ ODDDAR-   2- I      Removing FMOM from  CTRK block  data definition
+ ODDDAI-   2- I      Removing NBEC from  CTRK block  data definition
+ ODDDAI-   2- I      Removing TPD1 from  GNRL block  data definition
+ ODDDAI-   2- I      Removing TPD2 from  GNRL block  data definition
+ ODDDAI-   2- I      Removing TRPU from  GNRL block  data definition
+ ODDDAI-   2- I      Removing NBEC from  CTRK block  data definition
+ DCRDIC-  10- I      Dictionary loaded ok
+ TRCALR-   5- I      TRCT bank lifted by TRCALR
+ ASHEAD-  11- W      Event is not TKMH
+ ROLUSW-   1- I       SW luminosity last updated 15-Mar-2001 Analysis from DST?       F
+ ROSWTC-   2- I       SW luminosity last updated 15-Mar-2001
+ ROSWTC-   4- I       Lum. Tilt corr.1,run/sample:  7575   13 is:   1.00709999
+ ROSWTC-   4- I       Lum. Tilt corr.2,run/sample:  7575   13 is:   1.00709999
+ ROSWTC-   4- I       Lum. Tilt corr.3,run/sample:  7575   13 is:   1.00709999
+ ROLUSW-   6- I       LSWITx,XSEC,ECMS,TLTFAC,INTFAC       F   36.882000  172.291550    1.007100    1.000000
+ ROLUSW-   6- I       LSWITx,XSEC,ECMS,TLTFAC,INTFAC       F   36.484001  172.291550    1.007100    1.000000
+ ROLUSW-   6- I       LSWITx,XSEC,ECMS,TLTFAC,INTFAC       F   36.484001  172.291550    1.007100    1.000000
+ ROLUSW-   6- I       LSWITx,XSEC,ECMS,TLTFAC,INTFAC       F   36.882000  172.291550    1.007100    1.000000
+ ROLUSW-   6- I       LSWITx,XSEC,ECMS,TLTFAC,INTFAC       F   36.484001  172.291550    1.007100    1.000000
+ ROLUSW-   6- I       LSWITx,XSEC,ECMS,TLTFAC,INTFAC       F   36.484001  172.291550    1.007100    1.000000
+ ROLUFD-   1- I       FD luminosity calculation last updated 02-Apr-98
+ SULUIN-   1- I        0 Luminosity directories identified for Expt   8
+ SULUDB-  90- E      No SULU data found
+ SUFDLU-   1- I       FD luminosity parameters last updated 12-May-97
+ SUPASS-   1- I      Data from expt 8 rope version 2384 is PASS 5
+ SUFDLU-   3- I       Run, Pass, Bin      7575   5  11
+ SUFDLU-  21- I      LuBit,XEb, Xsec, Syserr, PTPerr at  86.15 :-    3   82.500000    3.837000    0.010000    0.004400
+ ROLUFD-  92- W      Setting CORI = 1. for Ebeam =      86.15
+ ROLUFD-             Lu/Event at   86.146 :-     0.284084
+                         3.8370 +- 0.0384 nb , corrections for s, E, If are     0.917149    1.000281    1.000000
+ QLROCR-  20- I      In energy bin
+ ROLUSW-   6- I       LSWITx,XSEC,ECMS,TLTFAC,INTFAC       F   36.882000  172.291550    1.007100    1.000000
+ ROLUSW-   6- I       LSWITx,XSEC,ECMS,TLTFAC,INTFAC       F   36.484001  172.291550    1.007100    1.000000
+ ROLUSW-   6- I       LSWITx,XSEC,ECMS,TLTFAC,INTFAC       F   36.484001  172.291550    1.007100    1.000000
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ ROLUSW-   6- I       LSWITx,XSEC,ECMS,TLTFAC,INTFAC       F   36.882000  172.291550    1.007100    1.000000
+ ASHEAD-  11- W      Event is not TKMH
+ QLROCR-  20- I      In energy bin
+ ASHEAD-  11- W      Event is not TKMH
+ QLROCR-  20- I      In energy bin
+ ASHEAD-  11- W      Event is not TKMH
+ QLROCR-  20- I      In energy bin
+ ASHEAD-  11- W      Event is not TKMH
+ QLROCR-  20- I      In energy bin
+ ASHEAD-  11- W      Event is not TKMH
+ QLROCR-  20- I      In energy bin
+ ASHEAD-  11- W      Event is not TKMH
+ QLROCR-  20- I      In energy bin
+ ASHEAD-  11- W      Event is not TKMH
+ QLROCR-  20- I      In energy bin
+ ASHEAD-  11- W      Event is not TKMH
+ QLROCR-  20- I      In energy bin
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ ASHEAD-  11- W      Event is not TKMH
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ QLROCR-  20- I      In energy bin
+ ROLUFD-  92- W      Setting CORI = 1. for Ebeam =      86.15
+ ROLUFD-  92- W      Setting CORI = 1. for Ebeam =      86.15
+ ROLUFD-  92- W      Setting CORI = 1. for Ebeam =      86.15
+ ROLUFD-  92- W      Setting CORI = 1. for Ebeam =      86.15
+ ROLUFD-  92- W      Setting CORI = 1. for Ebeam =      86.15
+ ROLUFD-  92- W      Setting CORI = 1. for Ebeam =      86.15
+ ROLUFD-  92- W      Setting CORI = 1. for Ebeam =      86.15
+ ROLUFD-  92- W      Setting CORI = 1. for Ebeam =      86.15
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ ROLUFD-  92- W      Setting CORI = 1. for Ebeam =      86.15
+ ASHEAD-  21- W      CJ Status < 3
+ ASHEAD-  31- W      Event failes detector status cuts
+ RGETDA-   3- I      Constants record found on input
+ RGETCN-   1- I      Calibration constants read on data stream.
+ TRCALR-   5- I      TRCT bank lifted by TRCALR
+ ROTRIG-   2- I      End-Of-Run record          on unit  31
+ ROTRIG-   3- I      End-Of-File                on unit  31
+ ROTRIG-   5- I      Attempt to read beyond EOD on unit  31
+ USEOF -   1- I      Dummy version of USEOF  called
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07577c01 on unit 31 as OLD
+ ROTRIG-   2- I      End-Of-Run record          on unit  31
+ ROTRIG-   3- I      End-Of-File                on unit  31
+ ROTRIG-   5- I      Attempt to read beyond EOD on unit  31
+ USEOF -   1- I      Dummy version of USEOF  called
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07579c01 on unit 31 as OLD
+ RGETDA-   3- I      Constants record found on input
+ RGETCN-   1- I      Calibration constants read on data stream.
+ TRCALR-   5- I      TRCT bank lifted by TRCALR
+ ROSWTC-   4- I       Lum. Tilt corr.1,run/sample:  7579   13 is:   1.00709999
+ ROSWTC-   4- I       Lum. Tilt corr.2,run/sample:  7579   13 is:   1.00709999
+ ROSWTC-   4- I       Lum. Tilt corr.3,run/sample:  7579   13 is:   1.00709999
+ RGETDA-   3- I      Constants record found on input
+ RGETCN-   1- I      Calibration constants read on data stream.
+ TRCALR-   5- I      TRCT bank lifted by TRCALR
+ RGETDA-   3- I      Constants record found on input
+ RGETCN-   1- I      Calibration constants read on data stream.
+ TRCALR-   5- I      TRCT bank lifted by TRCALR
+ RGETDA-   3- I      Constants record found on input
+ RGETCN-   1- I      Calibration constants read on data stream.
+ TRCALR-   5- I      TRCT bank lifted by TRCALR
+ ASHEAD-  21- W      CJ Status < 3
+ ASHEAD-  24- W      EB Status < 3
+ ASHEAD-  25- W      EE Status < 3
+ ASHEAD-  31- W      Event failes detector status cuts
+ ROTRIG-   2- I      End-Of-Run record          on unit  31
+ ROTRIG-   3- I      End-Of-File                on unit  31
+ ROTRIG-   5- I      Attempt to read beyond EOD on unit  31
+ USEOF -   1- I      Dummy version of USEOF  called
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07581c01 on unit 31 as OLD
+ ROSWTC-   4- I       Lum. Tilt corr.1,run/sample:  7581   13 is:   1.00709999
+ ROSWTC-   4- I       Lum. Tilt corr.2,run/sample:  7581   13 is:   1.00709999
+ ROSWTC-   4- I       Lum. Tilt corr.3,run/sample:  7581   13 is:   1.00709999
+ RGETDA-   3- I      Constants record found on input
+ RGETCN-   1- I      Calibration constants read on data stream.
+ TRCALR-   5- I      TRCT bank lifted by TRCALR
+ RGETDA-   3- I      Constants record found on input
+ RGETCN-   1- I      Calibration constants read on data stream.
+ TRCALR-   5- I      TRCT bank lifted by TRCALR
+ RGETDA-   3- I      Constants record found on input
+ RGETCN-   1- I      Calibration constants read on data stream.
+ TRCALR-   5- I      TRCT bank lifted by TRCALR
+ ROTRIG-   2- I      End-Of-Run record          on unit  31
+ ROTRIG-   3- I      End-Of-File                on unit  31
+ ROTRIG-   5- I      Attempt to read beyond EOD on unit  31
+ USEOF -   1- I      Dummy version of USEOF  called
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07584c01 on unit 31 as OLD
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ ROSWTC-   4- I       Lum. Tilt corr.1,run/sample:  7584   13 is:   1.00709999
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ RGETDA-   3- I      Constants record found on input
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ RGETCN-   1- I      Calibration constants read on data stream.
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ TRCALR-   5- I      TRCT bank lifted by TRCALR
+ ASHEAD-  26- W      At least two of TT, TB, EM triggers not OK, reject
+ ASHEAD-  31- W      Event failes detector status cuts
+ ROTRIG-   2- I      End-Of-Run record          on unit  31
+ ROTRIG-   3- I      End-Of-File                on unit  31
+ ROTRIG-   5- I      Attempt to read beyond EOD on unit  31
+ USEOF -   1- I      Dummy version of USEOF  called
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07586c01 on unit 31 as OLD
+ ROTRIG-   2- I      End-Of-Run record          on unit  31
+ ROTRIG-   3- I      End-Of-File                on unit  31
+ ROTRIG-   5- I      Attempt to read beyond EOD on unit  31
+ USEOF -   1- I      Dummy version of USEOF  called
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07588c01 on unit 31 as OLD
+ ROTRIG-   2- I      End-Of-Run record          on unit  31
+ ROTRIG-   3- I      End-Of-File                on unit  31
+ ROTRIG-   5- I      Attempt to read beyond EOD on unit  31
+ USEOF -   1- I      Dummy version of USEOF  called
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07590c01 on unit 31 as OLD
+ ROTRIG-   2- I      End-Of-Run record          on unit  31
+ ROTRIG-   3- I      End-Of-File                on unit  31
+ ROTRIG-   5- I      Attempt to read beyond EOD on unit  31
+ USEOF -   1- I      Dummy version of USEOF  called
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07592c01 on unit 31 as OLD
+ ASHEAD-  21- W      CJ Status < 3
+ ASHEAD-  31- W      Event failes detector status cuts
+ ROTRIG-   2- I      End-Of-Run record          on unit  31
+ ROTRIG-   3- I      End-Of-File                on unit  31
+ ROTRIG-   5- I      Attempt to read beyond EOD on unit  31
+ USEOF -   1- I      Dummy version of USEOF  called
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07594c01 on unit 31 as OLD
+ ASHEAD-  25- W      EE Status < 3
+ ASHEAD-  31- W      Event failes detector status cuts
+ ASHEAD-  25- W      EE Status < 3
+ ASHEAD-  31- W      Event failes detector status cuts
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ ROTRIG-   2- I      End-Of-Run record          on unit  31
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ ROTRIG-   3- I      End-Of-File                on unit  31
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ ROTRIG-   5- I      Attempt to read beyond EOD on unit  31
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ USEOF -   1- I      Dummy version of USEOF  called
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07596c01 on unit 31 as OLD
+ ASHEAD-  21- W      CJ Status < 3
+ ASHEAD-  31- W      Event failes detector status cuts
+ ASHEAD-  21- W      CJ Status < 3
+ ASHEAD-  31- W      Event failes detector status cuts
+ ASHEAD-  21- W      CJ Status < 3
+ ASHEAD-  31- W      Event failes detector status cuts
+ ASHEAD-  21- W      CJ Status < 3
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ ASHEAD-  31- W      Event failes detector status cuts
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07599c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07601c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07602c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07603c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07604c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07606c01 on unit 31 as OLD
+ ASHEAD-  26- W      At least two of TT, TB, EM triggers not OK, reject
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07608c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07610c01 on unit 31 as OLD
+ ASHEAD-  21- W      CJ Status < 3
+ ASHEAD-  21- W      CJ Status < 3
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ ASHEAD-  21- W      CJ Status < 3
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07614c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07620c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07622c01 on unit 31 as OLD
+ ASHEAD-  24- W      EB Status < 3
+ ASHEAD-  25- W      EE Status < 3
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07624c01 on unit 31 as OLD
+ ASHEAD-  26- W      At least two of TT, TB, EM triggers not OK, reject
+ ASHEAD-  26- W      At least two of TT, TB, EM triggers not OK, reject
+ ASHEAD-  26- W      At least two of TT, TB, EM triggers not OK, reject
+ ASHEAD-  26- W      At least two of TT, TB, EM triggers not OK, reject
+ ASHEAD-  26- W      At least two of TT, TB, EM triggers not OK, reject
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07626c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07629c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07631c01 on unit 31 as OLD
+ ASHEAD-  24- W      EB Status < 3
+ ASHEAD-  25- W      EE Status < 3
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07633c01 on unit 31 as OLD
+ ASHEAD-  25- W      EE Status < 3
+ ASHEAD-  25- W      EE Status < 3
+ ASHEAD-  25- W      EE Status < 3
+ ASHEAD-  25- W      EE Status < 3
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ ASHEAD-  25- W      EE Status < 3
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07635c01 on unit 31 as OLD
+ ASHEAD-  26- W      At least two of TT, TB, EM triggers not OK, reject
+ ASHEAD-  26- W      At least two of TT, TB, EM triggers not OK, reject
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ ASHEAD-  26- W      At least two of TT, TB, EM triggers not OK, reject
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07637c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07639c01 on unit 31 as OLD
+ ASHEAD-  24- W      EB Status < 3
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07641c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07646c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07648c01 on unit 31 as OLD
+ ASHEAD-  24- W      EB Status < 3
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07650c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07652c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07655c01 on unit 31 as OLD
+ ROCAPS-   2- I      Prestaging   33 castor files
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07658c01 on unit 31 as OLD
+ ASHEAD-  24- W      EB Status < 3
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07660c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07662c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07664c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07666c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07668c01 on unit 31 as OLD
+ ASHEAD-  24- W      EB Status < 3
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07670c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p81/r07672c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07674c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07690c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07693c01 on unit 31 as OLD
+ SUPASS-   1- I      Data from expt 8 rope version 2386 is PASS 5
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07695c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07704c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07706c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07708c01 on unit 31 as OLD
+ ASHEAD-  24- W      EB Status < 3
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07710c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07714c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07716c01 on unit 31 as OLD
+ ASHEAD-  24- W      EB Status < 3
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ ASHEAD-  24- W      EB Status < 3
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07718c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07720c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07725c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07729c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07733c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07735c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07737c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07739c01 on unit 31 as OLD
+ QLROCR-  30- I      Not in energy bin
+ QLROCR-  30- I      Not in energy bin
+ QLROCR-  30- I      Not in energy bin
+ QLROCR-  30- I      Not in energy bin
+ QLROCR-  30- I      Not in energy bin
+ QLROCR-  30- I      Not in energy bin
+ QLROCR-  30- I      Not in energy bin
+ QLROCR-  30- I      Not in energy bin
+ QLROCR-  30- I      Not in energy bin
+ REPORT-I- The following message was issued    10 times and will be suppressed :
+ QLROCR-  30- I      Not in energy bin
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07742c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07757c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07761c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07763c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07766c01 on unit 31 as OLD
+ ROOFLX: Processing file /castor/cern.ch/opal/csdst/pass7/fyz1/p82/r07768c01 on unit 31 as OLD
+ RSELDA-   2- I      All selected events have been read
+ ROFIN -   1- I       Number of events processed  =       0
+ CUFIN -   1- W      Dummy version of CUFIN called.
+ FDLSTA-   9- I      Bhabha Statistics
+
+
+          ******************************************************************************************
+          *                                                *                   *                   *
+          *                  CUBED                         *     Default       *     Actual        *
+          *                   cut                          *      Value        *      Value        *
+          *                                                *                   *                   *
+          ******************************************************************************************
+          *                                                *                   *                   *
+          *                            Ebar / Ebeam        *         0.6667    *         0.6667    *
+          *                                                *                   *                   *
+          *                            Abs DPhi            *        20.0000    *        20.0000    *
+          *                                                *                   *                   *
+          *                            Phi (quad )         *        15.0000    *        15.0000    *
+          *                                                *                   *                   *
+          *                            Theta min           *         0.0550    *         0.0550    *
+          *                                                *                   *                   *
+          *                            Theta max           *         0.1150    *         0.1150    *
+          *                                                *                   *                   *
+          *                            Theta bar min       *         0.0650    *         0.0650    *
+          *                                                *                   *                   *
+          *                            Theta bar max       *         0.1050    *         0.1050    *
+          *                                                *                   *                   *
+          *                            Theta use Calo      *         0.0000    *         0.0000    *
+          *                                                *                   *                   *
+          *                            Dphi Tube-Calo      *         6.0000    *         6.0000    *
+          *                                                *                   *                   *
+          *                            Eclus / Ebeam       *         0.4500    *         0.4500    *
+          *                                                *                   *                   *
+          ******************************************************************************************
+  
+ USFIN: header lumi analysis
+  
+ USFIN: QLPRNT, total raw for this run:
+ QLPRNT: all, SW ok, MHAD ok, SW ok && MHAD ok events:
+  2461724.  2449260.  2109.  2099.
+ Eff(SW ok)=  0.9949E+00 +/-  0.4524E-04
+ Eff(SW ok && MHAD ok)=  0.9953E+00 +/-  0.1496E-02
+
+ ******************************************************************************
+                   ***** Summary of ROCROS, sum number  1 *****
+ ******************************************************************************
+ Total number of times ROCROS was called with .TRUE. argument is:  2461724
+ FD or SW were good for   2461709 events
+ ******************************************************************************
+         Class           SW ok              SW ok  and FD ok   SW bad and FD ok
+ ******************************************************************************
+  Number of num. events       2449260            2448826              12449
+ ******************************************************************************
+  Number of SWITA evts          54304              54292                  0
+  SWITA integrated lumi     10433.39764        10431.09977            0.00000
+  Syst error on SWITA l     10433.39764        10431.09977            0.00000
+  Stat error on SWITA l        44.77418           44.76926            0.00000
+  SW lumi-w mean ebeam         86.04525           86.04528            0.00000
+  Sy. er. SW l-w mea eb         0.00852            0.00852            0.00000
+  St. er. SW l-w mea eb         0.00166            0.00166            0.00000
+  SW lumi-w eb spread           0.38588            0.38586            0.00000
+  St. er. SW l-w eb spr         0.00117            0.00117            0.00000
+ ******************************************************************************
+  Number of SW RL evts         53665.0            53654.0                0.0
+  SW RL integrated lumi     10423.04535        10420.91484            0.00000
+  Syst error on SW RL l        36.48066           36.47320            0.00000
+  Stat error on SW RL l        44.99528           44.99069            0.00000
+  SW lumi-w mean ebeam         86.04502           86.04504            0.00000
+  Sy. er. SW l-w mea eb         0.00852            0.00852            0.00000
+  St. er. SW l-w mea eb         0.00167            0.00167            0.00000
+  SW lumi-w eb spread           0.38680            0.38679            0.00000
+  St. er. SW l-w eb spr         0.00118            0.00118            0.00000
+ ******************************************************************************
+  Number of FD events               0              36474                129
+  FD integrated lumi            0.00000        10336.73492           36.13026
+  Syst error on FD lumi         0.00000          103.36735            0.36130
+  Stat error on FD lumi         0.00000           54.12642            3.18130
+  FD lumi-w mean ebeam          0.00000           86.04438           85.53864
+  Sy. er. FD l-w mea eb         0.00000            0.00852            0.00847
+  St. er. FD l-w mea eb         0.00000            0.00201            0.04307
+  FD lumi-w eb spread           0.00000            0.38474            0.48911
+  St. er. FD l-w eb spr         0.00000            0.00142            0.03045
+ ******************************************************************************
+
+ USFIN: QLPRNT, events not in energy bins:
+ QLPRNT: all, SW ok, MHAD ok, SW ok && MHAD ok events:
+  15399.  15398.  12.  12.
+ Eff(SW ok)=  0.9999E+00 +/-  0.6495E-04
+ Eff(SW ok && MHAD ok)=  0.1000E+01 +/-  0.0000E+00
+
+ ******************************************************************************
+                   ***** Summary of ROCROS, sum number  2 *****
+ ******************************************************************************
+ Total number of times ROCROS was called with .TRUE. argument is:    15399
+ FD or SW were good for     15398 events
+ ******************************************************************************
+         Class           SW ok              SW ok  and FD ok   SW bad and FD ok
+ ******************************************************************************
+  Number of num. events         15398              15398                  0
+ ******************************************************************************
+  Number of SWITA evts            238                238                  0
+  SWITA integrated lumi        41.83829           41.83829            0.00000
+  Syst error on SWITA l        41.83829           41.83829            0.00000
+  Stat error on SWITA l         2.71197            2.71197            0.00000
+  SW lumi-w mean ebeam         82.28210           82.28210            0.00000
+  Sy. er. SW l-w mea eb         0.00815            0.00815            0.00000
+  St. er. SW l-w mea eb         0.00007            0.00007            0.00000
+  SW lumi-w eb spread           0.00110            0.00110            0.00000
+  St. er. SW l-w eb spr         0.00005            0.00005            0.00000
+ ******************************************************************************
+  Number of SW RL evts           238.0              238.0                0.0
+  SW RL integrated lumi        42.29468           42.29468            0.00000
+  Syst error on SW RL l         0.14803            0.14803            0.00000
+  Stat error on SW RL l         2.74156            2.74156            0.00000
+  SW lumi-w mean ebeam         82.28209           82.28209            0.00000
+  Sy. er. SW l-w mea eb         0.00815            0.00815            0.00000
+  St. er. SW l-w mea eb         0.00007            0.00007            0.00000
+  SW lumi-w eb spread           0.00110            0.00110            0.00000
+  St. er. SW l-w eb spr         0.00005            0.00005            0.00000
+ ******************************************************************************
+  Number of FD events               0                154                  0
+  FD integrated lumi            0.00000           39.92435            0.00000
+  Syst error on FD lumi         0.00000            0.39924            0.00000
+  Stat error on FD lumi         0.00000            3.21720            0.00000
+  FD lumi-w mean ebeam          0.00000           82.28199            0.00000
+  Sy. er. FD l-w mea eb         0.00000            0.00815            0.00000
+  St. er. FD l-w mea eb         0.00000            0.00009            0.00000
+  FD lumi-w eb spread           0.00000            0.00110            0.00000
+  St. er. FD l-w eb spr         0.00000            0.00006            0.00000
+ ******************************************************************************
+
+ USFIN: QLPRNT (raw), energy bin  1: 129000 -  131000
+ USFIN: ROCROS sum  3 not filled
+ USFIN: QLPRNT, energy bin  1: 129000 -  131000
+ USFIN: ROCROS sum  4 not filled
+ USFIN: QLPRNT (raw), energy bin  2: 135000 -  137000
+ USFIN: ROCROS sum  5 not filled
+ USFIN: QLPRNT, energy bin  2: 135000 -  137000
+ USFIN: ROCROS sum  6 not filled
+ USFIN: QLPRNT (raw), energy bin  3: 160000 -  162000
+ USFIN: ROCROS sum  7 not filled
+ USFIN: QLPRNT, energy bin  3: 160000 -  162000
+ USFIN: ROCROS sum  8 not filled
+ USFIN: QLPRNT (raw), energy bin  4: 170000 -  173000
+ QLPRNT: all, SW ok, MHAD ok, SW ok && MHAD ok events:
+  2446325.  2433862.  2097.  2087.
+ Eff(SW ok)=  0.9949E+00 +/-  0.4552E-04
+ Eff(SW ok && MHAD ok)=  0.9952E+00 +/-  0.1504E-02
+
+ ******************************************************************************
+                   ***** Summary of ROCROS, sum number  9 *****
+ ******************************************************************************
+ Total number of times ROCROS was called with .TRUE. argument is:  2446325
+ FD or SW were good for   2446311 events
+ ******************************************************************************
+         Class           SW ok              SW ok  and FD ok   SW bad and FD ok
+ ******************************************************************************
+  Number of num. events       2433862            2433428              12449
+ ******************************************************************************
+  Number of SWITA evts          54066              54054                  0
+  SWITA integrated lumi     10391.55935        10389.26148            0.00000
+  Syst error on SWITA l     10391.55935        10389.26148            0.00000
+  Stat error on SWITA l        44.69197           44.68705            0.00000
+  SW lumi-w mean ebeam         86.06040           86.06043            0.00000
+  Sy. er. SW l-w mea eb         0.00852            0.00852            0.00000
+  St. er. SW l-w mea eb         0.00131            0.00131            0.00000
+  SW lumi-w eb spread           0.30373            0.30369            0.00000
+  St. er. SW l-w eb spr         0.00092            0.00092            0.00000
+ ******************************************************************************
+  Number of SW RL evts         53427.0            53416.0                0.0
+  SW RL integrated lumi     10380.75068        10378.62017            0.00000
+  Syst error on SW RL l        36.33263           36.32517            0.00000
+  Stat error on SW RL l        44.91168           44.90709            0.00000
+  SW lumi-w mean ebeam         86.06035           86.06038            0.00000
+  Sy. er. SW l-w mea eb         0.00852            0.00852            0.00000
+  St. er. SW l-w mea eb         0.00131            0.00131            0.00000
+  SW lumi-w eb spread           0.30380            0.30377            0.00000
+  St. er. SW l-w eb spr         0.00093            0.00093            0.00000
+ ******************************************************************************
+  Number of FD events               0              36320                129
+  FD integrated lumi            0.00000        10296.81057           36.13026
+  Syst error on FD lumi         0.00000          102.96810            0.36130
+  Stat error on FD lumi         0.00000           54.03072            3.18130
+  FD lumi-w mean ebeam          0.00000           86.05897           85.53864
+  Sy. er. FD l-w mea eb         0.00000            0.00852            0.00847
+  St. er. FD l-w mea eb         0.00000            0.00160            0.04307
+  FD lumi-w eb spread           0.00000            0.30577            0.48911
+  St. er. FD l-w eb spr         0.00000            0.00113            0.03045
+ ******************************************************************************
+
+ USFIN: QLPRNT, energy bin  4: 170000 -  173000
+ QLPRNT: all, SW ok, MHAD ok, SW ok && MHAD ok events:
+  2444931.  2432763.  2097.  2087.
+ Eff(SW ok)=  0.9950E+00 +/-  0.4500E-04
+ Eff(SW ok && MHAD ok)=  0.9952E+00 +/-  0.1504E-02
+
+ ******************************************************************************
+                   ***** Summary of ROCROS, sum number 10 *****
+ ******************************************************************************
+ Total number of times ROCROS was called with .TRUE. argument is:  2444931
+ FD or SW were good for   2444931 events
+ ******************************************************************************
+         Class           SW ok              SW ok  and FD ok   SW bad and FD ok
+ ******************************************************************************
+  Number of num. events       2432763            2432329              12168
+ ******************************************************************************
+  Number of SWITA evts          54063              54051                  0
+  SWITA integrated lumi     10390.98132        10388.68345            0.00000
+  Syst error on SWITA l     10390.98132        10388.68345            0.00000
+  Stat error on SWITA l        44.69073           44.68580            0.00000
+  SW lumi-w mean ebeam         86.06039           86.06043            0.00000
+  Sy. er. SW l-w mea eb         0.00852            0.00852            0.00000
+  St. er. SW l-w mea eb         0.00131            0.00131            0.00000
+  SW lumi-w eb spread           0.30374            0.30369            0.00000
+  St. er. SW l-w eb spr         0.00092            0.00092            0.00000
+ ******************************************************************************
+  Number of SW RL evts         53424.0            53413.0                0.0
+  SW RL integrated lumi     10380.16634        10378.03583            0.00000
+  Syst error on SW RL l        36.33058           36.32313            0.00000
+  Stat error on SW RL l        44.91041           44.90582            0.00000
+  SW lumi-w mean ebeam         86.06034           86.06037            0.00000
+  Sy. er. SW l-w mea eb         0.00852            0.00852            0.00000
+  St. er. SW l-w mea eb         0.00131            0.00131            0.00000
+  SW lumi-w eb spread           0.30381            0.30377            0.00000
+  St. er. SW l-w eb spr         0.00093            0.00093            0.00000
+ ******************************************************************************
+  Number of FD events               0              36318                129
+  FD integrated lumi            0.00000        10296.24279           36.13026
+  Syst error on FD lumi         0.00000          102.96243            0.36130
+  Stat error on FD lumi         0.00000           54.02923            3.18130
+  FD lumi-w mean ebeam          0.00000           86.05897           85.53864
+  Sy. er. FD l-w mea eb         0.00000            0.00852            0.00847
+  St. er. FD l-w mea eb         0.00000            0.00160            0.04307
+  FD lumi-w eb spread           0.00000            0.30578            0.48911
+  St. er. FD l-w eb spr         0.00000            0.00113            0.03045
+ ******************************************************************************
+
+ USFIN: QLPRNT (raw), energy bin  5: 180000 -  184500
+ USFIN: ROCROS sum  11 not filled
+ USFIN: QLPRNT, energy bin  5: 180000 -  184500
+ USFIN: ROCROS sum  12 not filled
+ USFIN: QLPRNT (raw), energy bin  6: 188000 -  190000
+ USFIN: ROCROS sum  13 not filled
+ USFIN: QLPRNT, energy bin  6: 188000 -  190000
+ USFIN: ROCROS sum  14 not filled
+ ROPFIN-   1- I      Dummies called for  OD
+
+ --------------------------- Report message summary ---------------------------
+
+     Messages to REPORT qualified as ERRORs      :
+
+      1 SULUDB E No SULU data found
+
+     Messages to REPORT qualified as WARNINGs    :
+
+    311 ASHEAD W At least two of TT, TB, EM triggers not OK, reject
+    927 ASHEAD W EE Status < 3
+     15 ASHEAD W EB Status < 3
+   1396 ASHEAD W Event failes detector status cuts
+    173 ASHEAD W CJ Status < 3
+ ****** ASHEAD W Event is not TKMH
+      1 BTINIT W Dummy version of BTINIT  called
+      1 CUFIN  W Dummy version of CUFIN called.
+      1 CUINIT W Dummy version of CUINIT called.
+ 180244 RGETDA W Junk event on input, skip it
+    988 ROLUFD W Setting CORI = 1. for Ebeam =      86.15
+
+     Messages to REPORT qualified as INFORMATIONs:
+
+      2 DCDEFI I Redefining OD pointers for version 420
+      1 DCRDIC I Dictionary loaded ok
+      1 DCRDIC I Reading first  dictionary (OD413 version  2)
+      1 DCREAD I Automatically loading dictionary /afs/cern.ch/opal/o
+                 ffline/db/dicts/dc413.dict
+      1 DCSETR I DD package is NOT loaded. No DD unpack
+      1 DCSETR I Loading all dictionaries in/afs/cern.ch/opal/offline
+                 /db/dicts
+      1 FBINIT I FB processor Vn 415.4  initialised
+      1 FBINIT I Pi = 3.141593 1./Sqrt(2.) = 0.707107
+      1 FBKEY  I FFREAD cards initialised for FB Vn 423 / 1995
+      1 FBSETR I FB processor Vn 419.1  setup
+      1 FDLSTA I Bhabha Statistics
+      1 FDLSTA I Initialised
+      1 MTINIT I Dummy was called
+      6 ODDDAI I Removing NBEC from  CTRK block  data definition
+     21 ODDDAR I Removing ECON from  CTRK block  data definition
+      1 ODFDIN I Initialised
+  15399 QLROCR I Not in energy bin
+ ****** QLROCR I In energy bin
+    164 RGETCN I Calibration constants read on data stream.
+    164 RGETDA I Constants record found on input
+      1 RIOSET I Set environment variable STAGE_POOL to opalstage
+      1 RIOSET I Set environment variable STAGE_HOST to opal001d
+      2 ROCAPS I Prestaging   36 castor files
+      1 ROCRST I SW-lumi selection will be done from header bit data
+      1 ROFIN  I  Number of events processed  =       0
+      1 ROLUFD I  FD luminosity calculation last updated 02-Apr-98
+ ****** ROLUSW I  LSWITx,XSEC,ECMS,TLTFAC,INTFAC       F   36.882000
+                  172.291550    1.007100    1.000000
+      1 ROLUSW I  SW luminosity last updated 15-Mar-2001 Analysis fro
+                 m DST?       F
+      1 ROOPEN I Opening the histogram file: ./lu172.histo
+      1 ROOPEN I Trying to delete the histogram file: ./lu172.histo
+      1 ROOPEN I  SUDB database last updated 200104STOP 0 statement executed
+09 154700
+      1 ROPFIN I Dummies called for  OD
+      4 ROPINI I Dummies called for  GR ON TT FI SC CV JC CZ CT DX CX
+                  SI
+    168 ROSWTC I  Lum. Tilt corr.1,run/sample:  7575   13 is:   1.007
+                 09999
+      1 ROSWTC I  SW luminosity last updated 15-Mar-2001
+     67 ROTRIG I Attempt to read beyond EOD on unit  31
+     67 ROTRIG I End-Of-File                on unit  31
+     67 ROTRIG I End-Of-Run record          on unit  31
+      1 RSCATA I Read catalog on default unit 51
+      1 RSELDA I All selected events have been read
+      1 SUFDLU I LuBit,XEb, Xsec, Syserr, PTPerr at  86.15 :-    3
+                 82.500000    3.837000    0.010000    0.004400
+      1 SUFDLU I  Run, Pass, Bin      7575   5  11
+      1 SUFDLU I  FD luminosity parameters last updated 12-May-97
+      1 SULUIN I   0 Luminosity directories identified for Expt   8
+      2 SUPASS I Data from expt 8 rope version 2384 is PASS 5
+    162 TRCALR I TRCT bank lifted by TRCALR
+     67 USEOF  I Dummy version of USEOF  called
+
+     Messages to REPORT qualified as SUCCESSes   :
+
+   1410 ASHEAD S Event is TKMH
+ ****** ASHEAD S Event passes detector status cuts
+      2 OCGET  S Forced retrieval attempt: //EX08/TROF/TRDF
+      1 RCPREP S Switching top directory name to EX08.
+      1 TRSETR S Pre-trigger definition will be taken from OPCAL
+      1 TRSETR S Trigger definition will be taken from OPCAL
+
+  Total of     ****** SUCCESSes
+               ****** INFORMATIONs
+               ****** WARNINGs
+                    1 ERRORs
+                    0 FATALs
+                    0 CRASHes
+
+ ------------------------------------------------------------------------------
+
+Copy lu172.histo to /afs/cern.ch/user/s/skluth/w0/qcd/qcdntuple/lu172.histo
+16384 bytes in 0 seconds through local (in) and local (out)
+job finished: Tue Oct 29 15:01:00 CET 2002
+
+
+CERN statistics: This job used 0:50:16 NCU hours
+

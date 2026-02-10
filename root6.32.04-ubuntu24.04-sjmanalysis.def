@@ -99,3 +99,11 @@ with addons: boost libs, less, nano, git
     # unminimize for login use
     yes | unminimize
 
+%environment
+
+    # Shared libs search path and gfortran print buffering
+    LD_LIBRARY_PATH=$PWD:/opt/root/lib:/opt/fastjet/fastjet-3.5.1/lib
+    GFORTRAN_UNBUFFERED_PRECONNECTED=y
+    EXPORTLIST="LD_LIBRARY_PATH GFORTRAN_UNBUFFERED_PRECONNECTED"
+    export $EXPORTLIST
+

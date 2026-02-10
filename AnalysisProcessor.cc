@@ -373,7 +373,7 @@ void AnalysisProcessor::LEPAnalysis() {
   hwMatrixExtras.push_back( Analysis( "hw", "mt", "stand", "none", "hadron" ) );
   hwAnalyses.insert( hwAnalyses.end(), hwMatrixExtras.begin(), hwMatrixExtras.end() );
   for( Observable* obs : vobs ) {
-    if( obs->getName() == "thrust" or
+    if( obs->getName() == "lepthrust" or
 	obs->getName() == "durhamymerge23" or
 	obs->getName() == "jadeymerge23" or
 	obs->getName() == "partonshower" ) {

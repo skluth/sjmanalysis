@@ -333,7 +333,7 @@ class LEP2AnalysisObservable( AnalysisObservable ):
 def createAnalysisObservable( tfile, obs="thrust", unf="bbb" ):
     filename= tfile.GetName()
     ao= None
-    print( "createAnalysisObservable: create for", obs, "from", filename, end="" )
+    print( "createAnalysisObservable: create for", obs, "from", filename, end=" " )
     if "sjm91" in filename:
         print( "LEP1AnalysisObservable" )
         ao= LEP1AnalysisObservable( obs )
@@ -395,12 +395,11 @@ def createCombineAnalysisObservables( filenames, obs="thrust" ):
         aocomb= combineAnalysisObservables( aobs )
     return aocomb
 
-# Extract ecm from file name:
+# Extract ecm from file names, Match digits between "sjm" and "_" or "."
 def ecmFromFilename( filename ):
-    ecm= ""
-    for character in filename:
-        if character.isdigit():
-            ecm= ecm + character
+    import re
+    result= re.match( "^sjm(\\d+)[_|.]", filename )
+    ecm= result.group( 1 )
     return ecm
 
 # Plot all groomed observables at combined ecms into pdf:

@@ -72,14 +72,14 @@ $(LIB): $(SRCS:.cc=.o) $(FSRCS:.f=.o)
 
 testsjmanalysis: testsjmanalysis.cc $(LIB)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GINCS) -o $@ $^ $(GLIBS) $(ROOTLIBS) $(FASTJETLIBS) -lboost_program_options
-	LD_LIBRARY_PATH=$(PWD):$(ROOTLIBDIR):$(FASTJETLIBDIR) ./$@
+	./$@
 
 GenEventDataDict.cc: GenEventData.hh GenEventDataLinkDef.hh
 	rootcint -f $@ -c $^
 
 testHepMCRootReader: testHepMCRootReader.cc HepMCRootReader.cc GenEventDataDict.cc $(LIB)
 	$(CXX) $(CXXFLAGS) $(GINCS) $(ROOTINC) -o $@ $^ $(GLIBS) $(ROOTLIBS) $(FASTJETLIBS) -lboost_program_options
-	LD_LIBRARY_PATH=$(PWD):$(ROOTLIBDIR):$(FASTJETLIBDIR) ./$@
+	./$@
 
 runjob: runjob.cc $(LIB)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $^ $(ROOTLIBS) $(FASTJETLIBS) -lboost_program_options

@@ -28,9 +28,9 @@ public:
   virtual void fill( NtupleReader* ntr, const Analysis & variation );
 
 protected:
-    
+
   virtual void calcWeight( const TLorentzVector&, const TLorentzVector&,
-			   Double_t& , Double_t& );
+                           Double_t& , Double_t& );
 
   bool selfCorrelation;
 
@@ -40,6 +40,12 @@ private:
 
   std::vector<Double_t> binedges;
   std::map<std::string,DifferentialDataStructure*> data;
+  std::map<std::string,DifferentialDataStructure*> datab;
+  std::map<std::string,DifferentialDataStructure*> dataudsc;
+
+  Int_t nevents;
+  Int_t neventsb;
+  Int_t neventsudsc;
   
 };
 

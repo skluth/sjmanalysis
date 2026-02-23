@@ -27,6 +27,7 @@ public:
   
   virtual bool MCNonRad() = 0;
   virtual bool isMC() = 0;
+  virtual Int_t getPrimaryFlavour() { return 0; }
 
 protected:
 

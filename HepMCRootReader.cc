@@ -120,7 +120,7 @@ bool HepMCRootReader::GetEvent( Int_t ievent ) {
     findISRphotons();
   }
   else {
-    std::cout << "HepMCRootReader::GetEvent: event " << nevents << " failure, stop"
+    std::cout << "HepMCRootReader::GetEvent: event " << nevents << " failure"
 	      << std::endl;
     result= false;
   }
@@ -269,6 +269,27 @@ bool isParton( const HepMCRootReader::Particle* particle ) {
       ( abspid >= 11 and abspid <= 16 ) or
       ( abspid >= 21 and abspid <= 24 ) ) {
     result= true;
+  }
+  return result;
+}
+
+// Primary flavour from first quarks connetced to e+e-
+Int_t HepMCRootReader::getPrimaryFlavour() {
+  Int_t result= 0;
+  for( const Particle & particle : eventData->particles ) {
+    Int_t abspid= abs( particle.pid );
+    if( abspid <= 6 ) {
+      // a quark, check parents are e+e-
+      ParticleVector parents= getParents( &particle );
+      if( parents.size() == 2 and abs(parents[0]->pid) == 11
+	  and abs(parents[1]->pid) == 11 ) {
+	result= abspid;
+	break;
+      }
+    }
+  }
+  if( result == 0 ) {
+    throw std::runtime_error( "HepMCRootReader::getPrimaryFlavour: none" );
   }
   return result;
 }

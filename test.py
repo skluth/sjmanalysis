@@ -938,7 +938,7 @@ def compareEECs( filename="sjm91_all.root" ):
     return
 
 
-def testMigrationMatrix( obs="thrust", filename="sjm91_all.root" ):
+def testMigrationMatrix( obs="lepthrust", filename="sjm91_96-98.root" ):
     hdetstr= obs+" py mt stand"
     hhstr= obs+" py hadron stand"
     hhnrstr= obs+" py hadron none nonrad"
@@ -970,17 +970,17 @@ def testMigrationMatrix( obs="thrust", filename="sjm91_all.root" ):
         for j in range( nbin ):
             R[j,i]= m.GetBinContent( i+1, j+1 )
 
-    width, precision= 7, 3
-    fmt= "{:"+str(width)+"."+str(precision)+"f}"
+    fmt71= "{:7.1f}"
+    fmt73= "{:7.3f}"
     for i in range( nbin ):
-        print( fmt.format( valueshnr[i] ), end="" )
-        print( fmt.format( valuesh[i] ), end="" )
+        print( fmt71.format( valueshnr[i] ), end=" " )
+        print( fmt71.format( valuesh[i] ), end=" " )
         for j in range( nbin ):
-            print( fmt.format( R[i,j] ), end="" )
+            print( fmt73.format( R[i,j] ), end=" " )
         print()
-    print( "               ", end="" )
+    print( "               ", end=" " )
     for i in range( nbin ):
-        print( fmt.format( valuesd[i] ), end="" )
+        print( fmt71.format( valuesd[i] ), end=" " )
     print()
 
     for i in range( nbin ):

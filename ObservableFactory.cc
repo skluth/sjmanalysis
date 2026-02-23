@@ -6,6 +6,7 @@
 #include "ObsEEC.hh"
 #include "ObsJEEC.hh"
 #include "ObsDEEC.hh"
+#include "ObsEEEC.hh"
 #include "PxThrustCalculator.hh"
 #include "LEPThrustCalculator.hh"
 #include "LEPYnmCalculator.hh"
@@ -95,6 +96,13 @@ ObservableFactory::createObservables( const vector<string> & obsnames,
 			 sjmConfigs.getPoints( "EEC" ),
 			 analyses );
     }
+    
+    else if( nameIs( name, "EEEC" ) ) {
+      obsp= new ObsEEEC( name,
+			 sjmConfigs.getPoints( "EEC" ),
+			 analyses );
+    }
+    
     else if( nameIs( name, "partonshower" ) ) {
       obsp= new ObsPartonShower( sjmConfigs.getPoints( "a14" ),
 				 sjmConfigs.getPoints( "c202" ),

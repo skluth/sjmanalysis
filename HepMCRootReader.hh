@@ -40,6 +40,7 @@ public:
 
   virtual bool MCNonRad();
   virtual bool isMC();
+  virtual Int_t getPrimaryFlavour();
   virtual void printParticlesVertices();
 
   typedef HepMC3::GenParticleData Particle;

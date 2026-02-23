@@ -1,6 +1,7 @@
 
 # Makefile for sjmanalysis package
 
+# Compilers options
 CXX      = g++
 LD       = $(CXX)
 RC       = rootcint
@@ -35,7 +36,8 @@ CPPFLAGS = $(ROOTINC) $(FASTJETINC)
 SRCS = LEPNtupleReader.cc TFastJet.cc Analysis.cc DataStructure.cc \
 JetrateDataStructure.cc DifferentialDataStructure.cc MatrixDataStructure.cc \
 Observable.cc ObsDifferential.cc ObsJetrate.cc ObsFastJetDiff.cc \
-ObsPartonShower.cc ObsEEC.cc ObsJEEC.cc ObsDEEC.cc ObsGroomed.cc ObservableFactory.cc \
+ObsEEC.cc ObsJEEC.cc ObsDEEC.cc ObsEEEC.cc \
+ObsPartonShower.cc ObsGroomed.cc ObservableFactory.cc \
 FilledObservable.cc Unfolder.cc BbbUnfolder.cc MtxUnfolder.cc OutputWriter.cc \
 LEPThrustCalculator.cc LEPYnmCalculator.cc PxThrustCalculator.cc \
 FastJetYcutCalculator.cc FastJetEminCalculator.cc FastJetRCalculator.cc \
@@ -68,7 +70,7 @@ $(DEPS): %.d: %.cc
 -include $(DEPS)
 
 $(LIB): $(SRCS:.cc=.o) $(FSRCS:.f=.o)
-	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) $(HEPMC2LIBS) -o $@ $^
+	$(CXX) -shared -Wl,--no-as-needed $(ROOTLIBS) $(FASTJETLIBS) -o $@ $^
 
 testsjmanalysis: testsjmanalysis.cc $(LIB)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GINCS) -o $@ $^ $(GLIBS) $(ROOTLIBS) $(FASTJETLIBS) -lboost_program_options

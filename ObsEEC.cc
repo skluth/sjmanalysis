@@ -20,7 +20,8 @@ ObsEEC::ObsEEC( const string & name,
 		const vector<Analysis> & variations,
 		const bool scOpt,
 		const bool lprint ) :
-  Observable( name ), selfCorrelation(scOpt), binedges( bins ) {
+  Observable( name ), selfCorrelation(scOpt), binedges( bins ),
+  nevents(0), neventsb(0), neventsudsc(0) {
   addAnalyses( variations );
   if( lprint ) {
     cout << "ObsEEC::ObsEEC: Energy-Energy Correlation for " << name;
@@ -36,6 +37,8 @@ ObsEEC::~ObsEEC() {}
 void ObsEEC::addAnalysis( const Analysis & analysis ) {
   string tag= analysis.getTag();
   data[tag]= new DifferentialDataStructure( binedges );
+  datab[tag]= new DifferentialDataStructure( binedges );
+  dataudsc[tag]= new DifferentialDataStructure( binedges );
 }
 
 // Calculuate EEC as 1/sigma*dEEC/dchi with chi in radian
@@ -43,22 +46,40 @@ void ObsEEC::addAnalysis( const Analysis & analysis ) {
 // weight calculation can be overidden in subclasses
 void ObsEEC::fill( NtupleReader* ntr, const Analysis & variation ) {
   const vector<TLorentzVector> vtlv= ntr->GetLorentzVectors( variation.getReco() );
+  Int_t iflavour= ntr->getPrimaryFlavour();
   Double_t evis= Evis( vtlv );
   Double_t evis2= evis*evis;
   string tag= variation.getTag();
   DifferentialDataStructure* dds= data.at( tag );
-  Double_t nevents= dds->getNEvents();
+  DifferentialDataStructure* ddsb= datab.at( tag );
+  DifferentialDataStructure* ddsudsc= dataudsc.at( tag );
   for( const TLorentzVector& tlv1 : vtlv ) {
     for( const TLorentzVector& tlv2 : vtlv ) {
       if( not selfCorrelation and ( &tlv1 == &tlv2 ) ) continue;
       Double_t angle, eecweight;
       calcWeight( tlv1, tlv2, angle, eecweight );
       Double_t eecvalue= eecweight/evis2;
+      // Inclusive
       dds->fill( angle, eecvalue );
+      // b or udsc
+      if( iflavour == 5 ) {
+	ddsb->fill( angle, eecvalue );
+      }
+      else if( iflavour >= 1 and iflavour <= 4 ) {
+	ddsudsc->fill( angle, eecvalue );
+      }
     }
   }
-  nevents+= 1.0;
+  nevents+= 1;
   dds->setNEvents( nevents );
+  if( iflavour == 5 ) {
+    neventsb+= 1;
+    ddsb->setNEvents( neventsb );
+  }
+  else if( iflavour >= 1 and iflavour <= 4 ) {
+    neventsudsc+= 1;
+    ddsudsc->setNEvents( neventsudsc );
+  }
   return;
 }
 void ObsEEC::calcWeight( const TLorentzVector& tlv1, const TLorentzVector& tlv2,
@@ -73,6 +94,8 @@ void ObsEEC::calcWeight( const TLorentzVector& tlv1, const TLorentzVector& tlv2,
 vector<FilledObservable*> ObsEEC::getFilledObservables() const {
   vector<FilledObservable*> vfobs;
   vfobs.push_back( new FilledObservable( name, data ) );
+  vfobs.push_back( new FilledObservable( name+"b", datab ) );
+  vfobs.push_back( new FilledObservable( name+"udsc", dataudsc ) );
   return vfobs;
 }
 
